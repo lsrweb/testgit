@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>消息发送页面</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .container {
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    textarea {
+      height: 100px;
+      resize: vertical;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .log-container {
+      margin-top: 20px;
+      border: 1px solid #eee;
+      padding: 10px;
+      height: 200px;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-bottom: 1px solid #eee;
+    }
+    .send-log {
+      color: #2196F3;
+    }
+    .receive-log {
+      color: #FF5722;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>消息发送页面</h1>
+    <p>使用此页面发送消息到接收页面</p>
+    
+    <div class="form-group">
+      <label for="channelName">通信频道:</label>
+      <input type="text" id="channelName" value="app_default_channel">
+    </div>
+    
+    <div class="form-group">
+      <label for="messageType">消息类型:</label>
+      <select id="messageType">
+        <option value="notification">通知消息</option>
+        <option value="data">数据传输</option>
+        <option value="command">命令控制</option>
+        <option value="custom">自定义类型</option>
+      </select>
+    </div>
+    
+    <div class="form-group" id="customTypeContainer" style="display: none;">
+      <label for="customType">自定义类型名称:</label>
+      <input type="text" id="customType" placeholder="输入自定义消息类型">
+    </div>
+    
+    <div class="form-group">
+      <label for="messageContent">消息内容 (JSON格式):</label>
+      <textarea id="messageContent">{
+  "title": "测试消息",
+  "content": "这是一条测试消息",
+  "timestamp": "2023-10-30 12:00:00"
+}</textarea>
+    </div>
+    
+    <div class="form-group">
+      <input type="checkbox" id="singleInstance" checked>
+      <label for="singleInstance" style="display: inline;">只打开一个接收页面实例</label>
+    </div>
+    
+    <button id="sendBtn">发送消息</button>
+    <button id="openReceiver">打开接收页面</button>
+    
+    <div class="log-container" id="logContainer">
+      <h3>操作日志</h3>
+      <div id="logEntries"></div>
+    </div>
+  </div>
+
+  <!-- 引入通信类 -->
+  <script src="../utils/PageCommunicator.js"></script>
+  
+  <script>
+    // 获取DOM元素
+    const channelNameInput = document.getElementById('channelName');
+    const messageTypeSelect = document.getElementById('messageType');
+    const customTypeContainer = document.getElementById('customTypeContainer');
+    const customTypeInput = document.getElementById('customType');
+    const messageContentTextarea = document.getElementById('messageContent');
+    const sendBtn = document.getElementById('sendBtn');
+    const openReceiverBtn = document.getElementById('openReceiver');
+    const logEntries = document.getElementById('logEntries');
+    
+    let communicator = null;
+    
+    // 显示日志
+    function log(message, type = 'info') {
+      const logEntry = document.createElement('div');
+      logEntry.className = `log-entry ${type}-log`;
+      logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logEntries.appendChild(logEntry);
+      logEntries.scrollTop = logEntries.scrollHeight;
+    }
+    
+    // 初始化通信
+    function initCommunication() {
+      const channelName = channelNameInput.value.trim();
+      
+      // 如果已经存在communicator，先关闭它
+      if (communicator) {
+        communicator.close();
+      }
+      
+      // 创建新的communicator实例
+      communicator = getPageCommunicator(channelName);
+      
+      // 监听接收消息
+      communicator.subscribe('notification', handleReceivedMessage);
+      communicator.subscribe('data', handleReceivedMessage);
+      communicator.subscribe('command', handleReceivedMessage);
+      // 使用通配符监听所有自定义类型
+      communicator.subscribe('custom', handleReceivedMessage);
+      
+      log(`已连接到频道: ${channelName}`);
+    }
+    
+    // 处理接收到的消息
+    function handleReceivedMessage(data, meta) {
+      log(`收到消息 [${meta.sender}]: ${JSON.stringify(data)}`, 'receive');
+    }
+    
+    // 发送消息
+    function sendMessage() {
+      if (!communicator) {
+        initCommunication();
+      }
+      
+      try {
+        let type = messageTypeSelect.value;
+        if (type === 'custom') {
+          type = customTypeInput.value.trim();
+          if (!type) {
+            alert('自定义消息类型不能为空');
+            return;
+          }
+        }
+        
+        let content;
+        try {
+          content = JSON.parse(messageContentTextarea.value);
+        } catch (e) {
+          alert('消息内容必须是有效的JSON格式');
+          return;
+        }
+        
+        // 使用广播方式发送消息
+        const success = communicator.broadcast(type, content);
+        
+        if (success) {
+          log(`发送消息 [${type}]: ${JSON.stringify(content)}`, 'send');
+        } else {
+          log(`消息发送失败 [${type}]`, 'error');
+        }
+      } catch (error) {
+        log(`错误: ${error.message}`, 'error');
+      }
+    }
+    
+    // 打开接收页面
+    function openReceiverPage() {
+      const singleInstance = document.getElementById('singleInstance').checked;
+      const newWindow = PageCommunicator.openPage('receiver.html', 'receiverPage', singleInstance);
+      
+      log(`打开接收页面 ${singleInstance ? '(单例模式)' : '(新窗口)'}`, 'info');
+      
+      // 如果是新窗口，可以尝试等待就绪并发送初始消息
+      if (newWindow && communicator) {
+        // 发送一个初始消息表明发送页面已打开
+        // 接收方将通过页面就绪机制确保能收到此消息
+        setTimeout(() => {
+          communicator.broadcast('notification', {
+            title: '发送页面已打开',
+            content: '这是一条来自发送页面的初始通知',
+            timestamp: new Date().toISOString()
+          });
+        }, 500);
+      }
+    }
+    
+    // 初始化事件监听
+    function initEventListeners() {
+      // 频道名称变更
+      channelNameInput.addEventListener('change', initCommunication);
+      
+      // 消息类型选择
+      messageTypeSelect.addEventListener('change', function() {
+        customTypeContainer.style.display = 
+          this.value === 'custom' ? 'block' : 'none';
+      });
+      
+      // 发送按钮
+      sendBtn.addEventListener('click', sendMessage);
+      
+      // 打开接收页面
+      openReceiverBtn.addEventListener('click', openReceiverPage);
+    }
+    
+    // 页面卸载时关闭连接
+    window.addEventListener('beforeunload', function() {
+      if (communicator) {
+        communicator.close();
+      }
+    });
+    
+    // 初始化
+    (function init() {
+      initCommunication();
+      initEventListeners();
+      log('页面已初始化');
+    })();
+  </script>
+</body>
+</html>

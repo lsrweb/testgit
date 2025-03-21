@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>关键词管理对话框</title>
+  <!-- 引入Element UI样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f7fa;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ebeef5;
+    }
+    .btn-group {
+      margin: 20px 0;
+    }
+    .badge {
+      background-color: #409EFF;
+      color: white;
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    .result-box {
+      background-color: #f8f8f8;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+      padding: 10px;
+      margin: 20px 0;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+    }
+    .dialog-textarea {
+      width: 100%;
+      min-height: 150px;
+      resize: vertical;
+    }
+    .tag-container {
+      margin-bottom: 15px;
+    }
+    .tagOne {
+      display: inline-block;
+      margin: 2px 5px;
+    }
+    .chooseTool {
+      margin-right: 5px;
+    }
+    .button-new-tag {
+      margin-left: 10px;
+      height: 32px;
+      line-height: 30px;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    .help-text {
+      color: #909399;
+      font-size: 12px;
+      margin: 5px 0;
+    }
+    .danger-text {
+      color: hsla(0, 100%, 50%, 0.639);
+      font-size: 12px;
+      margin: 5px 0;
+    }
+    .el-form-item {
+      margin-bottom: 22px;
+    }
+    .keyword-section {
+      background-color: #fafafa;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .keyword-header {
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <div class="header">
+        <h2>关键词管理</h2>
+        <p>管理精准和模糊关键词，可批量添加和删除</p>
+      </div>
+
+      <div class="btn-group">
+        <el-button type="primary" @click="openDialog">打开关键词编辑</el-button>
+        <el-button type="success" @click="saveData" :disabled="!hasAnyKeywords">保存数据</el-button>
+        <el-button @click="clearData" :disabled="!hasAnyKeywords">清空数据</el-button>
+        <el-button @click="toggleReadonly">{{ readonlyMode ? '进入编辑模式' : '进入只读模式' }}</el-button>
+      </div>
+
+      <div v-if="saveResult" class="result-box">
+        <strong>保存的数据：</strong>
+        <div>{{ saveResult }}</div>
+      </div>
+
+      <!-- 精准关键词部分 -->
+      <div class="keyword-section">
+        <div class="keyword-header">
+          <span>精准关键词 <span class="badge" v-if="exactKeywords.length > 0">{{ exactKeywords.length }} 项</span></span>
+          <div v-if="!readonlyMode">
+            <el-button size="mini" @click="openDialog('exact')" type="primary" plain>添加关键词</el-button>
+          </div>
+        </div>
+        
+        <el-form>
+          <el-form-item>
+            <!-- 编辑精准关键词 -->
+            <template v-if="!readonlyMode">
+              <el-checkbox class='chooseTool' @change='selectAll("exact")' v-if='batchDeletingExact && exactKeywords.length' v-model='allExactSelected' style="margin-right:10px;">全选</el-checkbox>
+              
+              <span class='tagOne' v-for="(keyword, index) in exactKeywords" :key="'exact-' + index">
+                <el-checkbox class='chooseTool' v-model='keyword.selected' v-if='batchDeletingExact'></el-checkbox>
+                <el-tag size="small" closable :disable-transitions="false" @close="removeKeyword('exact', index)">
+                  {{ keyword.text }}
+                </el-tag>
+              </span>
+              
+              <div v-if="exactKeywords.length > 0" style="margin-top: 10px;">
+                <el-button size='mini' type='text' style="color:#F56C6C;" v-if='!batchDeletingExact' @click='batchDeletingExact = true'>批量删除</el-button>
+                <el-button size='mini' type='text' style="color:#F56C6C;" v-if='batchDeletingExact && hasSelectedExact' @click='deleteSelected("exact")'>删除选中项</el-button>
+                <el-button size='mini' type='text' style="color:#409eff;" v-if='batchDeletingExact' @click='cancelBatchDelete("exact")'>取消</el-button>
+              </div>
+              <p v-if="exactKeywords.length === 0" class="help-text">暂无精准关键词，请点击"添加关键词"按钮进行添加</p>
+              <p class="danger-text">用户私聊时可通过"@"指令替对方触发关键词，如：@关键词、@打卡</p>
+            </template>
+            
+            <!-- 查看精准关键词 -->
+            <template v-else>
+              <span v-if="exactKeywords.length === 0" class="help-text">暂无精准关键词</span>
+              <el-tag size="small" v-for="(keyword, index) in exactKeywords" :key="'view-exact-' + index" style="margin: 2px 5px;">
+                {{ keyword.text }}
+              </el-tag>
+            </template>
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <!-- 模糊关键词部分 -->
+      <div class="keyword-section">
+        <div class="keyword-header">
+          <span>模糊关键词 <span class="badge" v-if="fuzzyKeywords.length > 0">{{ fuzzyKeywords.length }} 项</span></span>
+          <div v-if="!readonlyMode">
+            <el-button size="mini" @click="openDialog('fuzzy')" type="primary" plain>添加关键词</el-button>
+          </div>
+        </div>
+        
+        <el-form>
+          <el-form-item>
+            <!-- 编辑模糊关键词 -->
+            <template v-if="!readonlyMode">
+              <el-checkbox class='chooseTool' @change='selectAll("fuzzy")' v-if='batchDeletingFuzzy && fuzzyKeywords.length' v-model='allFuzzySelected' style="margin-right:10px;">全选</el-checkbox>
+              
+              <span class='tagOne' v-for="(keyword, index) in fuzzyKeywords" :key="'fuzzy-' + index">
+                <el-checkbox class='chooseTool' v-model='keyword.selected' v-if='batchDeletingFuzzy'></el-checkbox>
+                <el-tag size="small" closable :disable-transitions="false" @close="removeKeyword('fuzzy', index)">
+                  {{ keyword.text }}
+                </el-tag>
+              </span>
+              
+              <div v-if="fuzzyKeywords.length > 0" style="margin-top: 10px;">
+                <el-button size='mini' type='text' style="color:#F56C6C;" v-if='!batchDeletingFuzzy' @click='batchDeletingFuzzy = true'>批量删除</el-button>
+                <el-button size='mini' type='text' style="color:#F56C6C;" v-if='batchDeletingFuzzy && hasSelectedFuzzy' @click='deleteSelected("fuzzy")'>删除选中项</el-button>
+                <el-button size='mini' type='text' style="color:#409eff;" v-if='batchDeletingFuzzy' @click='cancelBatchDelete("fuzzy")'>取消</el-button>
+              </div>
+              <p v-if="fuzzyKeywords.length === 0" class="help-text">暂无模糊关键词，请点击"添加关键词"按钮进行添加</p>
+            </template>
+            
+            <!-- 查看模糊关键词 -->
+            <template v-else>
+              <span v-if="fuzzyKeywords.length === 0" class="help-text">暂无模糊关键词</span>
+              <el-tag size="small" v-for="(keyword, index) in fuzzyKeywords" :key="'view-fuzzy-' + index" style="margin: 2px 5px;">
+                {{ keyword.text }}
+              </el-tag>
+            </template>
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <!-- Element UI对话框 -->
+      <el-dialog
+        :title="dialogTitle"
+        :visible.sync="dialogVisible"
+        width="50%"
+        :before-close="handleDialogClose">
+        <el-form>
+          <el-form-item>
+            <p>请输入{{ currentKeywordType === 'exact' ? '精准' : '模糊' }}关键词，每行一个：</p>
+            <textarea 
+              class="dialog-textarea"
+              v-model="textareaContent"
+              :placeholder="currentKeywordType === 'exact' ? '请输入精准关键词，每行一个' : '请输入模糊关键词，每行一个'"
+              @blur="handleTextareaBlur"></textarea>
+          </el-form-item>
+          <div class="el-form-item">
+            <div class="el-form-item__label">预览结果 ({{ previewKeywords.length }} 项):</div>
+            <div v-if="previewKeywords.length > 0">
+              <el-tag 
+                v-for="(item, index) in previewKeywords" 
+                :key="'preview-' + index"
+                size="small"
+                style="margin: 2px 5px;">
+                {{ item }}
+              </el-tag>
+            </div>
+            <div v-else class="help-text">
+              暂无预览数据
+            </div>
+          </div>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmInput">确定</el-button>
+        </span>
+      </el-dialog>
+    </div>
+  </div>
+
+  <!-- 引入依赖库 -->
+  <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  
+  <script>
+    // 引入BroadcastChannel通信类
+    const communicatorScriptTag = document.createElement('script');
+    communicatorScriptTag.src = '../utils/PageCommunicator.js';
+    document.head.appendChild(communicatorScriptTag);
+
+    // 确保通信类加载完成后再初始化Vue应用
+    communicatorScriptTag.onload = function() {
+      new Vue({
+        el: '#app',
+        data() {
+          return {
+            // 对话框相关
+            dialogVisible: false,
+            textareaContent: '',
+            currentKeywordType: 'exact', // 'exact' 或 'fuzzy'
+            previewKeywords: [],
+            
+            // 关键词数据
+            exactKeywords: [],
+            fuzzyKeywords: [],
+            
+            // 批量删除相关
+            batchDeletingExact: false,
+            batchDeletingFuzzy: false,
+            allExactSelected: false,
+            allFuzzySelected: false,
+            
+            // 其他
+            readonlyMode: false,
+            saveResult: '',
+            communicator: null
+          };
+        },
+        computed: {
+          dialogTitle() {
+            return this.currentKeywordType === 'exact' ? '添加精准关键词' : '添加模糊关键词';
+          },
+          hasAnyKeywords() {
+            return this.exactKeywords.length > 0 || this.fuzzyKeywords.length > 0;
+          },
+          hasSelectedExact() {
+            return this.exactKeywords.some(k => k.selected);
+          },
+          hasSelectedFuzzy() {
+            return this.fuzzyKeywords.some(k => k.selected);
+          }
+        },
+        created() {
+          // 初始化通信
+          this.communicator = getPageCommunicator('keyword_manager_channel');
+          
+          // 监听可能来自其他页面的数据
+          this.communicator.subscribe('keywordData', (data) => {
+            if (data && data.exact && data.fuzzy) {
+              this.importKeywords(data);
+              this.$message.success('收到了来自其他页面的关键词数据');
+            }
+          });
+        },
+        methods: {
+          openDialog(type = 'exact') {
+            this.currentKeywordType = type;
+            this.dialogVisible = true;
+            this.textareaContent = '';
+            this.previewKeywords = [];
+            
+            // 对话框打开后自动聚焦到文本区域
+            this.$nextTick(() => {
+              const textarea = document.querySelector('.dialog-textarea');
+              if (textarea) {
+                textarea.focus();
+              }
+            });
+          },
+          
+          handleTextareaBlur() {
+            // 文本框失去焦点时处理输入内容
+            this.previewKeywords = this.parseTextToArray(this.textareaContent);
+          },
+          
+          parseTextToArray(text) {
+            // 将文本按换行符分割成数组，并去除空行和前后空白
+            if (!text) return [];
+            
+            return text.split('\n')
+              .map(line => line.trim())
+              .filter(line => line.length > 0);
+          },
+          
+          confirmInput() {
+            const keywords = this.parseTextToArray(this.textareaContent);
+            
+            if (this.currentKeywordType === 'exact') {
+              // 添加到精准关键词
+              keywords.forEach(text => {
+                if (!this.exactKeywords.find(k => k.text === text)) {
+                  this.exactKeywords.push({ text, selected: false });
+                }
+              });
+            } else {
+              // 添加到模糊关键词
+              keywords.forEach(text => {
+                if (!this.fuzzyKeywords.find(k => k.text === text)) {
+                  this.fuzzyKeywords.push({ text, selected: false });
+                }
+              });
+            }
+            
+            this.dialogVisible = false;
+            
+            if (keywords.length > 0) {
+              this.$message({
+                message: `成功添加了 ${keywords.length} 项${this.currentKeywordType === 'exact' ? '精准' : '模糊'}关键词`,
+                type: 'success'
+              });
+            }
+          },
+          
+          removeKeyword(type, index) {
+            if (type === 'exact') {
+              this.exactKeywords.splice(index, 1);
+            } else {
+              this.fuzzyKeywords.splice(index, 1);
+            }
+          },
+          
+          selectAll(type) {
+            if (type === 'exact') {
+              this.exactKeywords.forEach(k => k.selected = this.allExactSelected);
+            } else {
+              this.fuzzyKeywords.forEach(k => k.selected = this.allFuzzySelected);
+            }
+          },
+          
+          deleteSelected(type) {
+            if (type === 'exact') {
+              this.exactKeywords = this.exactKeywords.filter(k => !k.selected);
+              this.batchDeletingExact = false;
+              this.allExactSelected = false;
+            } else {
+              this.fuzzyKeywords = this.fuzzyKeywords.filter(k => !k.selected);
+              this.batchDeletingFuzzy = false;
+              this.allFuzzySelected = false;
+            }
+          },
+          
+          cancelBatchDelete(type) {
+            if (type === 'exact') {
+              this.batchDeletingExact = false;
+              this.allExactSelected = false;
+              this.exactKeywords.forEach(k => k.selected = false);
+            } else {
+              this.batchDeletingFuzzy = false;
+              this.allFuzzySelected = false;
+              this.fuzzyKeywords.forEach(k => k.selected = false);
+            }
+          },
+          
+          toggleReadonly() {
+            this.readonlyMode = !this.readonlyMode;
+            // 退出批量删除模式
+            this.cancelBatchDelete('exact');
+            this.cancelBatchDelete('fuzzy');
+          },
+          
+          saveData() {
+            // 准备保存的数据结构
+            const data = {
+              exact: this.exactKeywords.map(k => k.text),
+              fuzzy: this.fuzzyKeywords.map(k => k.text)
+            };
+            
+            // 保存数据并输出
+            this.saveResult = JSON.stringify(data, null, 2);
+            
+            // 将数据广播给其他可能的页面
+            if (this.communicator) {
+              this.communicator.send('keywordData', data);
+            }
+            
+            this.$message({
+              message: '关键词数据已保存并广播',
+              type: 'success'
+            });
+            
+            // 创建并触发自定义事件
+            const event = new CustomEvent('keywordsSaved', { 
+              detail: { data } 
+            });
+            window.dispatchEvent(event);
+          },
+          
+          clearData() {
+            this.$confirm('确定要清空所有关键词吗?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(() => {
+              this.exactKeywords = [];
+              this.fuzzyKeywords = [];
+              this.saveResult = '';
+              this.$message({
+                message: '关键词数据已清空',
+                type: 'info'
+              });
+            }).catch(() => {});
+          },
+          
+          importKeywords(data) {
+            if (data.exact && Array.isArray(data.exact)) {
+              this.exactKeywords = data.exact.map(text => ({ text, selected: false }));
+            }
+            if (data.fuzzy && Array.isArray(data.fuzzy)) {
+              this.fuzzyKeywords = data.fuzzy.map(text => ({ text, selected: false }));
+            }
+          },
+          
+          handleDialogClose(done) {
+            if (this.textareaContent) {
+              this.$confirm('有未保存的内容，确认关闭吗？')
+                .then(_ => {
+                  done();
+                })
+                .catch(_ => {});
+            } else {
+              done();
+            }
+          }
+        },
+        beforeDestroy() {
+          // 页面销毁前关闭通信连接
+          if (this.communicator) {
+            this.communicator.close();
+          }
+        }
+      });
+    };
+  </script>
+</body>
+</html>

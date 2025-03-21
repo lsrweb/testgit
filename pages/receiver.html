@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>消息接收页面</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .container {
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #2196F3;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover {
+      background-color: #0b7dda;
+    }
+    .message-container {
+      margin-top: 20px;
+      border: 1px solid #eee;
+      padding: 10px;
+      height: 400px;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+    }
+    .message-item {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    .message-type {
+      color: #2196F3;
+    }
+    .message-time {
+      color: #757575;
+    }
+    .message-sender {
+      color: #4CAF50;
+      font-style: italic;
+      font-size: 12px;
+    }
+    .message-content {
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+    .reply-container {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>消息接收页面</h1>
+    <p>此页面将接收从其他页面发送的消息</p>
+    
+    <div class="form-group">
+      <label for="channelName">通信频道:</label>
+      <input type="text" id="channelName" value="app_default_channel">
+    </div>
+    
+    <div class="form-group">
+      <label>接收消息类型:</label>
+      <div>
+        <input type="checkbox" id="receiveNotification" checked>
+        <label for="receiveNotification">通知消息</label>
+        
+        <input type="checkbox" id="receiveData" checked>
+        <label for="receiveData">数据传输</label>
+        
+        <input type="checkbox" id="receiveCommand" checked>
+        <label for="receiveCommand">命令控制</label>
+        
+        <input type="checkbox" id="receiveCustom" checked>
+        <label for="receiveCustom">自定义类型</label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <input type="checkbox" id="singleInstance" checked>
+      <label for="singleInstance" style="display: inline;">只打开一个发送页面实例</label>
+    </div>
+    
+    <button id="connectBtn">连接频道</button>
+    <button id="clearBtn">清空消息</button>
+    <button id="openSender">打开发送页面</button>
+    
+    <div class="message-container" id="messageContainer">
+      <h3>接收到的消息</h3>
+      <div id="messageList"></div>
+    </div>
+    
+    <div class="reply-container">
+      <h3>快速回复</h3>
+      <div class="form-group">
+        <label for="replyType">回复类型:</label>
+        <input type="text" id="replyType" value="notification">
+      </div>
+      <button id="replyBtn">回复"已收到"</button>
+    </div>
+  </div>
+
+  <!-- 引入通信类 -->
+  <script src="../utils/PageCommunicator.js"></script>
+  
+  <script>
+    // 获取DOM元素
+    const channelNameInput = document.getElementById('channelName');
+    const receiveNotification = document.getElementById('receiveNotification');
+    const receiveData = document.getElementById('receiveData');
+    const receiveCommand = document.getElementById('receiveCommand');
+    const receiveCustom = document.getElementById('receiveCustom');
+    const connectBtn = document.getElementById('connectBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const openSenderBtn = document.getElementById('openSender');
+    const messageList = document.getElementById('messageList');
+    const replyTypeInput = document.getElementById('replyType');
+    const replyBtn = document.getElementById('replyBtn');
+    
+    let communicator = null;
+    let unsubscribers = [];
+    
+    // 显示消息
+    function displayMessage(type, data, meta) {
+      const messageItem = document.createElement('div');
+      messageItem.className = 'message-item';
+      
+      // 创建消息头部
+      const header = document.createElement('div');
+      header.className = 'message-header';
+      
+      const typeSpan = document.createElement('span');
+      typeSpan.className = 'message-type';
+      typeSpan.textContent = `类型: ${type}`;
+      header.appendChild(typeSpan);
+      
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'message-time';
+      timeSpan.textContent = new Date(meta.timestamp).toLocaleString();
+      header.appendChild(timeSpan);
+      
+      messageItem.appendChild(header);
+      
+      // 创建发送者信息
+      const sender = document.createElement('div');
+      sender.className = 'message-sender';
+      sender.textContent = `发送者: ${meta.sender}`;
+      messageItem.appendChild(sender);
+      
+      // 创建消息内容
+      const content = document.createElement('pre');
+      content.className = 'message-content';
+      content.textContent = JSON.stringify(data, null, 2);
+      messageItem.appendChild(content);
+      
+      // 添加到列表
+      messageList.appendChild(messageItem);
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+    
+    // 初始化通信
+    function initCommunication() {
+      const channelName = channelNameInput.value.trim();
+      
+      // 取消现有订阅
+      unsubscribeAll();
+      
+      // 如果已经存在communicator，先关闭它
+      if (communicator) {
+        communicator.close();
+      }
+      
+      // 创建新的communicator实例
+      communicator = getPageCommunicator(channelName);
+      
+      // 根据选择的消息类型进行订阅
+      updateSubscriptions();
+      
+      // 添加状态消息
+      const statusMsg = document.createElement('div');
+      statusMsg.className = 'message-item';
+      statusMsg.innerHTML = `<div class="message-header">
+        <span class="message-type">系统消息</span>
+        <span class="message-time">${new Date().toLocaleString()}</span>
+      </div>
+      <div class="message-content">已连接到频道: ${channelName}<br>页面ID: ${communicator.pageId}</div>`;
+      messageList.appendChild(statusMsg);
+      
+      // 监听系统级消息
+      communicator.subscribe('__system__', (data, meta) => {
+        if (data.action === 'page_ready') {
+          const readyMsg = document.createElement('div');
+          readyMsg.className = 'message-item';
+          readyMsg.innerHTML = `<div class="message-header">
+            <span class="message-type">系统通知</span>
+            <span class="message-time">${new Date(meta.timestamp).toLocaleString()}</span>
+          </div>
+          <div class="message-content">页面就绪: ${data.path} (${data.pageId})</div>`;
+          messageList.appendChild(readyMsg);
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+      });
+    }
+    
+    // 更新订阅
+    function updateSubscriptions() {
+      unsubscribeAll();
+      
+      if (receiveNotification.checked) {
+        unsubscribers.push(
+          communicator.subscribe('notification', (data, meta) => {
+            displayMessage('notification', data, meta);
+          })
+        );
+      }
+      
+      if (receiveData.checked) {
+        unsubscribers.push(
+          communicator.subscribe('data', (data, meta) => {
+            displayMessage('data', data, meta);
+          })
+        );
+      }
+      
+      if (receiveCommand.checked) {
+        unsubscribers.push(
+          communicator.subscribe('command', (data, meta) => {
+            displayMessage('command', data, meta);
+          })
+        );
+      }
+      
+      if (receiveCustom.checked) {
+        unsubscribers.push(
+          communicator.subscribe('custom', (data, meta) => {
+            displayMessage('custom', data, meta);
+          })
+        );
+      }
+    }
+    
+    // 取消所有订阅
+    function unsubscribeAll() {
+      unsubscribers.forEach(unsubscribe => unsubscribe());
+      unsubscribers = [];
+    }
+    
+    // 初始化事件监听
+    function initEventListeners() {
+      // 连接按钮
+      connectBtn.addEventListener('click', initCommunication);
+      
+      // 清空消息
+      clearBtn.addEventListener('click', () => {
+        messageList.innerHTML = '';
+      });
+      
+      // 打开发送页面
+      openSenderBtn.addEventListener('click', openSenderPage);
+      
+      // 消息类型复选框
+      receiveNotification.addEventListener('change', updateSubscriptions);
+      receiveData.addEventListener('change', updateSubscriptions);
+      receiveCommand.addEventListener('change', updateSubscriptions);
+      receiveCustom.addEventListener('change', updateSubscriptions);
+      
+      // 回复按钮
+      replyBtn.addEventListener('click', () => {
+        const type = replyTypeInput.value.trim();
+        if (!type) return;
+        
+        communicator.send(type, {
+          message: "已收到您的消息",
+          timestamp: new Date().toISOString()
+        });
+      });
+    }
+    
+    // 打开发送页面
+    function openSenderPage() {
+      const singleInstance = document.getElementById('singleInstance').checked;
+      const newWindow = PageCommunicator.openPage('sender.html', 'senderPage', singleInstance);
+      
+      // 添加状态消息
+      const statusMsg = document.createElement('div');
+      statusMsg.className = 'message-item';
+      statusMsg.innerHTML = `<div class="message-header">
+        <span class="message-type">系统消息</span>
+        <span class="message-time">${new Date().toLocaleString()}</span>
+      </div>
+      <div class="message-content">已${singleInstance ? '尝试打开或获取焦点到现有' : '打开新的'}发送页面</div>`;
+      messageList.appendChild(statusMsg);
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+      
+      // 如果成功打开新窗口且通信器已初始化
+      if (newWindow && communicator) {
+        // 尝试发送消息通知发送页面
+        setTimeout(() => {
+          communicator.broadcast('notification', {
+            message: "接收页面已打开并准备就绪",
+            timestamp: new Date().toISOString()
+          });
+        }, 500);
+      }
+    }
+    
+    // 页面卸载时关闭连接
+    window.addEventListener('beforeunload', function() {
+      if (communicator) {
+        unsubscribeAll();
+        communicator.close();
+      }
+    });
+    
+    // 初始化
+    (function init() {
+      initCommunication();
+      initEventListeners();
+    })();
+  </script>
+</body>
+</html>
