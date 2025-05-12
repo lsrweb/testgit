@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Vue 2.6.11 示例页面</title>
+	<link rel="stylesheet" href="element-ui.css">
+	<style>
+		.dialog-content {
+			height: 400px;
+		}
+
+		/* 滚动条样式 */
+		::-webkit-scrollbar {
+			width: 6px;
+			height: 6px;
+		}
+
+		::-webkit-scrollbar-track {
+			background: #f1f1f1;
+			border-radius: 3px;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background: #c1c1c1;
+			border-radius: 3px;
+		}
+
+		::-webkit-scrollbar-thumb:hover {
+			background: #909090;
+		}
+
+		/* 平滑滚动 */
+		.message-list,
+		.preview-content {
+			scroll-behavior: smooth;
+		}
+
+		.message-list-content__wrapper {
+			flex: 1;
+			background-color: #f2f3f5;
+			padding: 12px;
+			border-radius: 6px;
+			padding-bottom: 4px;
+			padding-top: 4px;
+		}
+
+		.preview-wrapper {
+			height: 100%;
+			min-height: 500px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.preview-device {
+			width: 90%;
+			height: 0;
+			padding-bottom: 180%;
+			/* 调整宽高比，适配手机图片的比例 */
+			position: relative;
+			background: url('mock-phone.png') no-repeat center center;
+			background-size: contain;
+			margin: 0 auto;
+		}
+
+		.preview-header {
+			position: absolute;
+			top: 8%;
+			left: 0;
+			width: 100%;
+			text-align: center;
+			color: #909399;
+		}
+
+		.preview-content {
+			position: absolute;
+			top: 20px;
+			bottom: 10%;
+			left: 7%;
+			right: 7%;
+			overflow-y: auto;
+			display: flex;
+			flex-direction: column;
+			background-color: #f6f6f6;
+			padding: 15px;
+			border-radius: 40px;
+		}
+
+		.message-list {
+			max-height: 400px;
+			overflow-y: auto;
+			border: 1px solid #EBEEF5;
+			padding: 0;
+			border-radius: 6px;
+		}
+
+		.message-item {
+			border-radius: 4px;
+			display: flex;
+			padding: 8px;
+		}
+
+		.message-item:nth-child(n + 2) {
+			padding-top: 0;
+		}
+
+		.message-item:hover {
+			border-color: #505458;
+		}
+
+		.message-actions {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.empty-message {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			color: #909399;
+		}
+
+		.empty-message i {
+			font-size: 48px;
+			margin-bottom: 16px;
+			color: #DCDFE6;
+		}
+
+		/* 聊天框样式 */
+		.chat-message {
+			display: flex;
+			margin-bottom: 16px;
+			align-items: flex-start;
+		}
+
+		.chat-avatar {
+			width: 40px;
+			height: 40px;
+			border-radius: 4px;
+			background-color: #67C23A;
+			color: white;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+			margin-right: 8px;
+			flex-shrink: 0;
+		}
+
+		.chat-bubble {
+			background: white;
+			padding: 12px;
+			border-radius: 8px;
+			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+			position: relative;
+			flex: 1;
+			min-width: 0;
+		}
+
+		.chat-bubble:before {
+			content: '';
+			position: absolute;
+			left: -8px;
+			top: 14px;
+			width: 0;
+			height: 0;
+			border-top: 8px solid transparent;
+			border-right: 8px solid white;
+			border-bottom: 8px solid transparent;
+		}
+
+		.chat-bubble-content {
+			word-break: break-word;
+			white-space: pre-wrap;
+		}
+
+		.chat-bubble-image img {
+			max-width: 100%;
+			border-radius: 4px;
+		}
+
+		.chat-time {
+			font-size: 12px;
+			color: #909399;
+			margin-top: 4px;
+			text-align: right;
+		}
+
+		.ghost {
+			opacity: 0.5;
+			background: #f0f9eb;
+			/* Element UI success light color */
+			border: 1px dashed #67c23a;
+		}
+
+		.message-item-drag-handle {
+			cursor: grab !important;
+			font-size: 18px;
+			color: #909399;
+			margin-right: 6px;
+		}
+
+		.message-item-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 6px;
+			justify-content: space-between;
+			font-size: 12px;
+		}
+
+		.message-item-header>span:nth-of-type(1) {
+			/* Drag handle */
+		}
+
+		.message-item-header>span:nth-of-type(2) {
+			/* "消息 X" text */
+			margin-left: 8px;
+		}
+
+		/* Transition group for preview list */
+		.list-preview-move {
+			transition: transform 0.5s ease;
+		}
+
+		.list-preview-enter-active,
+		.list-preview-leave-active {
+			transition: all 0.4s ease;
+		}
+
+		.list-preview-enter,
+		.list-preview-leave-to {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+
+		.list-preview-leave-active {
+			position: absolute;
+			/* Important for smooth leave animations */
+			width: calc(100% - 30px);
+			/* Adjust width considering padding of preview-content */
+		}
+
+	</style>
+</head>
+
+<body>
+	<!-- Message Type Templates -->
+	<script type="text/x-template" id="preview-text-message">
+      <div class="chat-bubble">
+        <div class="chat-bubble-content">{{ message.data.content || '请输入文本内容' }}</div>
+        <div class="chat-time">{{ currentTime }}</div>
+      </div>
+    </script>
+
+	<script type="text/x-template" id="preview-image-message">
+      <div class="chat-bubble chat-bubble-image">
+        <img v-if="message.data.imageUrl" :src="message.data.imageUrl" alt="图片" style="max-width: 100%; border-radius: 4px;">
+        <span v-else>[请上传图片]</span>
+        <div class="chat-time">{{ currentTime }}</div>
+      </div>
+    </script>
+
+	<script type="text/x-template" id="preview-video-message">
+      <div class="chat-bubble video-preview">
+        <video v-if="message.data && message.data.videoUrl" :src="message.data.videoUrl" controls style="max-width: 100%; border-radius: 4px; background-color: #000;"></video>
+        <div v-if="message.data && message.data.title" style="margin-top: 5px;">{{ message.data.title }}</div>
+        <span v-else-if="!message.data || !message.data.videoUrl">[视频: {{ message.data && message.data.title ? message.data.title : '未设置URL' }}]</span>
+        <div class="chat-time">{{ currentTime }}</div>
+      </div>
+    </script>
+
+	<script type="text/x-template" id="preview-card-message">
+      <div class="chat-bubble card-preview">
+        <h4 v-if="message.data && message.data.title">{{ message.data.title }}</h4>
+        <p v-if="message.data && message.data.description">{{ message.data.description }}</p>
+        <img v-if="message.data && message.data.imageUrl" :src="message.data.imageUrl" alt="卡片图片" style="max-width: 100%; border-radius: 4px; margin-top: 5px;">
+        <a v-if="message.data && message.data.linkUrl" :href="message.data.linkUrl" target="_blank" style="display: block; margin-top: 5px;">查看详情</a>
+        <span v-else-if="!message.data || (!message.data.title && !message.data.description)">[卡片消息]</span>
+        <div class="chat-time">{{ currentTime }}</div>
+      </div>
+    </script>
+
+	<script type="text/x-template" id="preview-sticker-message">
+      <div class="chat-bubble sticker-preview" style="background: transparent; box-shadow: none;">
+        <img v-if="message.data && message.data.stickerUrl" :src="message.data.stickerUrl" alt="动态表情" style="max-width: 100px; max-height:100px;">
+        <span v-else>[动态表情]</span>
+      </div>
+    </script>
+
+	<script type="text/x-template" id="preview-miniprogram-message">
+      <div class="chat-bubble miniprogram-preview">
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+            <img v-if="message.data && message.data.iconUrl" :src="message.data.iconUrl" alt="小程序图标" style="width: 20px; height: 20px; margin-right: 8px; border-radius: 4px;">
+            <span v-if="message.data && message.data.appName" style="font-size: 0.9em; color: #888;">{{ message.data.appName }}</span>
+        </div>
+        <div v-if="message.data && message.data.title" style="font-weight: bold;">{{ message.data.title }}</div>
+        <span v-else-if="!message.data || !message.data.appName">[小程序]</span>
+        <div class="chat-time" style="text-align: left; margin-top:5px;">小程序</div>
+      </div>
+    </script>
+
+	<script type="text/x-template" id="preview-channels-video-message">
+      <div class="chat-bubble channels-video-preview">
+        <img v-if="message.data && message.data.coverUrl" :src="message.data.coverUrl" alt="视频号封面" style="max-width: 100%; border-radius: 4px;">
+        <div v-if="message.data && message.data.description" style="margin-top: 5px;">{{ message.data.description }}</div>
+        <span v-else-if="!message.data || !message.data.coverUrl">[视频号: {{ message.data && message.data.description ? message.data.description : '未设置封面' }}]</span>
+        <div class="chat-time">{{ currentTime }}</div>
+      </div>
+    </script>
+
+	<script type="text/x-template" id="preview-file-message">
+      <div class="chat-bubble file-preview" style="padding: 10px;">
+        <div style="display: flex; align-items: center;">
+            <i class="el-icon-document" style="font-size: 32px; margin-right: 10px; color: #909399;"></i>
+            <div style="flex: 1;">
+                <span v-if="message.data && message.data.fileName" style="display: block; font-weight: bold; word-break: break-all;">{{ message.data.fileName }}</span>
+                <small v-if="message.data && message.data.fileSize" style="color: #909399;">{{ message.data.fileSize }}</small>
+            </div>
+        </div>
+        <span v-if="!message.data || !message.data.fileName" style="display:block; margin-top:5px;">[文件]</span>
+        <div class="chat-time" style="border-top: 1px solid #f0f0f0; margin-top: 8px; padding-top: 5px;">文件消息</div>
+      </div>
+    </script>
+
+	<script type="text/x-template" id="preview-chat-record-message">
+      <div class="chat-bubble chat-record-preview">
+        <strong v-if="message.data && message.data.title">{{ message.data.title }}</strong>
+        <div v-else><strong>聊天记录</strong></div>
+        <div v-if="message.data && message.data.summary" style="font-size: 0.9em; margin-top: 5px; color: #666; border-top: 1px solid #eee; padding-top: 5px;">{{ message.data.summary }}</div>
+        <span v-else-if="!message.data || !message.data.title">[聊天记录]</span>
+        <div class="chat-time">{{ currentTime }}</div>
+      </div>
+    </script>
+
+	<script type="text/x-template" id="preview-voice-message">
+      <div class="chat-bubble voice-preview" style="display: flex; align-items: center; cursor: pointer;">
+        <i class="el-icon-microphone" style="font-size: 20px; margin-right: 8px;"></i>
+        <span>{{ (message.data && message.data.duration) ? message.data.duration : '[语音]' }}</span>
+        <div class="chat-time" style="margin-left: auto; padding-left: 10px;">{{ currentTime }}</div>
+      </div>
+    </script>
+
+	<script type="text/x-template" id="preview-favorite-note-message">
+      <div class="chat-bubble favorite-note-preview">
+        <strong v-if="message.data && message.data.title">{{ message.data.title }}</strong>
+        <div v-else><strong>收藏笔记</strong></div>
+        <p v-if="message.data && message.data.contentPreview" style="font-size: 0.9em; margin-top: 5px; color: #555;">{{ message.data.contentPreview }}</p>
+        <small v-if="message.data && message.data.source" style="display:block; margin-top:8px; color:#999; border-top: 1px solid #eee; padding-top:5px;">来源: {{ message.data.source }}</small>
+        <span v-else-if="!message.data || !message.data.title">[收藏笔记]</span>
+        <div class="chat-time">{{ currentTime }}</div>
+      </div>
+    </script>
+	<!-- End Message Type Templates -->
+
+	<div id="app">
+		<el-button type="primary" @click="dialogVisible = true">打开定时任务弹窗</el-button>
+		<el-dialog title="编辑定时发单任务" :visible.sync="dialogVisible" width="1000px" center top="20px">
+			<div class="dialog-content">
+				<el-row :gutter="24">
+					<el-col :span="14">
+						<el-form label-width="auto">
+							<el-form-item label="任务名称">
+								<el-input v-model="form.taskName" placeholder="请输入任务名称"></el-input>
+							</el-form-item>
+							<el-form-item label="发布时间">
+								<el-date-picker v-model="form.publishTime" type="datetime" placeholder="选择发布时间" style="width: 100%;"></el-date-picker>
+							</el-form-item>
+							<el-form-item label="执行方式">
+								<el-radio-group v-model="form.execType">
+									<el-radio label="定时执行">定时执行</el-radio>
+									<el-radio label="立即执行">立即执行</el-radio>
+								</el-radio-group>
+							</el-form-item>
+							<p style="font-weight: bold; margin-bottom: 12px;">内容设置</p>
+							<el-form-item label-width="0px">
+								<draggable v-model="form.messages" class="message-list" ref="messageList" ghost-class="ghost" handle=".message-item-drag-handle" animation="200" :scroll="true" :scroll-sensitivity="50" :scroll-speed="15">
+									<div v-for="(item, index) in form.messages" :key="item.id" class="message-item">
+										<span class="message-item-drag-handle"><i class="el-icon-rank"></i></span>
+										<div class="message-list-content__wrapper">
+
+											<div class="message-item-header">
+												<div>
+													<span style="margin-right: 5px;">推送类型</span>
+													<el-select v-model="item.type" placeholder="选择类型" size="mini" style="width: 80px;" @change="onMessageTypeChange(item)">
+														<el-option label="文本" value="text"></el-option>
+														<el-option label="图片" value="image"></el-option>
+														<el-option label="视频" value="video"></el-option>
+														<el-option label="卡片" value="card"></el-option>
+														<el-option label="动态表情" value="sticker"></el-option>
+														<el-option label="小程序" value="miniprogram"></el-option>
+														<el-option label="视频号" value="channels_video"></el-option>
+														<el-option label="文件" value="file"></el-option>
+														<el-option label="聊天记录" value="chat_record"></el-option>
+														<el-option label="语音" value="voice"></el-option>
+														<el-option label="收藏笔记" value="favorite_note"></el-option>
+													</el-select>
+												</div>
+												<div>
+													<span style="margin-left: 15px; margin-right: 5px;">上一条消息发送</span>
+													<el-input-number v-model="item.delaySeconds" controls-position="right" :min="0" size="mini" style="width: 90px;"></el-input-number>
+													<span style="margin-left: 5px;">秒后发送</span>
+												</div>
+											</div>
+
+											<!-- 文本 -->
+											<el-form-item v-if="item.type === 'text'" label-width="0" label="" :key="item.id + '-text'">
+												<el-input type="textarea" v-model="item.data.content" :rows="3" placeholder="请输入文本内容"></el-input>
+											</el-form-item>
+
+											<!-- 图片 -->
+											<el-form-item v-else-if="item.type === 'image'" label-width="0" :key="item.id + '-image'">
+												<el-upload action="#" :auto-upload="false" :on-change="(file) => handleImageUpload(file, item)" :show-file-list="false" list-type="picture">
+													<el-button size="small" type="primary">点击上传</el-button>
+													<div slot="tip" class="el-upload__tip">可选择图片文件</div>
+												</el-upload>
+												<div v-if="item.data.imageUrl" style="margin-top:10px;">
+													<img :src="item.data.imageUrl" style="max-width: 100px; max-height: 100px; border-radius: 4px;">
+												</div>
+											</el-form-item>
+
+											<!-- 视频 -->
+											<el-form-item v-else-if="item.type === 'video'" label-width="0" :key="item.id + '-video'">
+												<el-input v-model="item.data.videoUrl" placeholder="视频URL" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.title" placeholder="视频标题" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.coverUrl" placeholder="视频封面URL (可选)"></el-input>
+											</el-form-item>
+
+											<!-- 卡片 -->
+											<el-form-item v-else-if="item.type === 'card'" label-width="0" :key="item.id + '-card'">
+												<el-input v-model="item.data.title" placeholder="卡片标题" style="margin-bottom: 5px;"></el-input>
+												<el-input type="textarea" v-model="item.data.description" :rows="2" placeholder="卡片描述" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.imageUrl" placeholder="卡片图片URL" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.linkUrl" placeholder="卡片链接URL"></el-input>
+											</el-form-item>
+
+											<!-- 动态表情 -->
+											<el-form-item v-else-if="item.type === 'sticker'" label-width="0" :key="item.id + '-sticker'">
+												<el-input v-model="item.data.stickerUrl" placeholder="动态表情图片URL"></el-input>
+											</el-form-item>
+
+											<!-- 小程序 -->
+											<el-form-item v-else-if="item.type === 'miniprogram'" label-width="0" :key="item.id + '-miniprogram'">
+												<el-input v-model="item.data.appName" placeholder="小程序名称 (如：腾讯视频)" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.title" placeholder="小程序页面标题" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.iconUrl" placeholder="小程序图标URL" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.pagePath" placeholder="小程序页面路径"></el-input>
+											</el-form-item>
+
+											<!-- 视频号 -->
+											<el-form-item v-else-if="item.type === 'channels_video'" label-width="0" :key="item.id + '-channels_video'">
+												<el-input v-model="item.data.description" placeholder="视频描述" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.coverUrl" placeholder="视频封面URL" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.videoId" placeholder="视频ID (可选)"></el-input>
+											</el-form-item>
+
+											<!-- 文件 -->
+											<el-form-item v-else-if="item.type === 'file'" label-width="0" :key="item.id + '-file'">
+												<el-input v-model="item.data.fileName" placeholder="文件名" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.fileSize" placeholder="文件大小 (如: 2MB)" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.fileUrl" placeholder="文件下载URL (可选)"></el-input>
+											</el-form-item>
+
+											<!-- 聊天记录 -->
+											<el-form-item v-else-if="item.type === 'chat_record'" label-width="0" :key="item.id + '-chat_record'">
+												<el-input v-model="item.data.title" placeholder="聊天记录标题" style="margin-bottom: 5px;"></el-input>
+												<el-input type="textarea" :rows="2" v-model="item.data.summary" placeholder="聊天记录摘要 (如: 包含3条图片)"></el-input>
+											</el-form-item>
+
+											<!-- 语音 -->
+											<el-form-item v-else-if="item.type === 'voice'" label-width="0" :key="item.id + '-voice'">
+												<el-input v-model="item.data.voiceUrl" placeholder="语音文件URL" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.duration" placeholder="语音时长 (如: 00:35)"></el-input>
+											</el-form-item>
+
+											<!-- 收藏笔记 -->
+											<el-form-item v-else-if="item.type === 'favorite_note'" label-width="0" :key="item.id + '-favorite_note'">
+												<el-input v-model="item.data.title" placeholder="笔记标题" style="margin-bottom: 5px;"></el-input>
+												<el-input type="textarea" :rows="2" v-model="item.data.contentPreview" placeholder="笔记内容预览" style="margin-bottom: 5px;"></el-input>
+												<el-input v-model="item.data.source" placeholder="笔记来源 (如: 来自xx的分享)"></el-input>
+											</el-form-item>
+
+											<div class="message-actions">
+												<div>
+													<el-button type="primary" plain size="mini" icon="el-icon-plus" @click="addMessage(index, 'above')">上方新增</el-button>
+													<el-button type="primary" plain size="mini" icon="el-icon-plus" @click="addMessage(index, 'below')">下方新增</el-button>
+												</div>
+												<el-button type="text" style="color: #F56C6C;" @click="removeMessage(index)">删除</el-button>
+											</div>
+										</div>
+
+									</div>
+								</draggable>
+								<el-button type="primary" size="mini" plain icon="el-icon-plus" @click="addMessage(undefined, undefined,'text')" style="width: 100%; margin-top: 16px;">
+									添加新消息
+								</el-button>
+							</el-form-item>
+						</el-form>
+					</el-col>
+					<el-col :span="10">
+						<div class="preview-wrapper">
+							<div class="preview-device">
+								<div class="preview-content">
+									<div v-if="form.messages.length === 0" class="empty-message">
+										<i class="el-icon-chat-dot-round"></i>
+										<span>当前任务暂无消息，请在左侧添加</span>
+									</div>
+									<transition-group v-else name="list-preview" tag="div">
+										<div v-for="(msg, idx) in form.messages" :key="msg.id" class="chat-message" :ref="'chatMessage_' + msg.id">
+											<div class="chat-avatar">
+												<i class="el-icon-user"></i>
+											</div>
+											<component :is="getPreviewComponent(msg.type)" :message="msg" :current-time="getCurrentTime()"></component>
+										</div>
+									</transition-group>
+								</div>
+							</div>
+						</div>
+					</el-col>
+				</el-row>
+			</div>
+			<span slot="footer" class="dialog-footer">
+				<el-button @click="dialogVisible = false">取 消</el-button>
+				<el-button type="primary" @click="saveTask">保存并开启</el-button>
+			</span>
+		</el-dialog>
+	</div>
+
+	<script src="vue.js"></script>
+	<script src="Sortable.js"></script>
+	<script src="draggable.js"></script>
+	<script src="element-ui.js"></script>
+	<script>
+		Vue.component('preview-text-message', { template: '#preview-text-message', props: ['message', 'currentTime'] });
+		Vue.component('preview-image-message', { template: '#preview-image-message', props: ['message', 'currentTime'] });
+		Vue.component('preview-video-message', { template: '#preview-video-message', props: ['message', 'currentTime'] });
+		Vue.component('preview-card-message', { template: '#preview-card-message', props: ['message', 'currentTime'] });
+		Vue.component('preview-sticker-message', { template: '#preview-sticker-message', props: ['message', 'currentTime'] });
+		Vue.component('preview-miniprogram-message', { template: '#preview-miniprogram-message', props: ['message', 'currentTime'] });
+		Vue.component('preview-channels-video-message', { template: '#preview-channels-video-message', props: ['message', 'currentTime'] });
+		Vue.component('preview-file-message', { template: '#preview-file-message', props: ['message', 'currentTime'] });
+		Vue.component('preview-chat-record-message', { template: '#preview-chat-record-message', props: ['message', 'currentTime'] });
+		Vue.component('preview-voice-message', { template: '#preview-voice-message', props: ['message', 'currentTime'] });
+		Vue.component('preview-favorite-note-message', { template: '#preview-favorite-note-message', props: ['message', 'currentTime'] });
+
+		new Vue({
+			el: '#app',
+			data: {
+				dialogVisible: true, // Changed to true
+				form: {
+					taskName: '',
+					publishTime: '',
+					execType: '定时执行',
+					messages: [] // Will be populated in mounted
+				}
+			},
+			mounted() {
+				// Add a default message when the component is mounted
+				if (this.form.messages.length === 0) {
+					this.addMessage(undefined, undefined, 'text'); // Add a default text message to the end
+					// Optionally, set default content for the first message
+					if (this.form.messages[0] && this.form.messages[0].type === 'text') {
+						this.$set(this.form.messages[0].data, 'content', '这是一条默认的文本消息内容。');
+					}
+				}
+			},
+			methods: {
+				getInitialDataForType(type) {
+					switch (type) {
+						case 'text': return { content: '' };
+						case 'image': return { imageUrl: '', file: null };
+						case 'video': return { videoUrl: '', title: '', coverUrl: '' };
+						case 'card': return { title: '', description: '', imageUrl: '', linkUrl: '' };
+						case 'sticker': return { stickerUrl: '' };
+						case 'miniprogram': return { appName: '', title: '', iconUrl: '', pagePath: '' };
+						case 'channels_video': return { description: '', coverUrl: '', videoId: '' };
+						case 'file': return { fileName: '', fileSize: '', fileUrl: '' };
+						case 'chat_record': return { title: '', summary: '', records: [] };
+						case 'voice': return { voiceUrl: '', duration: '' };
+						case 'favorite_note': return { title: '', contentPreview: '', source: '', noteId: '' };
+						default: return {};
+					}
+				},
+				addMessage(index, position, initialType = 'text') {
+					const newMessage = {
+						id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+						type: initialType,
+						data: this.getInitialDataForType(initialType),
+						delaySeconds: 1
+					};
+
+					if (typeof index === 'undefined') {
+						this.form.messages.push(newMessage);
+					} else {
+						if (position === 'above') {
+							this.form.messages.splice(index, 0, newMessage);
+						} else if (position === 'below') {
+							this.form.messages.splice(index + 1, 0, newMessage);
+						} else {
+							this.form.messages.splice(index, 0, newMessage);
+						}
+					}
+					this.$nextTick(() => {
+						if (typeof index === 'undefined' || position === 'below' && index === this.form.messages.length - 2) {
+							this.scrollToBottom();
+						} else if (typeof index !== 'undefined') {
+							this.scrollToElement(position === 'below' ? index + 1 : index);
+						}
+					});
+				},
+				removeMessage(index) {
+					this.form.messages.splice(index, 1);
+				},
+				onMessageTypeChange(messageItem) {
+					this.$set(messageItem, 'data', this.getInitialDataForType(messageItem.type));
+				},
+				handleImageUpload(file, messageItem) {
+					if (file && file.raw) {
+						const reader = new FileReader();
+						reader.onload = (e) => {
+							this.$set(messageItem.data, 'imageUrl', e.target.result);
+						};
+						reader.readAsDataURL(file.raw);
+					}
+				},
+				getPreviewComponent(type) {
+					const componentMap = {
+						text: 'preview-text-message',
+						image: 'preview-image-message',
+						video: 'preview-video-message',
+						card: 'preview-card-message',
+						sticker: 'preview-sticker-message',
+						miniprogram: 'preview-miniprogram-message',
+						channels_video: 'preview-channels-video-message',
+						file: 'preview-file-message',
+						chat_record: 'preview-chat-record-message',
+						voice: 'preview-voice-message',
+						favorite_note: 'preview-favorite-note-message'
+					};
+					return componentMap[type] || 'preview-text-message';
+				},
+				scrollToBottom() {
+					const messageList = this.$refs.messageList ? (this.$refs.messageList.$el || this.$refs.messageList) : null;
+					if (messageList && typeof messageList.scrollTop !== 'undefined') {
+						messageList.scrollTop = messageList.scrollHeight;
+					}
+					const previewContent = document.querySelector('.preview-content');
+					if (previewContent) {
+						previewContent.scrollTop = previewContent.scrollHeight;
+					}
+				},
+				scrollToElement(index) {
+					this.$nextTick(() => {
+						const messageListContainer = this.$refs.messageList ? (this.$refs.messageList.$el || this.$refs.messageList) : null;
+						if (messageListContainer) {
+							const messageItems = messageListContainer.querySelectorAll('.message-item');
+							if (messageItems && messageItems[index]) {
+								messageItems[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+							}
+						}
+						const previewContent = document.querySelector('.preview-content');
+						const chatMessages = previewContent.querySelectorAll('.chat-message');
+						if (chatMessages && chatMessages[index]) {
+							setTimeout(() => {
+								chatMessages[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+							}, 100);
+						}
+					});
+				},
+				saveTask() {
+					if (this.form.messages.length === 0) {
+						this.$message.warning('请至少添加一条消息');
+						return;
+					}
+					this.dialogVisible = false;
+					this.$message.success('任务已保存并开启');
+				},
+				getCurrentTime() {
+					const now = new Date();
+					const hours = String(now.getHours()).padStart(2, '0');
+					const minutes = String(now.getMinutes()).padStart(2, '0');
+					return `${hours}:${minutes}`;
+				}
+			}
+		});
+	</script>
+</body>
+
+</html>
