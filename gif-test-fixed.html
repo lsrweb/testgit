@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF解析器修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-section {
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .canvas-container canvas {
+            border: 1px solid #999;
+            background: white;
+        }
+        
+        .info {
+            background: #e9f5ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .error {
+            background: #ffe9e9;
+            color: #d00;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            background: #e9ffe9;
+            color: #0a0;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        input[type="file"] {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 GIF解析器修复测试</h1>
+    
+    <div class="info">
+        <h3>修复内容：</h3>
+        <ul>
+            <li>✅ 修复LZW解码算法中的重复代码问题</li>
+            <li>✅ 改进颜色索引验证，防止超出范围</li>
+            <li>✅ 优化disposal method处理，正确处理帧间关系</li>
+            <li>✅ 添加临时画布处理透明度问题</li>
+            <li>✅ 增强错误处理和边界检查</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h3>测试GIF文件</h3>
+        <input type="file" id="fileInput" accept=".gif">
+        <div id="results"></div>
+    </div>
+
+    <script src="GifParser.js"></script>
+    <script>
+        let currentRenderer = null;
+        
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file || file.type !== 'image/gif') {
+                showMessage('请选择GIF文件', 'error');
+                return;
+            }
+            
+            await testGifFile(file);
+        });
+        
+        async function testGifFile(file) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>正在解析GIF文件...</p>';
+            
+            try {
+                // 解析GIF
+                const parser = await GifParser.fromFile(file, {
+                    strict: false,
+                    validateFrames: true,
+                    maxFrames: 100
+                });
+                
+                const gifData = parser.parse();
+                
+                // 显示基本信息
+                let html = `
+                    <div class="success">
+                        <h4>✅ 解析成功！</h4>
+                        <p><strong>文件:</strong> ${file.name}</p>
+                        <p><strong>尺寸:</strong> ${gifData.logicalScreen.width} x ${gifData.logicalScreen.height}</p>
+                        <p><strong>帧数:</strong> ${gifData.frames.length}</p>
+                        <p><strong>循环次数:</strong> ${gifData.loopCount === 0 ? '无限循环' : gifData.loopCount}</p>
+                    </div>
+                `;
+                
+                // 显示解析日志
+                if (gifData.errors.length > 0 || gifData.warnings.length > 0) {
+                    html += '<h4>解析日志:</h4>';
+                    
+                    gifData.errors.forEach(error => {
+                        html += `<div class="error">错误: ${error}</div>`;
+                    });
+                    
+                    gifData.warnings.forEach(warning => {
+                        html += `<div style="background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin: 5px 0;">警告: ${warning}</div>`;
+                    });
+                }
+                
+                // 创建渲染器
+                currentRenderer = new GifRenderer(gifData, {
+                    autoPlay: false,
+                    loop: true,
+                    scale: 1,
+                    backgroundColor: 'transparent'
+                });
+                
+                // 添加画布和控制按钮
+                html += `
+                    <div class="canvas-container">
+                        <div id="canvasWrapper"></div>
+                        <div style="margin-top: 10px;">
+                            <button onclick="testFrame(0)">第1帧</button>
+                            <button onclick="testAllFrames()">测试所有帧</button>
+                            <button onclick="exportTestFrames()">导出测试帧</button>
+                            <button onclick="togglePlay()">播放/暂停</button>
+                        </div>
+                        <div id="frameInfo" style="margin-top: 10px; font-family: monospace; font-size: 14px;"></div>
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = html;
+                
+                // 添加画布
+                const canvasWrapper = document.getElementById('canvasWrapper');
+                canvasWrapper.appendChild(currentRenderer.canvas);
+                
+                // 渲染第一帧
+                if (gifData.frames.length > 0) {
+                    testFrame(0);
+                }
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ 解析失败</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                console.error('GIF解析错误:', error);
+            }
+        }
+        
+        function testFrame(frameIndex) {
+            if (!currentRenderer) return;
+            
+            try {
+                currentRenderer.renderFrame(frameIndex);
+                const frame = currentRenderer.getFrameInfo(frameIndex);
+                
+                document.getElementById('frameInfo').innerHTML = `
+                    帧 ${frame.index + 1} / ${currentRenderer.getFrameCount()} | 
+                    尺寸: ${frame.width}x${frame.height} | 
+                    位置: (${frame.left}, ${frame.top}) | 
+                    延迟: ${frame.delayTime * 10}ms | 
+                    处理方式: ${getDisposalMethodName(frame.disposalMethod)} | 
+                    ${frame.transparentColorFlag ? '有透明' : '无透明'} | 
+                    ${frame.isInterlaced ? '交错' : '非交错'}
+                `;
+                
+                showMessage(`成功渲染帧 ${frameIndex + 1}`, 'success');
+            } catch (error) {
+                showMessage(`渲染帧 ${frameIndex + 1} 失败: ${error.message}`, 'error');
+                console.error('帧渲染错误:', error);
+            }
+        }
+        
+        function testAllFrames() {
+            if (!currentRenderer) return;
+            
+            const totalFrames = currentRenderer.getFrameCount();
+            let successCount = 0;
+            let errorCount = 0;
+            
+            for (let i = 0; i < totalFrames; i++) {
+                try {
+                    currentRenderer.renderFrame(i);
+                    successCount++;
+                } catch (error) {
+                    errorCount++;
+                    console.error(`帧 ${i + 1} 渲染失败:`, error);
+                }
+            }
+            
+            showMessage(`测试完成: ${successCount} 成功, ${errorCount} 失败`, 
+                errorCount === 0 ? 'success' : 'error');
+        }
+        
+        function exportTestFrames() {
+            if (!currentRenderer) return;
+            
+            try {
+                // 导出前几帧作为测试
+                const maxFrames = Math.min(5, currentRenderer.getFrameCount());
+                for (let i = 0; i < maxFrames; i++) {
+                    currentRenderer.renderFrame(i);
+                    const dataUrl = currentRenderer.exportFrame(i, 'image/png', 0.9);
+                    
+                    // 创建下载链接
+                    const a = document.createElement('a');
+                    a.href = dataUrl;
+                    a.download = `test_frame_${i + 1}.png`;
+                    a.click();
+                }
+                
+                showMessage(`成功导出 ${maxFrames} 帧`, 'success');
+            } catch (error) {
+                showMessage(`导出失败: ${error.message}`, 'error');
+            }
+        }
+        
+        function togglePlay() {
+            if (!currentRenderer) return;
+            
+            if (currentRenderer.isPlaying) {
+                currentRenderer.stop();
+                showMessage('播放停止', 'info');
+            } else {
+                currentRenderer.play((frameIndex, frame) => {
+                    const frameInfo = document.getElementById('frameInfo');
+                    if (frameInfo) {
+                        frameInfo.innerHTML = `
+                            播放中 - 帧 ${frameIndex + 1} / ${currentRenderer.getFrameCount()} | 
+                            延迟: ${frame.delayTime * 10}ms
+                        `;
+                    }
+                });
+                showMessage('开始播放', 'info');
+            }
+        }
+        
+        function getDisposalMethodName(method) {
+            const names = ['不指定', '不处理', '恢复背景', '恢复上一帧'];
+            return names[method] || '未知';
+        }
+        
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messageDiv.style.position = 'fixed';
+            messageDiv.style.top = '20px';
+            messageDiv.style.right = '20px';
+            messageDiv.style.zIndex = '1000';
+            messageDiv.style.padding = '10px 15px';
+            messageDiv.style.borderRadius = '5px';
+            messageDiv.style.maxWidth = '300px';
+            messageDiv.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

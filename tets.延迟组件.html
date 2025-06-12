@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <title>延迟组件与选项卡切换</title>
+  <script src="vue-prod.js"></script>
+  <style>
+    .tabs {
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+
+    .tab-button {
+      background: none;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab-button:hover {
+      background-color: #f5f5f5;
+    }
+
+    .tab-button.active {
+      border-bottom-color: #007bff;
+      color: #007bff;
+    }
+
+    .tab-content {
+      min-height: 400px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <script type="text/x-template"
+    id="tab2-template">
+    <div style="padding: 20px;">
+      <h3>标签页2 - 数据展示</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+        <div v-for="item in dataList" :key="item.id" 
+             style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9;">
+          <h4>{{ item.title }}</h4>
+          <p>{{ item.description }}</p>
+          <small style="color: #666;">{{ item.date }}</small>
+        </div>
+      </div>
+    </div>
+  </script>
+
+  <script type="text/x-template"
+    id="left-panel-template">
+       <div v-if="!show">加载中</div>
+        <div style="width: 300px; background-color: #f0f0f0; padding: 20px;" v-else>
+          <h3>左侧内容</h3>
+          <p v-for="i in 10000">
+        阿三大叔大叔大叔多
+        <span v-for="j in 20">{{j}}</span>
+          </p>
+        </div>
+      </script>
+  <div id="app">
+    <!-- 选项卡切换 -->
+    <div class="tabs">
+      <button class="tab-button"
+        :class="{ active: currentTab === 'tab1' }"
+        @click="currentTab = 'tab1'">
+        标签页1 - 延迟组件
+      </button>
+      <button class="tab-button"
+        :class="{ active: currentTab === 'tab2' }"
+        @click="currentTab = 'tab2'">
+        标签页2 - 数据展示
+      </button>
+    </div>
+
+    <!-- 标签页内容 -->
+    <div class="tab-content">
+      <!-- 标签页1: 原有的延迟组件内容 -->
+      <div v-if="currentTab === 'tab1'">
+        <div style="display: flex; height: 80vh;">
+          <left-panel></left-panel>
+          <div style="flex: 1; background-color: #fff; padding: 20px;">
+            <h3>右侧内容</h3>
+            <p>这里是右侧区域</p>
+            <p>当前时间: {{ currentTime }}</p>
+            <button @click="refreshTime"
+              style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              刷新时间
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 标签页2: 新的数据展示内容 -->
+      <div v-if="currentTab === 'tab2'">
+        <tab2-component></tab2-component>
+      </div>
+    </div>
+  </div>
+  <script>
+    // 标签页2组件
+    Vue.component('tab2-component', {
+      template: '#tab2-template',
+      data() {
+        return {
+          dataList: []
+        };
+      },
+      mounted() {
+        this.generateData();
+      },
+      methods: {
+        generateData() {
+          const data = [];
+          for (let i = 1; i <= 12; i++) {
+            data.push({
+              id: i,
+              title: `数据项 ${i}`,
+              description: `这是第${i}个数据项的详细描述信息，用于展示卡片布局效果。`,
+              date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toLocaleDateString()
+            });
+          }
+          this.dataList = data;
+        }
+      }
+    });
+
+    // 左侧面板组件
+    Vue.component('left-panel', {
+      template: '#left-panel-template',
+      data() {
+        return {
+          show: false
+        };
+      },
+      mounted() {
+        setTimeout(() => {
+          this.show = true;
+        }, 2000);
+      }
+    });
+
+    new Vue({
+      el: '#app',
+      data: {
+        message: 'Hello Vue!',
+        currentTab: 'tab1',
+        currentTime: new Date().toLocaleString()
+      },
+      methods: {
+        refreshTime() {
+          this.currentTime = new Date().toLocaleString();
+        }
+      },
+      mounted() {
+        setInterval(() => {
+          this.currentTime = new Date().toLocaleString();
+        }, 1000);
+      }
+    });
+  </script>
+
+</body>
+
+</html>

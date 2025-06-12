@@ -1,0 +1,3498 @@
+<!-- 创建记录 -->
+<?php echo $header; ?>
+<!-- 引入样式element -->
+<!-- <link rel="stylesheet" href="/assets/element-ui/2.15.6/theme-chalk/index.min.css">  -->
+<script type="text/javascript" src="/assets/js/clipboard.js-1.5.15/clipboard.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/assets/ele/theme/index.css">
+<!-- 引入组件库element -->
+<script src="/assets/element-ui/2.15.6/index.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/assets/layui-v2.5.6/css/layui.css">
+<script type="text/javascript" src="/assets/layui-v2.5.6/layui.js"></script>
+<link rel="stylesheet" href="/assets/css/tableSearch.css" />
+<script type="text/javascript" src="/assets/js/commonheaderpub.js"></script>
+
+<!-- 引入拖拽代码 -->
+<script type="text/javascript" src="/assets/js/draggable/Sortable.js"></script>
+<script type="text/javascript" src="/assets/js/draggable/draggable.js"></script>
+
+<script src="/assets/vue-clipboard2/0.3.3/vue-clipboard.min.js"></script>
+<script type="text/javascript" src="/assets/js/xml2json.js"></script>
+<!-- 富文本编辑器（带emoji表情） -->
+<script src="/application/views/common/expressionInput/index.js?v=0.0.5" type="text/javascript"></script>
+<!-- 自定义表情包 -->
+<script src="/application/views/common/emoticonSelect/index.js?v=2024831172419" type="text/javascript"></script>
+
+<link rel="stylesheet" href="/assets/umy-ui/index.css">
+<script src="/assets/umy-ui/index.js"></script>
+
+
+<!-- BEGIN PAGE HEADER -->
+<div class="page-bar">
+	<ul class="page-breadcrumb">
+	</ul>
+</div>
+<!-- END PAGE HEADER-->
+<style type="text/css">
+	/*[v-cloak] {
+        display: none;
+    }*/
+
+	.el-card__body {
+		padding: 0 10px;
+	}
+
+	.el-table .warning-row {
+		background: oldlace;
+	}
+
+	.el-table .success-row {
+		background: #def1d3;
+	}
+
+	.el-row {
+		margin: 5px;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.edit_msg {
+		margin-bottom: 10px;
+	}
+
+	.edit_msg .el-row {
+		margin-top: 8px;
+		margin-bottom: 8px;
+	}
+
+	.el-col {
+		border-radius: 4px;
+	}
+
+	.bg-purple-dark {
+		background: #99a9bf;
+	}
+
+	.bg-purple-succ {
+		background: #67C23A;
+	}
+
+	.bg-purple-light {
+		background: #e5e9f2;
+	}
+
+	.grid-content {
+		border-radius: 4px;
+		min-height: 36px;
+	}
+
+	.row-bg {
+		padding: 10px 0;
+		background-color: #f9fafc;
+	}
+
+	.el-timeline-item__node {
+		margin-top: 10px;
+	}
+
+	.el-timeline-item__tail {
+		margin-top: 20px;
+	}
+
+
+	.el-col {
+		border-radius: 4px;
+	}
+
+	.grid-content {
+		border-radius: 4px;
+		min-height: 36px;
+	}
+
+	.el-timeline-item {
+		padding-bottom: 0px !important;
+	}
+</style>
+<style scoped>
+	/deep/.el-table .warning-row {
+		background: oldlace;
+	}
+
+	/deep/.el-table .success-row {
+		background: #f0f9eb;
+	}
+
+	.iyunzk_container {
+		background: #fff;
+		padding: 20px 0px;
+		margin: 0px 15px;
+		border-radius: 5px;
+	}
+
+
+	.iyunzk_table {
+		font-size: 12px !important;
+		padding: 2px 0px !important;
+	}
+
+
+	.iyunzk_table .el-button--mini {
+		padding: 5px 5px;
+	}
+
+	.iyunzk_table .el-link {
+		font-size: 13px !important;
+		padding: 2px;
+	}
+
+	.lable_span {
+		font-size: 12px !important;
+	}
+
+	.iyunzk_input input {
+		height: 22px !important;
+		line-height: 22px !important;
+	}
+
+	.search_input {
+		width: 25% !important;
+	}
+
+	.kwd_input {
+		width: 60% !important;
+	}
+
+	.kwd_type {
+		width: 37% !important;
+	}
+
+	.num_input {
+		width: 80px !important;
+	}
+
+	/*.el-message--success{
+    top:30%!important;
+  }
+  .el-message--error{
+    top: 30%!important;
+  }*/
+	.el-tag--plain {
+		margin-left: 5px;
+		margin-right: 5px;
+	}
+
+	.line {
+		flex-wrap: wrap;
+	}
+
+	.mini_link {
+		font-size: 12px !important;
+	}
+
+
+
+
+	.el-form-item__content {
+		line-height: 15px;
+	}
+
+	.loading {
+		color: #409eff;
+	}
+
+	.link_box {
+		min-height: 60px;
+		background-color: #f5f7fa;
+		border: #e4e7ed solid 1px;
+		border-radius: 5px;
+		padding: 0px 10px;
+		margin-top: 12px;
+	}
+
+	.link_box .el-image {
+		width: 40px;
+		float: right;
+		/* margin-bottom: -39px; */
+		top: -24px;
+		right: 25px;
+		border-radius: 2px;
+	}
+
+	.link_input {
+		width: 250px;
+		margin-bottom: 10px;
+		display: block;
+	}
+</style>
+<style type="text/css">
+	.kwd_box .el-form-item__label {
+		font-size: 12px;
+		line-height: 30px;
+	}
+
+	.el-tag+.el-tag {
+		margin-left: 10px;
+		margin-bottom: 5px;
+	}
+
+	.el-tag.fast-tag {
+		cursor: pointer;
+	}
+
+	.button-new-tag {
+		margin-left: 10px;
+		height: 25px;
+		line-height: 25px;
+		padding-top: 0;
+		padding-bottom: 0;
+	}
+
+	.input-new-tag {
+		width: 90px !important;
+		margin-left: 10px;
+		vertical-align: bottom;
+	}
+
+	.msg_card {
+		margin-bottom: 0px;
+		margin-top: 0px;
+		display: inline-block;
+		float: right;
+		height: 25px;
+	}
+
+	.msg_card .el-button+.el-button {
+		margin-left: 0px;
+	}
+
+	.badge_item {
+		margin-top: 10px;
+		margin-right: 20px;
+		margin-bottom: 10px;
+	}
+
+	.el-image-viewer__canvas img {
+		max-height: 75% !important;
+		max-width: 75% !important;
+	}
+
+	.hyFrom .el-form-item {
+		margin-bottom: 5px;
+	}
+
+	.el-dialog__body {
+		padding: 10px 30px 20px 15px;
+	}
+	.compress .el-dialog__body{
+		padding: 12px 15px;
+	}
+	.mini-pro-list {
+		/*display: flex;*/
+		margin: 0 auto;
+	}
+
+	.mini-pro-list .el-avatar {
+		width: 60px;
+		height: 60px;
+	}
+
+	.mini-pro-list .item {
+		align-items: center;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.mini_pro_box {
+
+		border: 1px dashed #d9d9d9;
+		border-radius: 6px;
+		cursor: pointer;
+		position: relative;
+		overflow: hidden;
+		width: 80px;
+		height: 80px;
+		margin-top: 10px
+	}
+
+	.btn_type {
+		margin: 2px 0;
+	}
+
+	/*#########*/
+
+	/*图片上传*/
+	.avatar-uploader {
+		display: inline-block;
+		width: 180px;
+	}
+
+	.el-upload-dragger {
+		width: 175px;
+		height: 100px;
+		border: 0px;
+	}
+
+	.avatar-uploader .el-upload {
+		border: 1px dashed #d9d9d9;
+		border-radius: 6px;
+		cursor: pointer;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.avatar-uploader .el-upload:hover {
+		border-color: #409EFF;
+	}
+
+	.avatar-uploader-icon {
+		font-size: 40px !important;
+		color: #8c939d;
+		margin: 10px !important;
+		/* width: 80px;
+    height: 80px;*/
+		line-height: 15px;
+		text-align: center;
+	}
+
+
+	.upvideo .avatar-uploader-icon {
+		font-size: 28px;
+		color: #8c939d;
+		width: 80px;
+		height: 80px;
+		line-height: 80px;
+		text-align: center;
+	}
+
+	.avatar_video {
+		width: 150px;
+		height: 80px;
+		display: block;
+	}
+
+	/*.el-upload-dragger .el-icon-upload{
+    line-height: 25px;
+  }*/
+	.el-upload__text {
+		font-size: 12px !important;
+	}
+
+	.avatar {
+		margin: 0 auto;
+		width: 100%;
+		height: 80px;
+		display: block;
+		background-color: #EFEFEF;
+	}
+
+	.el-upload__input {
+		display: none !important;
+	}
+
+	.img-col {
+		height: 80px;
+		line-height: 80px;
+	}
+
+	.box-card {
+		min-height: 780px;
+	}
+
+	.zhantie {
+		display: inline-block;
+		position: absolute;
+		top: 35px;
+		left: 200px;
+		cursor: pointer;
+	}
+
+	.paste_tip {
+		font-size: 16px;
+		z-index: 13001;
+		position: fixed;
+		top: 40%;
+		left: 45%;
+		padding: 10px;
+		color: #fff;
+		background: linear-gradient(0deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .7));
+		background: -webkit-linear-gradient(0deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .7));
+		background: -o-linear-gradient(0deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .7));
+		background: -moz-linear-gradient(0deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .7));
+		text-align: center;
+	}
+
+	/*  .zhantie {
+    display: inline-block;
+    position: absolute;
+    top: 85px;
+    cursor: pointer;
+}*/
+	/*图片上传*/
+	.avatar-uploadergif .avatar-uploader-icon {
+		font-size: 40px !important;
+		color: #8c939d;
+		margin: 10px !important;
+		line-height: 30px !important;
+		text-align: center;
+		width: 80px;
+		height: auto;
+	}
+
+	.el-upload__text {
+		font-size: 12px !important;
+		line-height: 1.5;
+	}
+
+	/*微信表情*/
+	.faceWrap {
+		position: absolute;
+		z-index: 0;
+		background-color: #FFF;
+		width: 434px;
+		border: 1px solid #9FA0A0;
+		padding: 46px 20px 20px;
+		bottom: 4px;
+		margin-bottom: 88px;
+		_height: 172px;
+		overflow-y: hidden;
+		left: 5px;
+		/* position: absolute; */
+		border-radius: 3px;
+		-moz-border-radius: 3px;
+		-webkit-border-radius: 3px;
+		-moz-box-shadow: 0px 0px 6px rgba(94, 89, 89, 0.57);
+		-o-box-shadow: 0px 0px 6px rgba(94, 89, 89, 0.57);
+		-webkit-box-shadow: 0px 0px 6px rgba(94, 89, 89, 0.57);
+		-ms-box-shadow: 0px 0px 6px rgba(94, 89, 89, 0.57);
+		box-shadow: 0px 0px 6px rgba(94, 89, 89, 0.57);
+	}
+
+
+	.faceBox {
+		position: relative;
+		clear: both;
+		width: 435px;
+		overflow: hidden;
+		background: url(/assets/images/weixin/images/qqSmilies17ced31.png?v=1) no-repeat;
+		cursor: pointer;
+	}
+
+	.faceBox a {
+		display: block;
+		float: left;
+		width: 29px;
+		height: 29px;
+		border-right: 1px solid #DFE6F6;
+		border-bottom: 1px solid #dfe6f6;
+	}
+
+	/*微信表情*/
+
+
+	.el-image-viewer__wrapper {
+		/* z-index: 99999999 !important;*/
+	}
+
+	.el-image-viewer__wrapper {
+		/* z-index: 99999991 !important;*/
+	}
+
+	.space .el-input__inner {
+		padding: 0 5px !important;
+	}
+
+	.el-image-viewer__canvas img {
+		max-height: 75% !important;
+		max-width: 75% !important;
+	}
+    .new-voice-timer{
+        font-size:12px;
+        color:#999;
+        margin-top:calc(14px * .5);
+    }
+
+	.el-main {
+		padding: 0 20px;
+	}
+	.voice-audio-item{
+        width: 300px;
+        height: 58px;
+        transform: scale(0.7) translateX(-67px);
+    }
+</style>
+<style scoped>
+	/*表情包样式 */
+
+
+	.dropdown-container .el-dropdown-menu__item:focus,
+	.el-dropdown-menu__item:not(.is-disabled):hover {
+		background-color: #fff;
+		/* #f2f3f8;*/
+		color: #66b1ff;
+		/* border-radius:32px;*/
+	}
+
+	.dropdown-container .el-dropdown-menu__item {
+		padding: 0 0px;
+		margin-left: 2px;
+	}
+
+	.dropdown-container .el-dropdown-menu__item span {
+		padding: 3px 10px;
+	}
+
+	.component-wrap .el-dropdown {
+		width: calc(100% - 170px);
+	}
+
+	.dropdown-container {
+		display: flex;
+		flex-wrap: wrap;
+		width: 558px;
+	}
+
+	.dropdown-container .el-radio {
+		display: flex;
+		align-items: center;
+	}
+
+	.dropdown-container .el-radio .el-radio__input {
+		display: none;
+	}
+
+	/*.dropdown-container.el-dropdown-menu{
+  left:-200px!important;
+}*/
+	.dropdown-container .popper__arrow {
+		left: 50% !important;
+	}
+
+	.dropdown-container .el-radio__label {
+		display: flex;
+		align-items: center;
+		font-size: 14px;
+		padding-left: 4px;
+	}
+
+	.dropdown-container .el-radio__label img {
+		width: 60px;
+		height: 60px;
+		border: 1px solid #dcdfe6;
+		border-radius: 5px;
+		padding: 2px;
+	}
+
+	.dropdown-container .radio-container {
+		display: flex;
+		flex-wrap: wrap;
+	}
+
+	.dropdown-container .radio-container .el-dropdown-menu__item {
+		margin: 3px;
+		padding: 0;
+		/*width: 160px;*/
+		width: 63px;
+		height: 63px;
+	}
+
+
+	.dropdown-container .el-input__suffix-inner {
+		line-height: 40px;
+	}
+
+	.gif_active {
+		background: #f2f3f8;
+		border-radius: 32px;
+		color: #3171f6;
+		padding: 6px 10px;
+	}
+
+	.el-radio__label {
+		font-size: 12px;
+	}
+
+	.right-box .el-row {
+		margin-bottom: 10px;
+	}
+	.right-box .el-radio{
+		margin-right: 9px;
+	}
+	.msg-btn {
+		padding: 2px 10px;
+	}
+
+	.cmm-wrapper {
+		/* white-space: pre-wrap; */
+		line-height: 20px;
+		color: black;
+		font-size: 14px;
+		margin: 5px 0px 10px 15px;
+	}
+
+	.message {
+		display: flow-root;
+		margin: 0px 5px 10px 0px;
+		border: 1px solid #ddd;
+		border-radius: 5px;
+		padding: 10px;
+		position: relative;
+
+	}
+
+	.message.selected {
+		border: 1px solid #2196f3;
+		box-sizing: border-box;
+	}
+
+	.message .avatar {
+		border: 1px solid #9e9e9e;
+		border-radius: 5px;
+		margin: 5px 0px 10px 15px
+	}
+
+	.message .copy {
+		position: absolute;
+		top: 5px;
+		right: 8px;
+		font-size: 20px;
+		cursor: pointer;
+	}
+
+	.mark {
+		position: absolute;
+		top: 0;
+		left: 0;
+		/*    background-color: #2196f3;*/
+		/*    padding: 10px;*/
+	}
+
+	.mark:before {
+		border-radius: 5px 0 0 0;
+		content: "";
+		position: absolute;
+		top: 0px;
+		left: 0;
+		border-style: solid;
+		border-width: 20px;
+		z-index: 1;
+		border-color: rgb(0 138 255 / 70%) transparent transparent rgb(0 147 255 / 70%);
+	}
+	.text {
+		color: #FFF;
+		display: inline-block;
+		position: absolute;
+		left: 0;
+		z-index: 1;
+		font-size: 15px;
+		text-transform: uppercase;
+		width: 20px;
+		text-align: center;
+	}
+
+	.el-tabs__header {
+		margin: -15px 12px 10px 12px;
+	}
+	.message-line{
+		width: 100%;
+		overflow: hidden;
+	}
+	.timer-out{
+		display: table;
+		float: right;
+		font-size: 12px;
+		line-height: 28px;
+	}
+	.num_input{
+		margin: 0 5px;
+		width: calc(14px * 4);
+	}
+	.message-text-box{
+		width: 100%;
+		overflow: hidden;
+		background-color: #F1F3F6;
+		color: #2D4362;
+		border-radius: 5px;
+		line-height: calc(14px * 1.5);
+		box-sizing: border-box;
+		padding: 1em;
+		margin: 1em auto 0;
+	}
+	.message-function-list{
+		width: 100%;
+		overflow: hidden;
+		margin-top:1em;
+	}
+	.message-function-item:last-child{
+		float: right;
+	}
+	.message-video-box{
+		display: block;
+		width: 100%;
+		overflow: hidden;
+		margin: 1em auto;
+	}
+	.message-show-box{
+		float: left;
+		overflow: hidden;
+	}
+	.video-box{
+		float: left;
+		width: 80px;
+		height: 80px;
+		border-radius: 10px;
+		background-color: #E1E5EB;
+	}
+	.video-tisp{
+		width: 100%;
+		line-height: calc(14px * 1.5);
+		padding: 1em;
+		background-color: #F1F3F6;
+		color: #9e9e9e;
+		border: 10px;
+	}
+	.card-desc{
+		display: flex;
+		align-items: flex-start;
+	}
+	.card-desc-text{
+		white-space: pre-line;
+		overflow: hidden;
+  		text-overflow: ellipsis;
+  		display: -webkit-box;
+  		-webkit-line-clamp: 3;
+  		-webkit-box-orient: vertical;
+	}
+	.jisu-status{
+		float: left;
+		overflow: hidden;
+		/* margin-top: 50px; */
+		margin-left: 10px;
+	}
+	.jisu-status-text{
+		line-height: 30px;
+		height: 30px;
+		float: left;
+	}
+	.jisu-status-text+.jisu-status-text{
+		margin-left: 10px;
+	}
+
+
+	/* 小程序卡片样式 */
+	.xcx-card{
+		user-select: none;
+		width: 65%;
+		background-color: #fff;
+		padding: calc(14px * 0.5);
+		border-radius: 0.5em;
+		overflow: hidden;
+		box-shadow: 0 0 4px 0 rgba(0,0,0,.1);
+	}
+	.xcx-card-title{
+		display: block;
+		width: 100%;
+		display: flex;
+		/* justify-content: center; */
+		align-items: center;
+		margin-top: 0.375rem;
+	}
+	.xcx-card-logo{
+		display: block;
+		width: calc(14px * 1.5);
+		height: calc(14px * 1.5);
+		margin: calc(14px * 0.25);
+		position: relative;
+		border-radius: 50%;
+		background-color: #efefef;
+		overflow: hidden;
+
+	}
+	.xcx-card-logo .img{
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: 100%;
+		transform: translate(-50%,-50%);
+	}
+	.xcx-card-logo .el-image{
+		position: absolute;
+		left: 0;
+		top:0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		text-align: center;
+		line-height: calc(14px * 1.5);
+		color: #999;
+		font-size: 12px;
+	}
+	.xcx-card-logo.icon{
+		width: calc(14px * 1);
+		background-color: transparent;
+	}
+	.xcx-card-title-text{
+
+		width:calc(100% - (14px* 3));
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		line-height: calc(14px * 2);
+		box-sizing: border-box;
+		padding-left: calc(14px * 0.25);
+		font-size: 12px;
+	}
+	.xcx-card-img{
+		height: 216px;
+		margin: 0.5em 0 1em;
+		border-radius: 0.5em;
+		overflow: hidden;
+	}
+	.xcx-card-img .el-image{
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		background-color: #f6f6f6;
+		text-align: center;
+		line-height: 216px;
+		font-size: 20px;
+		color: #999;
+
+	}
+	.xcx-card hr{
+		margin: 0;
+	}
+	/* 聊天记录 */
+	.message-history-box{
+		background: #fff;
+		padding: 10px;
+		border-radius: 4px;
+		font-size: 14px;
+		border: 1px solid #eee;
+    	max-width: 350px;
+		overflow: hidden;
+	}
+	.history-title{
+		font-weight: 700;
+		color: #333;
+		margin-bottom: 10px;
+	}
+	.history-text{
+		font-size: 12px;
+		color: #999;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		width: 100%;
+	}
+	.history-text + .history-text{
+		margin-top: 5px;
+	}
+
+	/* 视频号卡片样式 */
+	.video-card{
+		width: 65%;
+		border-radius: 0.5em;
+		overflow: hidden;
+		position: relative;
+		box-shadow: 0 0 4px 0 rgba(0,0,0,.1);
+	}
+	.video-image-box{
+		width: 100%;
+		background-color: #efefef;
+		position: relative;
+	}
+	.video-text-tisp{
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 100%;
+		box-sizing: border-box;
+		padding: 0 1em;
+		line-height: calc(14px * 3);
+		color: #fff;
+		font-size: 13px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.video-text-tisp span{
+		position: relative;
+		z-index: 3;
+	}
+	.video-text-tisp::before{
+		content: '';
+		display: block;
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 100%;
+		height: 100%;
+		background-image: linear-gradient(to top,#000000a3,transparent);
+		z-index: 2;
+	}
+	.video-image-box .el-image{
+		width: 100%;
+		height: 100%;
+		display: block;
+		max-height: 250px;
+		min-height: 200px;
+		text-align: center;
+		line-height: 200px;
+		color: #999;
+		font-size: 20px;
+	}
+	.video-card-data{
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%,-50%);
+		font-size: 45px;
+		color: #ffffff;
+		border-radius: 50%;
+		background-color: rgba(0,0,0,.3);
+	}
+	.video-card-title{
+		margin: 5px 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	.video-card-box img{
+
+		display: block;
+		width: 100%;
+		height: 250px;
+	}
+	.image-slot img{
+		display: block;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.edit-live{
+		float: left;
+		width: calc(100% - 660px);
+	}
+	.right-box{
+		float: left;
+		width: 660px;
+	}
+	.edit-live-title{
+		display: block;
+		margin: 0 auto;
+		width: 100%;
+		position: relative;
+	}
+	.edit-live-title-btn{
+		/* float: left; */
+		margin-right: calc(14px * 1);
+		/* position: absolute!important; */
+		/* left: 6px; */
+		/* top: 0; */
+	}
+	.edit-live-title-text{
+		float: right;
+		text-align: right;
+		font-size: 13px;
+		color: coral;
+		letter-spacing: .5px;
+	}
+	.cardBox{
+		position: relative;
+		display: inline-block;
+		width: calc(100% - 190px);
+		top: 0;
+		left: 0;
+		vertical-align: top;
+	}
+	.cardBox .el-form-item__label{
+		line-height: 26px;
+		font-size: 12px;
+	}
+	.cardBox .el-form-item{
+		margin-bottom: 0;
+	}
+	.tipsBox .el-dialog__body{
+		padding-bottom: 0;
+	}
+	.tipsBox .el-checkbox__input.is-checked+.el-checkbox__label{
+		color: #e6a23c!important;
+	}
+	.tipsBox .nowTime .el-checkbox__input.is-checked+.el-checkbox__label{
+		color: #409eff!important;
+	}
+	.fuhe{
+		display: inline-block;
+		white-space:nowrap;
+		height:32px;
+		border:1px solid #DCDFE6;
+		border-radius: 4px;
+		vertical-align: bottom;
+	}
+	.fuhe .el-select{
+		display: inline-block;
+		vertical-align: top;
+		height: 30px;
+	}
+	.fuhe .el-input__inner{
+		border: none!important;
+	}
+	.fuhe .el-select__tags .el-select__input{
+		display: none!important;
+	}
+	.fuhe .el-select__tags .el-tag:first-child{
+		max-width:205px;
+		overflow:hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		display: inline-block;
+	}
+	.editFangan .el-select__tags .el-select__input{
+		display:block!important;
+	}
+	.editFangan .el-select__tags .el-tag--info{
+		max-width: 59%!important;
+	}
+	.ex-day-week-class{
+		margin-top: 14px;
+		margin-bottom: calc(14px * 0.5);
+		font-size: 13px;
+	}
+	.ex-day-week-class .el-checkbox__inner{
+		width: 13px;
+		height: 13px;
+	}
+	.ex-day-week-class .el-checkbox__label{
+		padding-left: 5px;
+	}
+	.ex-day-week-class  .el-checkbox{
+		margin-right: 10px;
+	}
+	.ex-day-week-class .el-checkbox__label{
+		font-size: 13px;
+	}
+	.del_content{
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	.timeBox{display: inline-block;}
+	.timeBox .el-tag+.el-tag{
+		margin: 0;
+	}
+	.customDialog .el-table .el-table__header-wrapper .el-checkbox {
+		display: none;
+	}
+	.customDialog .el-dialog__body{
+		padding-top:0;
+	}
+	.kindTit{
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		font-size: 12px;
+		color:#909399;
+		margin-bottom:10px;
+	}
+	.collection-operation-box{
+        overflow:hidden;
+    }
+	.collection-operation-box .saerch-input{
+        float: left;
+        width: calc(100% - (14px * 2.5));
+        margin-right: calc(14px * .5);
+    }
+	/* .collection-operation-box .saerch-input-btn{
+        border-radius: 4px;
+        overflow: hidden;
+        line-height: calc(14px * 2);
+        width: calc(14px * 2);
+        float: left;
+        overflow: hidden;
+        text-align: center;
+        cursor: pointer;
+        background-color: #F8F9FD;
+        color: #4B5871;
+    } */
+    /* .collection-operation-box .saerch-input-box .el-input__inner{
+        background-color: #F8F9FD;
+        border: none;
+        border-radius: 4px;
+        overflow: hidden;
+    } */
+    .collection-operation-box .saerch-input-btn i{
+        font-size: 13px;
+    }
+	.collection-operation-box{
+        overflow:hidden;
+    }
+    .collection-operation-box .collection-select-robot{
+        width:200px;
+    }
+	.replace-robot-option{
+        height: unset!important;
+        padding: 10px 15px 10px 10px!important;
+    }
+    .replace-robot{
+
+        display: block;
+        width: 100%;
+    }
+    .replace-robot-header{
+        width: calc(14px * 2.5);
+        height: calc(14px * 2.5);
+        position: relative;
+    }
+    .replace-robot-header-image{
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+    .replace-robot-header-type{
+        position: absolute;
+        right: -5px;
+        bottom: -3px;
+        width: calc(14px * 1);
+        height: calc(14px * 1);
+        object-fit: cover;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid #fff;
+    }
+    .replace-robot-header-type img{
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .replace-robot-data{
+        display: block;
+        width: calc(100% - (14px * 2.5));
+        box-sizing: border-box;
+        padding-left: calc(14px * .8);
+    }
+    .replace-robot-data-name,
+    .replace-robot-data-id{
+        line-height: calc((14px * 2.5) / 2);
+        font-weight: unset!important;
+        font-size: 12px;
+        max-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+	.new-voice-box{
+        text-align:center;
+        font-size:14px;
+        min-height:140px;
+        box-sizing:border-box;
+    }
+	.new-voice-operation{
+		display: flex;
+		align-items:center;
+		justify-content: center;
+	}
+	.yunyinbofnag{
+		display: block;
+		transform: scale(0.7) translateX(-22%);
+		height: 45px;
+		width: 400px;
+	}
+
+	/* robot-active */
+	.robot-col{
+		height: 100%;overflow-y: auto;border-right: 1px solid #EBEEF5;overflow-x: hidden;
+		transition: all .3s ease;
+	}
+	.robot-col-for {
+		background-color: #f9f9f9;
+		border-left: 3px solid transparent;
+		display: flex;
+		align-items: center;
+		padding: 0 6px;
+		height: 60px;
+		gap: 10px;
+		cursor: pointer;
+		font-size: 12px;
+	}
+	.robot-col-for__active {
+		background-color: #ecf5ff;
+		border-left-color: #409eff;
+	}
+	.left-avatar {
+		width: 40px;
+		border-radius: 50%;
+	}
+	.for-right {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+    	gap: 4px;
+		width: calc(100% - 50px);
+	}
+	.for-right p {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.group-name {
+		font-size: 14px;
+		color: #606266;
+		max-width: 85%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		display: inline-block;
+    vertical-align: middle;
+	}
+	.group-name + .count {
+		color: #909399;
+		font-size: 12px;
+		margin-left: 4px;
+		display: inline-block;
+	}
+	.tooltop-pov .popper__arrow{
+		left: 10px !important;
+	}
+	.gray_text{
+		color: #909399;
+		font-size: 12px;
+		line-height: 18px;
+	}
+	.radio-group-rew .el-radio-button__inner{
+		padding: 7px 10px;
+	}
+	.mb-radio .el-radio {
+		margin-bottom: 0;
+    height: 100%;
+    vertical-align: middle;
+	}
+	.robot-col,
+	.group-col {
+		border-radius: unset;
+	}
+	.robot-col .search-item,
+	.group-col .search-item{
+		display: flex;
+		align-items: center;
+		padding: 6px;
+		margin-right: 0;
+		margin-bottom: 0;
+	}
+	.group-col .search-line {
+		display: flex;
+		align-items: center;
+	}
+	.robot-col .search-item .search-input,
+	.group-col .search-item .search-input{
+		width: 100%;
+	}
+	.robot-col .search-item .search-title ,
+	.group-col .search-item .search-title{
+		white-space: nowrap;
+	}
+	.bufa-group-dialog .el-dialog__body{
+		padding: 0 10px 10px 10px;
+	}
+	/* 美化滚动条样式 */
+	.plTableBox .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+	/* 压缩弹窗 */
+	.dialog-alert{
+		width: 100%;
+		box-sizing: border-box;
+		padding: calc(14px* 1);
+		background: #e6a23c;
+		color: #fff;
+		overflow: hidden;
+		border-radius: 4px;
+		margin-bottom: 14px;
+		font-size: 12px;
+		line-height: calc(14px* 1.3);
+	}
+	.compress-live-box,
+	.compress-slider-box{
+		width: 100%;
+		overflow: hidden;
+		position: relative;
+		border-radius: 6px;
+		overflow: hidden;
+	}
+	.compress-live{
+		display: block;
+		width: 100%;
+		/* width: 360px; */
+		height: 300px;
+		position: relative;
+		background: #efefef;
+	}
+	.compress-live-size{
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		font-size: 13px;
+		line-height: calc(14px * 2);
+		z-index: 99;
+		padding: 0 calc(14px * 1);
+		background: #67C23A;
+		color: #fff;
+		user-select: none;
+		border-top-left-radius: 6px;
+	}
+	.compress-live-size.error{
+		background: #F56C6C;
+	}
+	.compress-slider-title{
+		width: calc(14px * 5);
+		float: left;
+		line-height: 38px;
+	}
+	.compress-slider{
+		float: left;
+		width: calc(100% - (14px * 5));
+		height: 38px;
+	}
+	.compress-footer{
+		display: table;
+		margin-left: auto;
+		padding: 1em 0;
+	}
+</style>
+<style>
+/* 滚动条样式 */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+.preview-device::after{ content: ''; display: block; position: absolute; top: 0; left: -8px; width: 2px; height: 100%; background-color: #EBEEF5; }
+.el-row-bottom-line { border-bottom: 1px solid #EBEEF5; padding-bottom: 10px; }
+::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #909090; }
+/* 平滑滚动 */
+.message-list, .preview-content { scroll-behavior: smooth; }
+.message-list-content__wrapper { flex: 1; background-color: #f2f3f5; padding: 12px; border-radius: 6px; padding-bottom: 4px; padding-top: 4px; }
+.preview-wrapper { height: 100%; min-height: 500px; display: flex; justify-content: center; align-items: center; }
+.preview-device { width: 90%; height: 0; padding-bottom: 180%; position: relative; background: url('/assets/images/fadan/mock-phone.png') no-repeat center center; background-size: contain; margin: 0 auto; }
+.preview-header { position: absolute; top: 8%; left: 0; width: 100%; text-align: center; color: #909399; }
+.preview-content { position: absolute; top: 19px; bottom: 19px; left: 7%; right: 7%; overflow-y: auto; display: flex; flex-direction: column; background-color: #f6f6f6; padding: 16px; border-radius: 40px; }
+.message-list { max-height: 400px; overflow-y: auto; border: 1px solid #EBEEF5; padding: 0; border-radius: 6px; }
+.message-item { border-radius: 4px; display: flex; padding: 8px; }
+.message-item:nth-child(n + 2) { padding-top: 0; }
+.message-item:hover { border-color: #505458; }
+.message-actions { display: flex; justify-content: space-between; align-items: center; }
+.empty-message { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #909399; }
+.empty-message i { font-size: 48px; margin-bottom: 16px; color: #DCDFE6; }
+/* 聊天框样式 */
+.chat-message { display: flex; margin-bottom: 16px; align-items: flex-start; }
+.chat-avatar { width: 40px; height: 40px; border-radius: 4px; background-color: #67C23A; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 8px; flex-shrink: 0; }
+.chat-bubble { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); position: relative; flex: 1; min-width: 0; }
+.chat-bubble:before { content: ''; position: absolute; left: -8px; top: 14px; width: 0; height: 0; border-top: 8px solid transparent; border-right: 8px solid white; border-bottom: 8px solid transparent; }
+.chat-bubble-content { word-break: break-word; white-space: pre-wrap; }
+.chat-bubble-image img { max-width: 100%; border-radius: 4px; }
+.chat-time { font-size: 12px; color: #909399; margin-top: 4px; text-align: right; }
+.ghost { opacity: 0.5; background: #f0f9eb; border: 1px dashed #67c23a; }
+.message-item-drag-handle { cursor: grab !important; font-size: 18px; color: #909399; margin-right: 6px; }
+.message-item-header { display: flex; align-items: center; margin-bottom: 6px; justify-content: space-between; font-size: 12px; }
+.message-item-header>span:nth-of-type(1) { }
+.message-item-header>span:nth-of-type(2) { margin-left: 8px; }
+/* Transition group for preview list */
+.list-preview-move { transition: transform 0.5s ease; }
+.list-preview-enter-active, .list-preview-leave-active { transition: all 0.4s ease; }
+.list-preview-enter, .list-preview-leave-to { opacity: 0; transform: translateY(20px); }
+.list-preview-leave-active { position: absolute; width: calc(100% - 30px); }
+/* Collapse transition for message editor content */
+.collapse-enter-active { transition: max-height 0.3s ease-out, opacity 0.3s ease-out 0.05s; overflow: hidden; }
+.collapse-leave-active { transition: max-height 0.3s ease-in, opacity 0.2s ease-in; overflow: hidden; }
+.collapse-enter, .collapse-leave-to { max-height: 0; opacity: 0; }
+.collapse-enter-to, .collapse-leave { max-height: 1000px; opacity: 1; }
+.message-editor-content { overflow: hidden; }
+.message-list { scrollbar-gutter: stable; }
+.preview-content { scrollbar-gutter: stable; }
+.footer-right{ text-align: right; margin-top: 16px; }
+.npadding-col { padding: 0 !important; }
+.el-form-item--mini.el-form-item{ margin-bottom: 6px !important; }
+.ex-type-class .el-radio{ margin-right: calc(12px * .6); }
+.ex-type-class .el-radio .el-radio__label{ padding-left: calc(12px * .3); }
+.ex-type-check-class .el-checkbox{ margin-right: calc(12px * .6); }
+.ex-type-check-class .el-checkbox .el-checkbox__label{ padding-left: calc(12px * .3); }
+.line-row{ border-bottom: 2px solid #EBEEF5; padding-bottom: 2px; }
+.title-main-msg{ font-size: 16px; color: #303133; margin-top: 10px; display: flex; justify-content: space-between; }
+.title-main-msg span{ color: #909399; }
+</style>
+<div class="alert alert-block alert-info fade in" style="margin-bottom: 10px;">
+	定时发单功能，可配合发单助手2.0进行定时发单、排单功能；<strong>第一次使用？<a target="_blank"
+			href="https://www.yuque.com/iyunzk/fadan/lfpggxi8kymo68g2"
+			class="font-blue">点我查看操作教程&gt;&gt;&gt;</a></strong>
+	<br>
+	<strong>联盟选品一键定时发单、排单配置使用教程；</strong><a target="_blank" href="https://www.yuque.com/iyunzk/fadan/uiaemfs3c2bdxm5k"
+		class="font-blue">点我查看操作教程&gt;&gt;&gt;</a>
+	<div>系统最大保留90天内的数据，可通过设置删除指定时间来选择要保留的天数。<el-button onclick='commandDel()' size='mini' type='primary' style="color:#409eff;font-weight:bold;cursor:pointer">设置删除指定时间</el-button></div>
+</div>
+
+<div id="models" v-cloak class="row margin-top-10">
+  <div class="paste_tip" v-if="isshowv">
+    截图或复制图片后，按下Ctrl + V 粘贴图片
+  </div>
+  <el-container class="iyunzk_container" style="overflow: auto;">
+        <el-tabs v-model="activeName" @tab-click="handleClick" style="width: 100%;">
+          <el-tab-pane label="定时发单任务" name="ds">
+            <el-main style="padding: 0 5px;">
+              <el-row >
+                <el-col :span="24">
+                  <el-row>
+                    <el-button @click="addFadanTiming(),setLocalTime()" type="primary" size="small">添加定时发单</el-button>
+                    <el-button @click="copyFadanTiming" type="primary" size="small" style='margin-left:0;'>共享码克隆</el-button>
+					<el-input size="small" v-model="jobSearch.bianhao" placeholder="编号搜索" style="width: 120px;"></el-input>
+                    <el-input size="small" v-model="jobSearch.kw" placeholder="任务名称" style="width: 120px;"></el-input>
+					<!-- @focus="getFanganList"  -->
+					<div class='fuhe'>
+						<el-select @change='jobSearch.fangan_id = ""' filterable placeholder='选择分组' clearable v-model='cur_group' size='mini' style="width: 130px;">
+							<el-option v-for="(item,index) in group_list.filter(item=>{return item.id != ''})" :label='item.name' :value='item.id' :key='index'></el-option>
+						</el-select>
+						<el-select style="width: 120px;" @change="doSearch" v-model="jobSearch.fangan_id" size="mini" placeholder="请选择发单方案" filterable clearable>
+							<el-option v-for="(item,index) in fangan_list.filter((item)=>{return !cur_group || item.group_id == cur_group})" :key="item.id" :label="(index + 1) + '、' + item.name" :value="item.id" :style="{color: item.status == 'N' ? 'red' : ''}" :title="item.status == 'N' ? '发单方案未启动' : ''"></el-option>
+						</el-select>
+					</div>
+                    <el-select style="width: 120px;" v-model="jobSearch.ex_status" @change="doSearch" clearable placeholder="执行状态" size="small">
+                      <el-option label="未执行" value="1"></el-option>
+                      <el-option label="执行中" value="2"></el-option>
+                      <el-option label="已完成" value="3"></el-option>
+                      <el-option label="已终止" value="4"></el-option>
+					  <el-option label="未执行(重复执行)" value="5">
+						  <span>未执行(重复执行)</span>
+						  <el-tooltip class='item' content='包含当日未执行的重复执行任务和没有执行过的任务' placement='top'>
+							  <i class='el-icon-info'></i>
+						  </el-tooltip>
+					  </el-option>
+                    </el-select>
+
+
+                    <el-select style="width: 120px;" v-model="jobSearch.ex_type" @change="doSearch" clearable placeholder="任务类型" size="small">
+                      <el-option label="定时执行" value="timing"></el-option>
+                      <el-option label="重复执行（每天）" value="day"></el-option>
+                      <el-option label="立即执行" value="now"></el-option>
+                    </el-select>
+
+
+                    <!-- <el-select v-model="jobSearch.order_type" clearable placeholder="排序类型" size="mini">
+                      <el-option label="添加时间" value="create_time"></el-option>
+                      <el-option label="发送时间" value="ex_time"></el-option>
+                      <el-option label="完成时间" value="end_time"></el-option>
+                    </el-select>
+
+                    <el-select v-model="jobSearch.order_val" clearable placeholder="排序" size="mini">
+                      <el-option label="早到晚" value="asc"></el-option>
+                      <el-option label="晚到早" value="desc"></el-option>
+                    </el-select> -->
+
+								<!-- <el-input size="mini" v-model="jobSearch.kwd_group" placeholder="来源群昵称" style="width: 10%;"></el-input> -->
+								<!-- <el-select v-model="jobSearch.status" clearable placeholder="执行进度" size="mini">
+                      <el-option label="未执行" value="0"></el-option>
+                      <el-option label="已执行" value="1"></el-option>
+                      <el-option label="已结束" value="2"></el-option>
+                    </el-select> -->
+								<el-button type="primary" plain @click="doSearch()" size="small">筛选</el-button>
+								<el-button @click="switchFadanTimingBatch" type="warning" plain size="small" style='margin:0'>终止</el-button>
+								<el-dropdown split-button type="danger" size='small' plain @click="delFadanTimingBatch" @command='command_del'>
+								  立即删除
+								  <el-dropdown-menu slot="dropdown">
+									<el-dropdown-item style="color: #F56C6C;">删除指定时间</el-dropdown-item>
+									</el-dropdown-menu>
+								</el-dropdown>
+								<el-dropdown type="primary" size='small'  @click="withdraw(multipleSelection)" @command='handleMoreBatch'>
+									<el-button type="primary" size='small' plain >
+										更多批量操作
+										<i class="el-icon-arrow-down el-icon--right"></i>
+									</el-button>
+									<el-dropdown-menu slot="dropdown">
+									  	<el-dropdown-item command="withdraw">批量撤回</el-dropdown-item>
+									  	<el-dropdown-item command="handleUpdateTime">
+											批量重置执行时间
+											<el-tooltip class="item" effect="dark" content="" placement="top" >
+												<div slot="content" style="width: 500px;">
+													<div>“本周定时执行”和“重复执行（每天）”类型的任务，如果重置时间不符合选择的执行条件，系统会自动调整到下一个符合条件的时间。</div>
+													<div style="margin: 5px 0;">例如：选择“周一、周三”的“定时执行”，重置时间为“周四”，不符合“周一、周三”的条件，自动调整为下一个“周一”对应时间执行。</div>
+													<div>“本周定时执行”类型任务，重置的时间不在当前周，则不会执行。</div>
+												</div>
+												<i class="el-icon-info"></i>
+											</el-tooltip>
+										</el-dropdown-item>
+									  	<el-dropdown-item command="handlePlScheme">批量设置发单方案</el-dropdown-item>
+									</el-dropdown-menu>
+								  </el-dropdown>
+								<!-- <el-button @click="delFadanTimingBatch" type="danger" plain size="small" style='margin:0'>删除</el-button> -->
+								<!-- <el-button @click="withdraw(multipleSelection)" type="info" plain size="small" style='margin:0'>批量撤回</el-button>
+								<el-button @click="handleUpdateTime" type="primary" plain size="small" style='margin:0'>
+									批量重置执行时间
+									<el-tooltip class="item" effect="dark" content="" placement="top" >
+										<div slot="content" style="width: 500px;">
+											<div>“本周定时执行”和“重复执行（每天）”类型的任务，如果重置时间不符合选择的执行条件，系统会自动调整到下一个符合条件的时间。</div>
+											<div style="margin: 5px 0;">例如：选择“周一、周三”的“定时执行”，重置时间为“周四”，不符合“周一、周三”的条件，自动调整为下一个“周一”对应时间执行。</div>
+											<div>“本周定时执行”类型任务，重置的时间不在当前周，则不会执行。</div>
+										</div>
+										<i class="el-icon-info"></i>
+									</el-tooltip>
+								</el-button>
+								<el-button type="primary" plain @click="handlePlScheme" size="small" style='margin:0'>批量设置发单方案</el-button> -->
+								<!-- <el-button type="danger" style="float:right;" @click="delJob()" size="mini">删除</el-button>
+								<el-button type="danger" style="float:right;" @click="delJob('Y')" size="mini">清空</el-button> -->
+								<el-checkbox style="padding-top: 10px" @change="doSearch()" v-model="jobSearch.type" true-label='lmpush' false-label=''>隐藏联盟任务</el-checkbox>
+
+							</el-row>
+						</el-col>
+					</el-row>
+					<el-row>
+						<el-table ref="multipleTable_job" :data="table_data.list"
+							v-loading="fadanLoad"
+							@selection-change="handleSelectionChange_job" header-row-class-name="iyunzk_table"
+							header-cell-class-name="iyunzk_table" cell-class-name="iyunzk_table" empty-text
+							@row-dblclick="editFadanTiming"
+							@sort-change="sortChange"
+							>
+							<el-table-column type="selection" width='35'></el-table-column>
+							<el-table-column prop="id" label="编号" width="80" show-overflow-tooltip>
+								<template slot-scope="scope">
+								   <strong v-if="yinyong == scope.row.id" style="color: #409eff;"> > {{scope.row.id}}</strong>
+								    <span v-else>{{scope.row.id}}</span>
+								</template>
+							</el-table-column>
+							<el-table-column prop="name" label="任务名" show-overflow-tooltip>
+								<template slot-scope="scope">
+									<span><img v-if="scope.row.type == 'lmpush'" src="/assets/images/logo/alimama.png"
+											style="width: 20px;"><strong>{{scope.row.name}}</strong></span>
+								</template>
+							</el-table-column>
+
+							<el-table-column label="方案">
+								<template slot-scope="scope">
+									<p v-for="(item) in scope.row.fangan_ids" style="line-height: 15px;">
+										<block v-if="fangan_list_id2index[item]">
+											<el-link :href="'/wx/FaDan#' + item">
+												<el-tooltip v-if="fangan_list_id2index[item].status == 'N'" class="item"
+													effect="dark" content="发单方案未启动" placement="left">
+													<span style="color:red">{{fangan_list_id2index[item].name}}</span>
+												</el-tooltip>
+												<span v-else>{{fangan_list_id2index[item].name}}</span>
+											</el-link>
+										</block>
+										<block v-else>
+											<span :title="'方案ID:' + item" style="color:gray;">方案不存在</span>
+										</block>
+
+
+									</p>
+								</template>
+							</el-table-column>
+
+							<el-table-column prop="msg_count" label="进度" width="80px">
+								<template slot-scope="scope">
+									<span style="color: #66b1ff;cursor:pointer" @click="editFadanTiming(scope.row,'edit')">{{scope.row.status1}}/{{scope.row.msg_count}}</span>
+								</template>
+							</el-table-column>
+							<el-table-column prop="ex_type" label="发送模式" show-overflow-tooltip>
+								<template slot-scope="scope">
+									<div>
+										<span v-if='scope.row.ex_type=="timing"'><i
+												class="el-icon-alarm-clock"></i>定时执行<br><span
+												style="color: #9e9e9e;">({{scope.row.job_time_str}})</span></span>
+											<span v-if='scope.row.ex_type=="timing_week"'><i
+												class="el-icon-alarm-clock"></i>本周定时执行<br>
+												<span style="color: #9e9e9e;">
+													{{convertDayWeek(scope.row.ex_day_week)}}
+													({{scope.row.job_time_str}})
+												</span>
+											</span>
+										<span v-if='scope.row.ex_type=="day"'><i
+												class="el-icon-timer"></i>重复执行<br><span
+												style="color: #9e9e9e; width: 100%; display: block; overflow: hidden; white-space: normal;">
+												{{scope.row.ex_day_week.length == 0 || scope.row.ex_day_week.length > 6 ? '（每天）' : convertDayWeek(scope.row.ex_day_week) }}
+												({{scope.row.job_time_str}})</span>
+											</span>
+										<span v-if='scope.row.ex_type=="now"'><i
+												class="el-icon-position"></i>立即执行</span>
+										<span v-if='scope.row.ex_type=="month"'><i
+												class="el-icon-alarm-clock"></i>每月定时执行<br>
+												<span style="color: #9e9e9e;">
+													(每月的{{scope.row.ex_day_month.join(',')}})
+													({{scope.row.job_time_str}})
+												</span>
+										</span>
+									</div>
+								</template>
+
+							</el-table-column>
+
+							<el-table-column label="执行状态" show-overflow-tooltip>
+								<template slot-scope="scope">
+										<div v-if="scope.row.ex_type=='timing'||scope.row.ex_type=='now'">
+
+											<el-tooltip v-if="scope.row.remark" class="item" effect="dark" :content="scope.row.remark" placement="right">
+									      <span v-html="scope.row.status_str" ></span>
+									    </el-tooltip>
+								      <span v-else v-html="scope.row.status_str" ></span>
+
+
+										<!-- <el-link v-if='scope.row.status==0' type='danger' :underline="false">未执行</el-link>
+                        <el-link v-if='scope.row.status==1' type='success' :underline="false">已执行</el-link>
+                        <el-link v-if='scope.row.status==2' type='success' :underline="false">已取消</el-link> -->
+
+                    </div>
+
+					<span v-if="scope.row.ex_type=='timing_week'">
+						<div v-if="scope.row.status_str_day != '--'">下次执行时间</div>
+						<span  v-if="scope.row.status_str_day != '--'" style="color: #9e9e9e;">{{scope.row.status_str_day}}</span>
+						<el-tooltip v-if="scope.row.remark" class="item" effect="dark" :content="scope.row.remark" placement="right">
+							<span v-html="scope.row.status_str" ></span>
+						  </el-tooltip>
+						<span v-else v-html="scope.row.status_str" ></span>
+					</span>
+                      <span v-if="scope.row.ex_type=='day' || scope.row.ex_type=='month'">
+                       <div v-if="scope.row.status_str_day != '--'">下次执行时间</div>
+                       <span style="color: #9e9e9e;">{{scope.row.status_str_day}}</span>
+                      </span>
+
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="start_datetime" label="发送、完成时间" show-overflow-tooltip>
+                    <template slot-scope="scope">
+                      <p>发送：{{scope.row.start_datetime}} </p>
+
+                      <p>完成：{{scope.row.end_datetime}} </p>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="create_datetime" label="创建、预计完成时间" show-overflow-tooltip>
+					<template slot-scope="scope">
+						<p>创建：{{scope.row.create_datetime}} </p>
+
+						<p>预计：{{scope.row.yuji_time}} </p>
+					</template>
+                  </el-table-column>
+									<el-table-column prop="sort" label="排序" width="140" sortable="custom" align="center">
+										<template slot-scope="scope">
+											<div style="display: flex; align-items: center;justify-content: center;">
+												<span v-if="!scope.row.isEditingSort" @click="prepareSortEdit(scope.row, scope.$index)">
+													{{ scope.row.sort || 0 }}
+												</span>
+												<el-input
+													v-else
+													v-model.number="scope.row.sort"
+													size="mini"
+													type="number"
+													style="width: 80px;"
+													@blur.self="saveSort(scope.row)"
+													ref="sortInput"
+													autofocus
+												></el-input>
+												<i class="el-icon-edit" v-if="!scope.row.isEditingSort"
+													@click.self="setOtherSort(scope.row, scope.$index)"
+													style="margin-left: 5px; cursor: pointer; color: #409EFF;"
+												></i>
+											</div>
+					</template>
+                  </el-table-column>
+                  <el-table-column label="操作" width='300px'>
+                    <template slot-scope="scope">
+											<div>
+                        <el-link type='primary' @click="editFadanTiming(scope.row,'edit')" :underline="false">编辑</el-link>
+                        <el-link v-if="scope.row.switch=='Y'" type='warning'  @click="funSwitch(scope.row.id,'N')":underline="false">终止</el-link>
+                        <el-link v-else type='success' @click="funSwitch(scope.row.id,'Y',scope.row)" :underline="false">开启</el-link>
+                        <el-link type='info' :underline="false" @click='withdraw([scope.row])'>撤回</el-link>
+                        <el-link type='danger' @click="delFadanTiming(scope.row.id)"   :underline="false">删除</el-link>
+                        <el-link type='success' @click="copyShareCode(scope.row.id)"   :underline="false">复制共享码</el-link>
+						<el-link type='primary' :underline="false" @click='syncContent(scope.row.id)'>同步内容</el-link>
+                      </div>
+                    </template>
+                  </el-table-column>
+                </el-table>
+                <el-pagination layout="total, sizes, prev, pager, next, jumper" background @current-change="jobCurrentChange" @size-change="jobSizeChange" :current-page="table_data.currPage" :page-size="table_data.size" :total="table_data.total" style="margin-top: 1em;">
+                </el-pagination>
+              </el-row>
+            </el-main>
+          </el-tab-pane>
+          <el-tab-pane label="联盟选品配置" name="xp">
+            <el-main >
+				<el-button type="primary" size='small' @click="show_add_setting=true;clear_data()" icon="el-icon-plus">新建联盟选品配置</el-button>
+				<el-input v-model="searchParams.title" placeholder="标题搜索" clearable size='small' style="width:200px"></el-input>
+				<el-select style="width: 140px;" v-model="searchParams.status" @change="search"  clearable placeholder="开启状态" size="small">
+				    <el-option label="开启" value="Y"></el-option>
+				    <el-option label="关闭" value="N"></el-option>
+				</el-select>
+				<div class='fuhe'>
+					<el-select filterable placeholder='选择分组' @change='searchParams.fanganid = ""' clearable v-model='sel_group' size='mini' style="width: 150px;">
+						<el-option v-for="(item,index) in group_list.filter(item=>{return item.id != ''})" :label='item.name' :value='item.id' :key='index'></el-option>
+					</el-select>
+					<el-select style="width: 140px;" v-model="searchParams.fanganid" @change="search"   @focus="getFanganList"  clearable placeholder="发单方案" size="mini">
+					  <el-option v-for="(item,index) in fangan_list.filter((item)=>{return !sel_group || item.group_id == sel_group})" :key="item.id" :label="(index + 1) + '、' + item.name" :value="item.id" :style="{color: item.status == 'N' ? 'red' : ''}" :title="item.status == 'N' ? '发单方案未启动' : ''"></el-option>
+					</el-select>
+				</div>
+				<el-button type="primary" @click="search" size="small">搜索</el-button>
+				<el-link type="info" :underline="false">接收到的选品推送将在左侧定时发单任务内显示</el-link>
+              <!-- 列表 -->
+              <template>
+                  <el-table ref="multipleTable_job" :data="tableData.list" :header-row-class-name="iyunzk_table_class" :header-cell-class-name="iyunzk_table_class" :row-class-name="iyunzk_table_class" :cell-class-name="iyunzk_table_class" empty-text >
+                    <el-table-column type="index" label="编号" width="80" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop ="title" label="方案名称" width="180"></el-table-column>
+                    <el-table-column label="联盟" width="180">
+                      <template slot-scope="scope">
+                        {{ getlm_account(scope.row.lm_id)}}
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="配置延时" width="180">
+                        <template slot-scope="scope">
+                          <p>文本：{{scope.row.config.text_ys}} 秒 图片：{{scope.row.config.pic_ys}} 秒</p>
+                          <p>视频：{{scope.row.config.video_ys}} 秒 动图：{{scope.row.config.gif_ys}} 秒</p>
+                        </template>
+
+                    </el-table-column>
+
+                    <el-table-column label="消息(联盟)" width="120">
+                        <template slot-scope="scope">
+                          {{scope.row.log_nums}}
+                          <el-link v-if="scope.row.log_nums>0" type="primary" style="font-size: 12px;" @click="show_lm_rule_log(scope.row)" icon="el-icon-zoom-in">查</el-link>
+                        </template>
+
+                    </el-table-column>
+
+
+                    <el-table-column label="发单方案" width="200">
+                        <template slot-scope="scope">
+                          <el-tag style="margin-left: 5px;" v-for="(item,index) in scope.row.fangan_sel" size="mini">
+                             <template v-if="getfangan(item)">{{getfangan(item)}}</template>
+                          </el-tag>
+                        </template>
+
+                    </el-table-column>
+                    <el-table-column label="时间" width="180">
+                        <template slot-scope="scope">
+                          <div v-if="scope.row.create_time">创：{{timestampToTime(scope.row.create_time)}}</div>
+                          <div v-if="scope.row.update_time>0">更：{{timestampToTime(scope.row.update_time)}}</div>
+                        </template>
+                    </el-table-column>
+
+                    <!-- <el-table-column label="定时发单" width="100" fixed="right" style="display: none;">
+
+                      <template slot-scope="scope">
+                        <el-switch @change="change_status(scope.row,'fadan_status')"
+                            v-model="scope.row.fadan_status"
+                            active-color="#13ce66"
+                            active-value="Y"
+                            inactive-value="N"
+                            inactive-color="#ff4949">
+                          </el-switch>
+                      </template>
+                    </el-table-column> -->
+
+							<el-table-column label="接收状态" width="100" fixed="right">
+								<template slot-scope="scope">
+									<el-switch @change="change_status(scope.row,'status')" v-model="scope.row.status"
+										active-color="#13ce66" active-value="Y" inactive-value="N"
+										inactive-color="#ff4949">
+									</el-switch>
+								</template>
+							</el-table-column>
+							<el-table-column label="操作" fixed="right" min-width="180">
+								<template slot-scope="scope">
+
+									<el-button size="mini" @click="do_edit_setting(scope.row)">修改</el-button>
+									<el-button size="mini" @click="delsetting(scope.row)">删除</el-button>
+								</template>
+
+							</el-table-column>
+						</el-table>
+					</template>
+					<!-- 分页 -->
+					<el-pagination v-if="tableData.totalPage>1" @size-change="SizeChange"
+						@current-change="CurrentChange" :current-page="searchParams.page" :page-sizes="[20,50,100]"
+						:page-size="20" layout="total, sizes, prev, pager, next, jumper" :total="tableData.total">
+					</el-pagination>
+
+				</el-main>
+			</el-tab-pane>
+		</el-tabs>
+
+		<!-- 机器人信息 -->
+
+	</el-container>
+	<!-- 删除指定时间之前的记录 -->
+	<el-dialog title='删除时间设置' @close='delConfig = 90' @open='getDelTime' :visible.sync='delTimeDialog' width='400px'>
+		<div class='del_content'>
+			<span>删除</span>
+			<el-input-number v-model='delConfig' @change='setDelTime' controls-position="right" :min="1" :max='90' size='mini' style="margin: 0 5px;"></el-input-number>
+			<span>天前的记录</span>
+		</div>
+		<span slot='footer' class='dialog-footer'>
+			<el-button size='mini' @click='delTimeDialog = false'>取消</el-button>
+			<el-button size='mini' type='primary' @click='saveDelTime'>保存</el-button>
+		</span>
+	</el-dialog>
+
+	<el-dialog :title="`编辑定时发单任务`+job_id" :close-on-click-modal="false" @close="addFadanTimingDialogClose" :visible.sync="addFadanTimingDialog" width="1200px" top="40px">
+		<div class="edit-box clearfix">
+			<div class="edit-live">
+				<div class="edit-live-title clearfix">
+					<el-tooltip class="item" effect="dark" content="若少数素材出现传输失败,请单独重传素材" placement="top" :open-delay='500'>
+						<el-button v-if="job_id" @click="batchUpFileCDN" :loading='batchUpLoading' class="edit-live-title-btn" type="primary" size="mini">一键重传素材</el-button>
+					</el-tooltip>
+					<span>
+						<span>全部折叠</span>
+						<el-switch v-model="fold" style="transform: scale(0.8);" @change='changeFold'></el-switch>
+					</span>
+					<div class="edit-live-title-text">
+						<p style='font-size: 12px;color: #666666;padding-right: 6px;' v-if='finishTime'>预计完成时间：{{finishTime}}</p>
+						<span>长按可拖动进行重新排序</span>
+					</div>
+				</div>
+				<el-row style="width:98%; max-height:600px; overflow-y:auto;">
+					<template v-if="!replyForm.msg.length">
+						<el-empty description="当前任务暂无消息，请在右侧添加"></el-empty>
+					</template>
+					<template v-else>
+						<draggable v-model="replyForm.msg" ghost-class="ghost" fallback-tolerance="3" chosen-class="chosen"
+							force-fallback="true" filter=".layui-icon-delete" animation="300" class="moveclass"
+							@update="datadragEnd">
+							<div v-for="(item_msg,index) in replyForm.msg" class="message" :class="{selected : reply_msg_index===index}" @click.stop="editReplyMsg(index)">
+								<p class="mark"> <span class="text">{{index+1}}</span>  </p>
+								<div class="message-line">
+									<el-tag size="mini" style="margin-top: 5px;margin:4px 0 4px 10px;" v-if="item_msg.status == 1&&replyForm.ex_type!='day'" type="success">已执行: {{item_msg.ex_time}}</el-tag>
+									<el-tag size="mini" style="margin-top: 5px;margin:4px 0 4px 10px;" v-if="item_msg.status == 1&&replyForm.ex_type=='day'" type="info">下次执行: {{item_msg.ex_time}}</el-tag>
+									<el-tag size="mini" style="margin-top: 5px;margin:4px 0 4px 10px;" v-if="item_msg.status == 0 && item_msg.is_start == '0'" type="info">待执行</el-tag>
+									<el-tooltip class="item" effect="dark" content="重新开启发单时未设置从该内容开始" placement="top">
+										<i class="el-icon-question" v-if="item_msg.status == 0 && item_msg.is_start == '0'"></i>
+									</el-tooltip>
+									<el-tag size="mini" style="margin-top: 5px;margin:4px 0 4px 10px;" v-if="item_msg.status == 0 && item_msg.is_start == '1'" type="info">待执行</el-tag>
+									<div class="timer-out">
+										<span>折叠 <el-switch v-model="item_msg.showContent?false:true" style="transform: scale(0.8);" @change="changeZD($event,index)"></el-switch></span>
+										<span style="display: inline-block;margin-left:12px;" @click.stop="(e) => {}">
+											延时
+											<el-input v-model="item_msg.yanshi" @change.stop="check_number($event,1,'建议')" min="1" type="number" size="mini" class="num_input" size="mini"></el-input>
+											秒
+										</span>
+									</div>
+								</div>
+								<el-link v-if="item_msg.msg_type_reply=='card'" :underline="false" style="font-size: 12px;font-weight: 800;color: red;">实际展示样式以手机屏幕宽度为准</el-link>
+								<div class="message-line message-text-box" v-if="item_msg.msg_type_reply=='txt' && item_msg.showContent">
+									<div v-if="item_msg.msg == ''" style="color:#9e9e9e">请在右侧进行编辑</div>
+									<div v-else v-html="relpaceContent(item_msg.msg)" style="white-space:pre-wrap"></div>
+								</div>
+								<template v-if="item_msg.msg_type_reply=='xiaochengxu' && item_msg.showContent">
+									<div class="cmm-wrapper" v-if="item_msg.msg == ''" style="color:#9e9e9e">请在右侧进行编辑</div>
+									<div class="cmm-wrapper" v-if="item_msg.xcxData">
+										<div class="xcx-card">
+											<div class="card-box1">
+												<div class="xcx-card-title">
+													<div class="xcx-card-logo">
+														<el-image class="el-image" :src="item_msg.xcxData.appicon" fit="cover">
+															<div slot="error" class="image-slot">
+																<i class="el-icon-picture-outline"></i>
+															</div>
+														</el-image>
+													</div>
+													<div class="xcx-card-title-text">{{item_msg.xcxData.name}}</div>
+												</div>
+												<div class="xcx-card-content-text">{{item_msg.xcxData.title}}</div>
+												<div class="xcx-card-img">
+													<el-image class="el-image" :src="item_msg.xcxData.media" fit="cover">
+														<div slot="error" class="image-slot">
+															<img src="/assets/images/roobot/xiaochengxutupianyulan.jpg" alt="">
+															<!-- <i class="el-icon-picture-outline"></i> -->
+														</div>
+													</el-image>
+												</div>
+												<hr>
+											</div>
+											<div class="card-box2">
+												<div class="xcx-card-title">
+													<div class="xcx-card-logo icon">
+														<img class="img" src="/assets/images/logo/xiaochengxu2.png" alt="">
+													</div>
+													<div class="xcx-card-title-text">小程序</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</template>
+
+								<template v-if="item_msg.msg_type_reply=='shipinhao' && item_msg.showContent">
+									<div class="cmm-wrapper" v-if="item_msg.msg == ''" style="color:#9e9e9e">请在右侧进行编辑</div>
+									<div class="cmm-wrapper" v-if="item_msg.sphData">
+										<div class='video-card'>
+											<div class="video-image-box">
+												<el-image class="el-image" :src="item_msg.sphData.media" fit="cover">
+													<div slot="error" class="image-slot">
+														<i class="el-icon-picture-outline"></i>
+													</div>
+												</el-image>
+												<div class="video-card-data">
+													<i class="el-icon-video-play"></i>
+												</div>
+												<div class="video-text-tisp">
+													<span>{{item_msg.sphData.title}}</span>
+												</div>
+											</div>
+											<div class='video-card-title'>
+												<div class="xcx-card-logo">
+													<el-image class="el-image" :src="item_msg.sphData.appicon" fit="cover">
+														<div slot="error" class="image-slot">
+															<i class="el-icon-picture-outline"></i>
+														</div>
+													</el-image>
+												</div>
+												<div class="xcx-card-title-text">{{item_msg.sphData.name}}</div>
+											</div>
+										</div>
+									</div>
+								</template>
+
+								<div class="message-line message-video-box"  v-if="item_msg.msg_type_reply!='txt' && item_msg.showContent">
+									<div class="message-show-box" v-if="item_msg.msg_type_reply=='img'">
+										<el-image class="video-box" fit="contain" v-if="item_msg.img_src != ''" :src="item_msg.img_src" title="点击预览" @click.stop="imgPreview(item_msg.img_src,'img')"></el-image>
+										<div v-else class="video-tisp">请在右侧上传图片</div>
+									</div>
+									<div class="message-show-box" v-if="item_msg.msg_type_reply=='card'">
+										<el-image class="video-box" fit="contain" v-if="item_msg.img_src != ''" :src="item_msg.img_src" title="点击预览" @click.stop="imgPreview(item_msg.img_src,'img')"></el-image>
+										<div v-else class="video-tisp">请在右侧上传图片</div>
+									</div>
+									<div class="message-show-box" v-if="item_msg.msg_type_reply=='shipin'">
+										<el-image class="video-box" fit="contain" v-if="item_msg.img_src != ''" :src="item_msg.img_src_video" title="点击预览" @click.stop="imgPreview(item_msg.img_src,'video')"></el-image>
+										<div v-else class="video-tisp">请在右侧上传视频</div>
+									</div>
+									<div class="message-show-box" v-if="item_msg.msg_type_reply=='gif'">
+										<el-image class="video-box" fit="contain" v-if="item_msg.img_src != ''" :src="item_msg.img_src" title="点击预览" @click.stop="imgPreview(item_msg.img_src,'img')"></el-image>
+										<div v-else class="video-tisp">请在右侧上传动态表情</div>
+									</div>
+									<div class="message-show-box" v-if="item_msg.msg_type_reply=='file'">
+										<div v-if="item_msg.img_src != ''">
+											<i class="video-box el-icon-document" style="font-size: 40px;line-height: 80px;text-align: center;color: #409EFF;"  title="点击预览" @click.stop="imgPreview(item_msg.img_src,'file')"></i>
+											<div><el-button type="text" size="mini">{{item_msg.title}}</el-button></div>
+										</div>
+										<div v-else class="video-tisp">请在右侧上传文件</div>
+									</div>
+									<div v-if="item_msg.msg_type_reply=='card'" style="padding-left: 92px;line-height: 22px;font-size: 12px;">
+										<p>标题：{{item_msg.title}}</p>
+										<p>链接：{{item_msg.url}}</p>
+										<div class="card-desc">
+											<div>描述：</div>
+											<div class="card-desc-text" >{{item_msg.desc}}</div>
+										</div>
+									</div>
+									<div class="jisu-status" v-if="item_msg.img_src!='' && item_msg.msg_type_reply != 'card'">
+										<div class="jisu-status-text" v-if="item_msg.jisu_stuatus=='准备中'" style="color: #e6a23c;">个微极速准备中...</div>
+										<div class="jisu-status-text" v-if="item_msg.jisu_stuatus=='未就绪'" style="color: #f56c6c;">个微极速未就绪</div>
+										<div class="jisu-status-text" v-if="item_msg.jisu_stuatus=='就绪'" style="color: #67c23a;">个微极速就绪</div>
+										<div class="jisu-status-text" v-if="item_msg.jisu_stuatus_qy=='准备中'" style="color: #e6a23c;">企微极速准备中...</div>
+										<div class="jisu-status-text" v-if="item_msg.jisu_stuatus_qy=='未就绪'" style="color: #f56c6c;">企微极速未就绪</div>
+										<div class="jisu-status-text" v-if="item_msg.jisu_stuatus_qy=='就绪'" style="color: #67c23a;">企微极速就绪</div>
+									</div>
+								</div>
+								<div class="message-line message-history-box" v-if="item_msg.msg_type_reply=='liaotianjilu' && item_msg.showContent">
+									<div class="history-title">{{item_msg.msg_title}}</div>
+									<template v-if="item_msg.msg_desc && item_msg.msg_desc.length">
+										<div class="history-text" v-for="(content,contentIndex) in item_msg.msg_desc" :key="contentIndex">{{content}}</div>
+									</template>
+								</div>
+								<div class="message-line message-history-box" v-if="item_msg.msg_type_reply=='voice' && item_msg.showContent">
+									<audio :src="formatVoiceData(item_msg.msg).mp3_file" class="yunyinbofnag" controls></audio>
+								</div>
+								<!-- note 笔记类型 -->
+								<div class="message-line message-history-box" v-if="item_msg.msg_type_reply=='note' && item_msg.showContent">
+									<div class="history-title">微信收藏笔记</div>
+									<div class="history-text" v-if="item_msg.noteData && item_msg.noteData.title">{{item_msg.noteData.title}}</div>
+									<div class="history-text" v-else>暂无笔记内容</div>
+									<i class="el-icon-notebook-2" style="margin-top: 8px;"></i>
+								</div>
+								<div class="message-function-list" v-if='item_msg.showContent'>
+									<el-button class="message-function-item" size="mini" title="前增加" plain @click.stop="addReplyMsg(index,'up')" type="primary">向前 <i class="el-icon-circle-plus-outline"></i></el-button>
+									<el-button class="message-function-item" size="mini" title="后增加" plain @click.stop="addReplyMsg(index,'bottom')" type="primary">向后 <i class="el-icon-circle-plus-outline"></i></el-button>
+									<el-button class="message-function-item" size="mini" title="复制文字" plain @click.stop="copy(item_msg.msg)" type="primary" v-if="item_msg.msg_type_reply=='txt'"><i class="el-icon-copy-document"></i></el-button>
+									<el-button class="message-function-item" size="mini" title="移除" plain @click.stop="delReplyMsg(item_msg)" type="danger"><i class="el-icon-delete"></i></el-button>
+								</div>
+							</div>
+						</draggable>
+					</template>
+				</el-row>
+			</div>
+			<div class="right-box">
+				<el-row style="min-height:500px; ">
+					<template>
+						<el-row>
+							<span style="font-size:12px;">任务名称：</span>
+							<el-input style="width:200px" v-model="replyForm.name" placeholder="请输入任务名称" type="text"
+								size="mini" class=""></el-input>
+						</el-row>
+							<!-- 选择补发群 -->
+							<el-row>
+								<span style="font-size:12px;">选择补发：</span>
+								<el-radio-group v-model="needFadanRobotGroup" size="mini" style="margin-right: 10px;" @change="fadanRobotGroupChange" class="mb-radio">
+									<el-radio :label="0">全部发送</el-radio>
+									<el-radio :label="1">选择补发群</el-radio>
+								</el-radio-group>
+							</el-row>
+						<el-row>
+							<span style="font-size:12px;">发单方案：</span>
+							<div class='fuhe editFangan' style="width:396px;vertical-align: middle;">
+								<el-select filterable placeholder='选择分组' clearable @change='replyForm.fangan_sel = []' v-model='fadan_group' size='mini' style="width: 100px;">
+									<el-option v-for="(item,index) in group_list.filter(item=>{return item.id != ''})" :label='item.name' :value='item.id' :key='index'></el-option>
+								</el-select>
+								<el-select style="width:290px" tabIndex="10" ref="fanganSel" style="width:100%;"
+									@change="funFanganChange" clearable multiple @focus="getFanganList" collapse-tags v-model="replyForm.fangan_sel" size="mini"
+									:placeholder="needFadanRobotGroup ? '请选择发单方案' : '请选择发单方案（可选择多个）'" filterable
+									@clear="faDanSelClear"
+								>
+									<el-option v-for="(item,index) in fangan_list.filter((item)=>{ return !fadan_group || item.group_id == fadan_group})" :key="item.id"
+										:label="(index + 1) + '、' + item.name" :value="item.id"
+										:style="{color: item.status == 'N' ? 'red' : ''}"
+										:title="item.status == 'N' ? '发单方案未启动' : ''">
+									</el-option>
+								</el-select>
+							</div>
+						</el-row>
+						<el-row v-if="needFadanRobotGroup">
+							<span style="font-size:12px;">补发范围：</span>
+							<el-button type="primary" size="mini" @click="selectFadanRobotGroup">选择补发群
+								<span v-if="getAllSelectedGroupsTotal > 0" style="color: #fff;font-size: 12px">&nbsp;&nbsp;已选择（{{getAllSelectedGroupsTotal}}）个群聊</span>
+							</el-button>
+						</el-row>
+						</el-row>
+						<el-row>
+							<div>
+								<lable style="font-size: 12px;" class="">执行方式：</lable>
+								<el-radio-group @change="exTypeChange" v-model="replyForm.ex_type">
+									<el-radio label="timing">定时执行</el-radio>
+									<el-radio label="timing_week">本周定时执行</el-radio>
+									<el-radio label="day">重复执行(每天)</el-radio>
+									<el-radio label="month">重复执行(每月)</el-radio>
+									<el-radio label="now">立即执行</el-radio>
+								</el-radio-group>
+							</div>
+							<div style="margin-left: 64px;">
+								<div>
+									<!-- 周日期选择 -->
+									<el-checkbox-group v-show="replyForm.ex_type == 'timing_week'  || replyForm.ex_type == 'day'"  v-model="replyForm.ex_day_week" class="ex-day-week-class" >
+										<el-checkbox label="1"  :disabled="zhou_day > 1 && replyForm.ex_type == 'timing_week' "  >周一</el-checkbox>
+										<el-checkbox label="2"  :disabled="zhou_day > 2 && replyForm.ex_type == 'timing_week' "  >周二</el-checkbox>
+										<el-checkbox label="3"  :disabled="zhou_day > 3 && replyForm.ex_type == 'timing_week' "  >周三</el-checkbox>
+										<el-checkbox label="4"  :disabled="zhou_day > 4 && replyForm.ex_type == 'timing_week' "  >周四</el-checkbox>
+										<el-checkbox label="5"  :disabled="zhou_day > 5 && replyForm.ex_type == 'timing_week' "  >周五</el-checkbox>
+										<el-checkbox label="6"  :disabled="zhou_day > 6 && replyForm.ex_type == 'timing_week' "  >周六</el-checkbox>
+										<el-checkbox label="7"  :disabled="zhou_day > 7 && replyForm.ex_type == 'timing_week' "  style="margin-right: 0;">周日</el-checkbox>
+									</el-checkbox-group>
+									<el-date-picker size="mini" value-format="yyyy/MM/dd HH:mm:ss" :editable="false"
+										format="yyyy/MM/dd HH:mm:ss" v-if="replyForm.ex_type=='timing'  "
+										@change='calcFinishTime'
+										v-model="replyForm.ex_time" type="datetime" placeholder="选择日期时间">
+									</el-date-picker>
+									<el-popover v-if="send_time_zhuijia=='N' && replyForm.ex_type == 'timing' "  >
+										<div style="display: flex;align-items: center;" >
+											<span style="font-size:12px;padding-right:10px;">每次进入自动设置</span>
+											<el-input-number size="mini" :min='0'  v-model="zidingyi_timer"   label="自定义追加时间"></el-input-number>
+											<span style="font-size:12px;padding-left:10px ;">分钟后</span>
+										</div>
+										 <el-button type="text" size="mini"  style="display: inline-block;" slot="reference">更多高级设置</el-button>
+									</el-popover>
+									<el-tooltip  v-if="send_time_zhuijia=='N' && replyForm.ex_type == 'timing'"  class="item" effect="dark"  placement="top"  >
+										  <div slot="content">
+											  如果上次时间大于当前时间,则该时间为"上次设置时间" + "高级设置时间",<br/>
+											  如果上次设置时间小于当前时间,则该时间为"当前时间"+"高级设置时间"
+										  </div>
+										  <el-i class="el-icon-question"></el-i>
+									</el-tooltip>
+									<!-- <div  v-if="send_time_zhuijia=='N' && replyForm.ex_type=='timing'" style="display: inline-block;">
+										<el-input-number size="mini" :min='1'  v-model="zidingyi_timer"  @change='setDingshi(zidingyi_timer)'  label="自定义追加时间"></el-input-number><span style="font-size:12px;padding-left:5px">分钟后</span>
+									</div> -->
+								</div>
+								<div>
+
+								</div>
+								<template v-if="replyForm.ex_type=='timing' ">
+									<template v-if="send_time_zhuijia=='N'">
+										<el-link @click="setDingshi(1)"
+											style="font-size: 12px; margin-right: 5px;cursor:pointer;"
+											type="primary">1分钟后</el-link>
+										<el-link @click="setDingshi(10)"
+											style="font-size: 12px;margin-right: 5px;cursor:pointer;"
+											type="primary">10分钟后</el-link>
+										<el-link @click="setDingshi(30)"
+											style="font-size: 12px;margin-right: 5px;cursor:pointer;"
+											type="primary">30分钟后</el-link>
+
+											<!-- <el-popover  placement="right" width="100"  trigger="click">
+											  <div>
+												 <div style="color:#999;font-size:12px;margin-bottom:12px" >分钟</div>
+											  </div>
+											  <el-link style="font-size: 12px;margin-right: 5px;cursor:pointer;" type="primary" slot="reference">
+												  自定义
+											 </el-link>
+											</el-popover>
+											 -->
+									</template>
+									<template v-else>
+										<el-link @click="setDingshi(1)"
+											style="font-size: 12px; margin-right: 5px;cursor:pointer;"
+											type="primary">+1分钟</el-link>
+										<el-link @click="setDingshi(10)"
+											style="font-size: 12px;margin-right: 5px;cursor:pointer;"
+											type="primary">+10分钟</el-link>
+										<el-link @click="setDingshi(30)"
+											style="font-size: 12px;margin-right: 5px;cursor:pointer;"
+											type="primary">+30分钟</el-link>
+									</template>
+								</template>
+								<el-tooltip class="item" v-if="replyForm.ex_type=='timing'"  effect="dark"  style="margin-left: 5px;" content="勾选后，在已设置定时基础上追加xx分钟（可多次点击）"
+									placement="top-start" open-delay=500>
+									<el-checkbox @change="sendTimeZhuijiaChange" v-model="send_time_zhuijia" true-label="Y" false-label="N">
+										<span style="font-size:12px;">追加时间</span>
+									</el-checkbox>
+								</el-tooltip>
+								<el-select v-if="replyForm.ex_type=='month'" clearable filterable size="mini" placeholder="请选择日期" multiple collapse-tags v-model="replyForm.ex_day_month">
+									<el-option v-for="item in 31" :key="item" :label="item" :value="`${item}`"></el-option>
+								</el-select>
+								<el-time-picker size="mini" v-if="replyForm.ex_type=='day' || replyForm.ex_type == 'timing_week' || replyForm.ex_type == 'month'" value-format="HH:mm:ss"
+									@change='calcFinishTime'
+									format="HH:mm:ss" v-model="replyForm.ex_time" :picker-options="{selectableRange: '00:00:00 - 23:59:59'}" placeholder="任意时间点">
+								</el-time-picker>
+								<el-link style="font-size: 12px;" type="danger" v-if="replyForm.ex_type == 'month'" :underline="false">
+									如果当前月份没有指定的日期天数，则跳过该日期，顺延到后续月份执行。
+								</el-link>
+							</div>
+
+						</el-row>
+						<el-card
+							style='margin-bottom: 5px;padding-top:20px; padding-bottom:10px; width:100%;overflow:unset;'
+							shadow="hover">
+							<div style="display: inline-block;margin-bottom: 5px;" class="radio-group-rew">
+								<span style="font-size: 12px;">内容：</span>
+								<el-radio-group size="mini" v-model="reply_msg.msg_type_reply"
+									@change='replyTypeChange($event,reply_msg)' size="medium">
+									<el-radio-button v-for="(item,index) in msgTypeList_reply" :label="item.id">
+										{{item.name}}
+									</el-radio-button>
+								</el-radio-group>
+							</div>
+							<!-- 回复内容 -->
+							<div style="position: relative;">
+								<div v-show="reply_msg.msg_type_reply=='txt'">
+									<!-- 编辑消息内容 -->
+									<paratext ref="paratext" prove="paratext"
+									@model="(content) => {reply_msg.msg = content}" @backref="(prove,quill) => {paratextDom = $refs.paratext}"
+									placeholder="请输入需要发送的内容"></paratext>
+									<!-- <el-input @blur="txtBlurArea_reply" size='mini' :rows="4"
+										v-model="reply_msg.msg" type="textarea" placeholder='请输入需要发送的内容'></el-input>
+									<el-popover placement="bottom-start" width="455" placement="right"
+										trigger="click">
+										<div class="faceBox emojiArea">
+											<el-link @click="setEmo_area_reply(item_emo,reply_msg)"
+												:underline="false" v-for="(item_emo ,index_emo) in wx_emoji"
+												:key="index_emo" :title="item_emo"></el-link>
+										</div>
+										<el-button slot="reference" type="text" title='微信表情' size='mini' circle>
+											<el-image src='/assets/images/weixin/images/btn-face.png'></el-image>
+										</el-button>
+									</el-popover> -->
+								</div>
+								<template v-if="reply_msg.msg_type_reply=='img'">
+									<!-- 编辑  图片内容 -->
+									<!-- <div style="display: flex;   align-items: center;" class="avatar-uploader"> -->
+									<el-upload class="avatar-uploader" drag action="/wx/FenWei_rw/Uploadpic"
+										:show-file-list="false" name='msg_img'
+										:data="{path:'PaiDan',replymsg_index:0,p_index:0}"
+										:on-success="handleAvatarSuccess_reply" :before-upload="beforeAvatarUpload">
+										<el-image fit="contain"
+											v-if="reply_msg.img_src&&reply_msg.msg_type_reply=='img'"
+											:src="reply_msg.img_src" class="avatar"></el-image>
+										<i v-else class="el-icon-upload avatar-uploader-icon"></i>
+										<div class="el-upload__text">将图片拖到此处，或<em>点击上传</em></div>
+									</el-upload>
+									<div class="jisu_stuatus">
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='img'&&reply_msg.jisu_stuatus=='准备中'"
+											style="color: #e6a23c;font-style: normal;">个微极速准备中...</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='img'&&reply_msg.jisu_stuatus=='未就绪'"
+											style="color: #f56c6c;font-style: normal;">个微极速未就绪
+										</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='img'&&reply_msg.jisu_stuatus=='就绪'"
+											style="color: #67c23a;font-style: normal;">个微极速就绪</em>
+
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='img'&&reply_msg.jisu_stuatus_qy=='准备中'"
+											style="color: #e6a23c;font-style: normal;">企微极速准备中...</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='img'&&reply_msg.jisu_stuatus_qy=='未就绪'"
+											style="color: #f56c6c;font-style: normal;">企微极速未就绪
+										</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='img'&&reply_msg.jisu_stuatus_qy=='就绪'"
+											style="color: #67c23a;font-style: normal;">企微极速就绪</em>
+
+										<el-link type='primary'
+											v-if="reply_msg.jisu_stuatus!='就绪' || reply_msg.jisu_stuatus_qy!='就绪'"
+											size='mini' @click="reExUploadCDN(reply_msg,'N')">重新检测</el-link>
+										<el-link type='primary' size='mini'
+											@click="reExUploadCDN(reply_msg,'Y')">重新上传</el-link>
+
+									</div>
+ 
+									<div class="el-upload__text zhantie">
+										<span
+											v-if="reply_msg.file_size!=''&&reply_msg.file_size!=null&&reply_msg.file_size!=0">{{reply_msg.file_size}}kb</span>
+										<div>
+											<em class="picbtn" @click="tlj_product_img_paste(0,0)"
+												style="color: #409eff;font-style: normal;">粘贴图片</em>
+											<em class="picbtn" v-if="reply_msg.img_src&&reply_msg.msg_type_reply=='img'"
+												@click="imgPreview(reply_msg.img_src)"
+												style="color: #409eff;font-style: normal;">预览</em>
+										</div>
+
+									</div>
+								</template>
+								<!-- 卡片类型 -->
+								<template v-else-if="reply_msg.msg_type_reply=='card'">
+									<div>
+										<el-upload class="avatar-uploader" drag action="/wx/FenWei_rw/Uploadpic"
+											:show-file-list="false" name='msg_img'
+											:data="{path:'PaiDan',replymsg_index:0,p_index:0}"
+											:on-success="handleAvatarSuccess_reply" :before-upload="beforeAvatarUpload">
+											<el-image fit="contain"
+												v-if="reply_msg.img_src&&reply_msg.msg_type_reply=='card'"
+												:src="reply_msg.img_src" class="avatar"></el-image>
+											<i v-else class="el-icon-upload avatar-uploader-icon"></i>
+											<div class="el-upload__text">将图片拖到此处，或<em>点击上传</em></div>
+										</el-upload>
+										<div class="el-upload__text zhantie cardBox">
+											<el-form ref="form" label-width="50px" style="display: inline-block;vertical-align: top;font-size: 12px;">
+												<el-form-item label="标题">
+												  <el-input placeholder="请输入标题" size="mini" v-model="reply_msg.title" style="width: 238px;"></el-input>
+												</el-form-item>
+												<el-form-item label="链接">
+													<el-input placeholder="请输入链接" size="mini" v-model="reply_msg.url" style="width: 238px;"></el-input>
+												</el-form-item>
+												<el-form-item label="描述">
+													<el-input placeholder="请输入描述" type="textarea" size="mini" v-model="reply_msg.desc" style="width: 238px;"></el-input>
+												</el-form-item>
+											</el-form>
+										</div>
+									</div>
+									<div class="jisu_stuatus">
+										<span v-if="reply_msg.file_size!=''&&reply_msg.file_size!=null&&reply_msg.file_size!=0">{{reply_msg.file_size}}kb</span>
+										<em class="picbtn" @click="tlj_product_img_paste(0,0)" style="color: #409eff;font-style: normal;">粘贴图片</em>
+										<em class="picbtn" v-if="reply_msg.img_src&&reply_msg.msg_type_reply=='card'" @click="imgPreview(reply_msg.img_src)" style="color: #409eff;font-style: normal;">预览</em>
+									</div>
+									<!-- <div class="jisu_stuatus">
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='card'&&reply_msg.jisu_stuatus=='准备中'"
+											style="color: #e6a23c;font-style: normal;">个微极速准备中...</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='card'&&reply_msg.jisu_stuatus=='未就绪'"
+											style="color: #f56c6c;font-style: normal;">个微极速未就绪
+										</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='card'&&reply_msg.jisu_stuatus=='就绪'"
+											style="color: #67c23a;font-style: normal;">个微极速就绪</em>
+
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='card'&&reply_msg.jisu_stuatus_qy=='准备中'"
+											style="color: #e6a23c;font-style: normal;">企微极速准备中...</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='card'&&reply_msg.jisu_stuatus_qy=='未就绪'"
+											style="color: #f56c6c;font-style: normal;">企微极速未就绪
+										</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='card'&&reply_msg.jisu_stuatus_qy=='就绪'"
+											style="color: #67c23a;font-style: normal;">企微极速就绪</em>
+
+										<el-link type='primary'
+											v-if="reply_msg.jisu_stuatus!='就绪' || reply_msg.jisu_stuatus_qy!='就绪'"
+											size='mini' @click="reExUploadCDN(reply_msg,'N')">重新检测</el-link>
+										<el-link type='primary' size='mini'
+											@click="reExUploadCDN(reply_msg,'Y')">重新上传</el-link>
+									</div> -->
+								</template>
+								<!-- 卡片类型结束 -->
+								<template v-else-if="reply_msg.msg_type_reply=='file'">
+									<!-- 编辑  文件内容 -->
+									<el-upload class="avatar-uploader" drag action="/wx/FenWei_rw/Uploadpic"
+										name='msg_img' :show-file-list="false"
+										:data="{path:'PaiDan',type:'file',replymsg_index:0,p_index:0}"
+										:on-success="handleAvatarSuccess_reply"
+										:before-upload="beforeAvatarUpload_file">
+										<template v-if="reply_msg.img_src&&reply_msg.msg_type_reply=='file'">
+											<i class="el-icon-document" style="font-size: 40px;line-height: 80px;"></i>
+											<div class="el-upload__text">{{reply_msg.title}}</div>
+										</template>
+										<template  v-else>
+											<i class="el-icon-upload avatar-uploader-icon"></i>
+											<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+										</template>
+									</el-upload>
+									<div class="jisu_stuatus">
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='file'&&reply_msg.jisu_stuatus=='准备中'"
+											style="color: #e6a23c;font-style: normal;">个微极速准备中...</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='file'&&reply_msg.jisu_stuatus=='未就绪'"
+											style="color: #f56c6c;font-style: normal;">个微极速未就绪
+										</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='file'&&reply_msg.jisu_stuatus=='就绪'"
+											style="color: #67c23a;font-style: normal;">个微极速就绪</em>
+
+
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='file'&&reply_msg.jisu_stuatus_qy=='准备中'"
+											style="color: #e6a23c;font-style: normal;">企微极速准备中...</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='file'&&reply_msg.jisu_stuatus_qy=='未就绪'"
+											style="color: #f56c6c;font-style: normal;">企微极速未就绪
+										</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='file'&&reply_msg.jisu_stuatus_qy=='就绪'"
+											style="color: #67c23a;font-style: normal;">企微极速就绪</em>
+
+										<el-link type='primary'
+											v-if="reply_msg.jisu_stuatus!='就绪' || reply_msg.jisu_stuatus_qy!='就绪'"
+											size='mini' @click="reExUploadCDN(reply_msg,'N')">重新检测</el-link>
+										<el-link type='primary' size='mini'
+											@click="reExUploadCDN(reply_msg,'Y')">重新上传</el-link>
+									</div>
+								</template>
+
+								<template v-else-if="reply_msg.msg_type_reply=='shipin'">
+									<!-- 编辑  视频内容 -->
+									<el-upload class="avatar-uploader" drag action="/wx/FenWei_rw/Uploadpic"
+										:show-file-list="false" name='msg_img'
+										:data="{path:'PaiDan',type:'video',replymsg_index:0,p_index:0}"
+										:on-success="handleAvatarSuccess_reply"
+										:before-upload="beforeAvatarUpload_video">
+										<el-image fit="contain"
+											v-if="reply_msg.img_src&&reply_msg.msg_type_reply=='shipin'"
+											:src="reply_msg.img_src_video" class="avatar"></el-image>
+										<i v-else class="el-icon-upload avatar-uploader-icon"></i>
+										<div class="el-upload__text">将视频拖到此处，或<em>点击上传</em></div>
+									</el-upload>
+									<div class="el-upload__text zhantie" style="left: 205px;">
+
+										<div>
+											<span
+												v-if="reply_msg.file_size!=''&&reply_msg.file_size!=null&&reply_msg.file_size!=0">{{reply_msg.file_size}}kb</span>
+										</div>
+										<el-link class="picbtn"
+											v-if="reply_msg.img_src&&reply_msg.msg_type_reply=='shipin'" size="mini"
+											type="primary" :href="reply_msg.img_src" target="_blank">查看视频</el-link>
+									</div>
+
+									<div class="jisu_stuatus">
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='shipin'&&reply_msg.jisu_stuatus=='准备中'"
+											style="color: #e6a23c;font-style: normal;">个微极速准备中...</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='shipin'&&reply_msg.jisu_stuatus=='未就绪'"
+											style="color: #f56c6c;font-style: normal;">个微极速未就绪
+										</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='shipin'&&reply_msg.jisu_stuatus=='就绪'"
+											style="color: #67c23a;font-style: normal;">个微极速就绪</em>
+
+
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='shipin'&&reply_msg.jisu_stuatus_qy=='准备中'"
+											style="color: #e6a23c;font-style: normal;">企微极速准备中...</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='shipin'&&reply_msg.jisu_stuatus_qy=='未就绪'"
+											style="color: #f56c6c;font-style: normal;">企微极速未就绪
+										</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='shipin'&&reply_msg.jisu_stuatus_qy=='就绪'"
+											style="color: #67c23a;font-style: normal;">企微极速就绪</em>
+
+										<el-link type='primary'
+											v-if="reply_msg.jisu_stuatus!='就绪' || reply_msg.jisu_stuatus_qy!='就绪'"
+											size='mini' @click="reExUploadCDN(reply_msg,'N')">重新检测</el-link>
+										<el-link type='primary' size='mini'
+											@click="reExUploadCDN(reply_msg,'Y')">重新上传</el-link>
+									</div>
+
+								</template>
+								<template v-else-if="reply_msg.msg_type_reply=='gif' ">
+									<el-upload class="avatar-uploader" drag action="/wx/FenWei_rw/Uploadpic"
+										:show-file-list="false" name='msg_img'
+										:data="{path:'PaiDan',type:'gif_force',replymsg_index:0,p_index:0}"
+										:on-success="handleAvatarSuccess_reply" :before-upload="beforeAvatarUpload">
+										<el-image fit="contain" style='width: 100%;height: 100%;'
+											v-if="reply_msg.img_src&&reply_msg.msg_type_reply=='gif'"
+											:src="reply_msg.img_src" class="avatar"></el-image>
+										<template v-else>
+											<i class="el-icon-upload avatar-uploader-icon"></i>
+											<div class="el-upload__text" style="margin-top: -10px;">
+												用企业号拖动动态表情到此处<br>或<em>点击上传</em>
+											</div>
+										</template>
+									</el-upload>
+									<!-- 表情包 -->
+									<div style="display: inline-block; align-items: center;">
+										<el-dropdown trigger="click" ref="biaoqing" :hide-on-click="false"
+											placement="bottom-start">
+											<el-link type="primary" style="font-size:12px;" size="mini"
+												:underline="false">选择表情包</el-link>
+											<el-dropdown-menu slot="dropdown" :append-to-body="false"
+												class="dropdown-container">
+												<el-dropdown-item>
+													<span type="info" :class="gif_active_cur =='keai'?'gif_active':''"
+														@click.stop="handleItem('keai')">可爱</span>
+												</el-dropdown-item>
+												<el-dropdown-item class="li-title"><span type="info"
+														:class="gif_active_cur =='gaoguai'?'gif_active':''"
+														@click.stop="handleItem('gaoguai')">搞怪</span></el-dropdown-item>
+												<el-dropdown-item class="li-title"><span type="info"
+														:class="gif_active_cur =='chaiquan'?'gif_active':''"
+														@click.stop="handleItem('chaiquan')">柴犬</span></el-dropdown-item>
+												<el-dropdown-item class="li-title"><span type="info"
+														:class="gif_active_cur =='yaoyiyao'?'gif_active':''"
+														@click.stop="handleItem('yaoyiyao')">瑶一瑶</span></el-dropdown-item>
+												<el-dropdown-item class="li-title"><span type="info"
+														:class="gif_active_cur =='anzhongguancha'?'gif_active':''"
+														@click.stop="handleItem('anzhongguancha')">暗中观察</span></el-dropdown-item>
+												<el-dropdown-item class="li-title"><span type="info"
+														:class="gif_active_cur =='woyao'?'gif_active':''"
+														@click.stop="handleItem('woyao')">我要</span></el-dropdown-item>
+												<el-dropdown-item class="li-title"><span type="info"
+														:class="gif_active_cur =='zai'?'gif_active':''"
+														@click.stop="handleItem('zai')">在</span></el-dropdown-item>
+												<el-dropdown-item class="li-title"><span type="info"
+														:class="gif_active_cur =='dianzan'?'gif_active':''"
+														@click.stop="handleItem('dianzan')">点赞</span></el-dropdown-item>
+												<el-dropdown-item class="li-title"><span type="info"
+														:class="gif_active_cur =='jushou'?'gif_active':''"
+														@click.stop="handleItem('jushou')">举手</span></el-dropdown-item>
+												<el-dropdown-item class="li-title"><span type="info"
+														:class="gif_active_cur =='wolaile'?'gif_active':''"
+														@click.stop="handleItem('wolaile')">我来了</span></el-dropdown-item>
+												<el-radio-group v-model="radio" class="radio-container"
+													@change="setGif($event,reply_msg)">
+													<el-dropdown-item v-for="(item, i) in gifList" :key="i">
+														<el-radio :label="item.url">
+															<img :src="oss_host+item.url" alt="" /></el-radio>
+													</el-dropdown-item>
+												</el-radio-group>
+											</el-dropdown-menu>
+										</el-dropdown>
+									</div>
+									<!-- 表情包 -->
+									<div style="display: inline-block; align-items: center;">
+										<el-popover ref="emoticon" placement="top" width="600" trigger="click">
+											<emoticon @select="(imageUrl) => {setGif(imageUrl.img_half_url,reply_msg);}"></emoticon>
+											<el-link  slot="reference" type="primary" style="font-size:12px;" size="mini" :underline="false">自定义表情包</el-link>
+										</el-popover>
+									</div>
+
+									<div class="jisu_stuatus">
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='gif'&&reply_msg.jisu_stuatus=='准备中'"
+											style="color: #e6a23c;font-style: normal;">个微极速准备中...</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='gif'&&reply_msg.jisu_stuatus=='未就绪'"
+											style="color: #f56c6c;font-style: normal;">个微极速未就绪
+										</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='gif'&&reply_msg.jisu_stuatus=='就绪'"
+											style="color: #67c23a;font-style: normal;">个微极速就绪</em>
+
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='gif'&&reply_msg.jisu_stuatus_qy=='准备中'"
+											style="color: #e6a23c;font-style: normal;">企微极速准备中...</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='gif'&&reply_msg.jisu_stuatus_qy=='未就绪'"
+											style="color: #f56c6c;font-style: normal;">企微极速未就绪
+										</em>
+										<em class="picbtn"
+											v-if="reply_msg.img_src!=''&&reply_msg.msg_type_reply=='gif'&&reply_msg.jisu_stuatus_qy=='就绪'"
+											style="color: #67c23a;font-style: normal;">企微极速就绪</em>
+
+										<el-link type='primary'
+										v-if="reply_msg.jisu_stuatus_qy!='就绪' || reply_msg.jisu_stuatus!='就绪'"
+											size='mini' @click="reExUploadCDN(reply_msg,'N')">重新检测</el-link>
+										<el-link type='primary' size='mini'
+											@click="reExUploadCDN(reply_msg,'Y')">重新上传</el-link>
+									</div>
+									<!-- 表情包 -->
+									<div class="el-upload__text zhantie">
+										<span
+											v-if="reply_msg.file_size!=''&&reply_msg.file_size!=null&&reply_msg.file_size!=0">{{reply_msg.file_size}}kb</span>
+									</div>
+								</template>
+								<template v-else-if="reply_msg.msg_type_reply=='xiaochengxu'">
+									<!-- 编辑消息内容 -->
+								<template>
+									<el-link type="primary" style="display: inline-block;margin-bottom: 8px;font-size: 12px;" href="https://www.yuque.com/iyunzk/gonggao/poq356oz4mv4ntfs"  target="_blank" class="xiaochengxjiacheng"><i class="el-icon-warning-outline"></i> 如何获取,小程序参数?</el-link>
+										<!-- <el-input @blur.self="getCdnInfo(reply_msg,null)" size='mini' :rows="5"
+												  v-model="reply_msg.msg"
+												  type="textarea" placeholder='个微号请将小程序转发到个微文件传输助手。企微号将小程序发到自己企微账号里。随后将解析后的文本信息复制放入文本框'></el-input> -->
+										<!--<span style="color: orangered; font-size: 12px;">Tips：发单方案内，存在【个微】时，必须通过【个微】获取参数，否则会导致无法发送</span> -->
+									</template>
+									<!-- 将这里拆分成 个微类型 msg_geren 和企微类型 msg_qiye 两个输入框 -->
+									<el-row>
+										<el-col :span="24">
+											<div class='kindTit'> <img src="/assets/images/logo/wx2.png" style="width: 16px; height: 16px; border-radius: 5px;margin-right: 5px;"> <span>个微类型</span></div>
+											<el-input @blur.self="getCdnInfo(reply_msg,'geren')" size='mini' :rows="5"
+												v-model="reply_msg.geren"
+												type="textarea" placeholder='个微号请将小程序转发到个微文件传输助手。随后将解析后的文本信息复制放入文本框'></el-input>
+										<span style="color: orangered; font-size: 12px;">Tips：发单方案内，存在【个微】时，必须通过【个微】获取参数，否则会导致无法发送</span>
+										</el-col>
+										<el-col :span="24">
+											<div class='kindTit' style="margin-top: 10px;"><img src="/assets/images/logo/wx_work.png" style="width: 16px; height: 16px; border-radius: 5px;margin-right: 5px;"> <span>企微类型</span></div>
+											<el-input @blur.self="getCdnInfo(reply_msg,'qiye')" size='mini' :rows="5"
+												v-model="reply_msg.qiye"
+												type="textarea" placeholder='企微号将小程序发到自己企微账号里。随后将解析后的文本信息复制放入文本框'></el-input>
+											<span style="color: orangered; font-size: 12px;">Tips：发单方案内，存在【企微】时，必须通过【企微】获取参数，否则会导致无法发送</span>
+										</el-col>
+									</el-row>
+								</template>
+								<template v-else-if="reply_msg.msg_type_reply=='shipinhao'">
+									<!-- 编辑消息内容 -->
+									<template>
+										<el-input @blur="getCdnInfo(reply_msg,'shipinhao')" size='mini' :rows="5"
+											v-model="reply_msg.msg"
+											type="textarea" placeholder='个微号请将视频号转发到个微文件传输助手。企微号将视频号发到自己企微账号里。随后将解析后的文本信息复制放入文本框'>
+										</el-input>
+										<span style="color: orangered; font-size: 12px;">Tips：发单方案内，存在【企微】时，必须通过【企微】获取参数，否则会导致无法发送</span>
+
+									</template>
+								</template>
+								<template v-else-if="reply_msg.msg_type_reply=='liaotianjilu'">
+									<!-- 编辑消息内容 -->
+									<el-link type="primary" style="display: inline-block;margin-bottom: 8px;font-size: 12px;" href="https://www.yuque.com/iyunzk/gonggao/poq356oz4mv4ntfs"  target="_blank" class="xiaochengxjiacheng"><i class="el-icon-warning-outline"></i> 如何获取,聊天记录参数?</el-link>
+									<el-input @blur="getChatInfo(reply_msg,'liaotianjilu')" size='mini' :rows="5"
+											  v-model="reply_msg.msg"
+											  type="textarea" placeholder='个微号请将聊天记录转发到个微文件传输助手。企微号将聊天记录发到自己企微账号里。随后将解析后的文本信息复制放入文本框'></el-input>
+									<span style="color: orangered; font-size: 12px;">Tips：个微聊天记录仅支持个微聊天记录发送，企微聊天记录仅支持企微聊天记录发送。不支持跨端聊天记录发送</span>
+									<span style="color: red; font-size: 12px;">不支持转链</span>
+								</template>
+								<template v-else-if="reply_msg.msg_type_reply=='voice'" >
+									<div class="voice-selection">
+										<template v-if="reply_msg.msg && formatVoiceData(reply_msg.gr_cdn).voice_time">
+											<audio :src="formatVoiceData(reply_msg.msg).mp3_file" class="yunyinbofnag" controls></audio>
+											<div class="new-voice-msg" style="font-size: 12px;" >
+												<span style="margin-left: 18px;">
+													语音时长:{{reply_msg.gr_cdn ? ((formatVoiceData(reply_msg.gr_cdn).voice_time)/ 1024).toFixed(1) : formatVoiceData(reply_msg.qy_cdn).voice_time}}s
+												</span>
+												<span style="margin-left: 18px;">
+													语音大小:{{(Number(formatVoiceData(reply_msg.qy_cdn ? reply_msg.qy_cdn : reply_msg.gr_cdn).size ) / 1024 ).toFixed(1)}}Kb
+												</span>
+												<el-button style="margin-left: 18px;" type="text" @click="getFdRobotlist()" size="mini" >重新选择</el-button>
+											</div>
+										</template>
+										<el-button v-else type="primary"  size="mini"  @click="getFdRobotlist()" >选择语音</el-button>
+									</div>
+								</template>
+								<!-- 收藏笔记 -->
+								<template v-else-if="reply_msg.msg_type_reply=='note'">
+									<el-input @blur="getCdnInfo(reply_msg,'note')" size='mini' :rows="5"
+											  v-model="reply_msg.msg"
+											  type="textarea" placeholder='个微号请将收藏笔记转发到个微文件传输助手。随后将解析后的文本信息复制放入文本框'></el-input>
+									<span style="color: orangered; font-size: 12px;">Tips:发单方案仅支持通过【个微】获取参数和发送</span>
+								</template>
+							</div>
+							<!-- 回复内容 -->
+
+							<div v-if="reply_msg_index===''">
+								<el-row>
+									<lable style="font-size: 12px;" class="">发送间隔</lable>
+									<el-input v-model="default_yanshi" @change="check_number($event,1,'建议')" min="1"
+										type="number" size="mini" class="num_input"></el-input>
+									<lable style="font-size: 12px;" class="">秒</lable>
+
+									<el-button style="float: right;" type="primary" plain size="mini"
+										@click="addViewMsg(reply_msg)">加入预览</el-button>
+								</el-row>
+							</div>
+							<div v-else>
+								<el-row>
+									<lable style="font-size: 12px;" class="">发送间隔</lable>
+									<el-input v-model="reply_msg.yanshi" @change="check_number($event,1,'建议')" min="1"
+										type="number" size="mini" class="num_input"></el-input>
+									<lable style="font-size: 12px;" class="">秒</lable>
+
+									<el-button style="float: right;" type="primary" plain size="mini"
+										@click="closeEditReplyMsg">完成编辑</el-button>
+
+									<el-button style="float: right; margin-right:10px;" type="info" plain size="mini"
+										@click="cancelEditReplyMsg">取消编辑</el-button>
+									<!-- <el-button type="primary" size="mini" @click="addViewMsg">加入预览</el-button> -->
+								</el-row>
+							</div>
+						</el-card>
+
+						<el-row style="text-align: right;margin-top: 70px;">
+							<el-button v-loading.fullscreen.lock="loading" type="primary" size="small" @click="funSaveFaDanTiming('N')">保存并终止</el-button>
+							<el-button v-loading.fullscreen.lock="loading" type="primary" size="small" @click="funSaveFaDanTiming('Y')">保存并开启</el-button>
+
+							<el-button size="small" @click="addFadanTimingDialog=false">取消</el-button>
+						</el-row>
+					</template>
+				</el-row>
+			</div>
+		</div>
+	</el-dialog>
+
+		<el-dialog :title="`编辑定时发单任务`+job_id" :visible.sync="addFadanTimingDialog2" width="1000px" center top="20px">
+			<div class="dialog-content-fd">
+				<el-row :gutter="24" class="el-row-bottom-line">
+					<el-col :span="14" class="npadding-col">
+						<el-form label-width="auto" size="mini">
+							<!-- 任务名称 -->
+							<el-form-item label="任务名称">
+								<el-input v-model="replyForm.name" placeholder="请输入任务名称"></el-input>
+							</el-form-item>
+							<!-- 选择补发 -->
+							<el-form-item label="选择补发">
+								<el-radio-group v-model="needFadanRobotGroup" size="mini" style="margin-right: 10px;" @change="fadanRobotGroupChange" class="mb-radio ex-type-class">
+									<el-radio :label="0">全部发送</el-radio>
+									<el-radio :label="1">选择补发群</el-radio>
+								</el-radio-group>
+							</el-form-item>
+							<!-- 发单方案 -->
+							<el-form-item label="发单方案">
+								<div class='fuhe editFangan' style="width:100%;vertical-align: middle;">
+									<el-select filterable placeholder='选择分组' clearable @change='replyForm.fangan_sel = []' v-model='fadan_group' size='mini' style="width: 100px;" >
+										<el-option v-for="(item,index) in group_list.filter(item=>{return item.id != ''})" :label='item.name' :value='item.id' :key='index'></el-option>
+									</el-select>
+									<el-select style="width:calc(100% - 105px)" tabIndex="10" ref="fanganSel"
+										@change="funFanganChange" clearable multiple @focus="getFanganList" collapse-tags v-model="replyForm.fangan_sel" size="mini"
+										:placeholder="needFadanRobotGroup ? '请选择发单方案' : '请选择发单方案（可选择多个）'" filterable
+										@clear="faDanSelClear">
+										<el-option v-for="(item,index) in fangan_list.filter((item)=>{ return !fadan_group || item.group_id == fadan_group})" :key="item.id"
+											:label="(index + 1) + '、' + item.name" :value="item.id"
+											:style="{color: item.status == 'N' ? 'red' : ''}"
+											:title="item.status == 'N' ? '发单方案未启动' : ''">
+										</el-option>
+									</el-select>
+								</div>
+							</el-form-item>
+							<el-form-item v-if="needFadanRobotGroup" label="补发范围">
+								<el-button type="primary" size="mini" @click="selectFadanRobotGroup">选择补发群
+									<span v-if="getAllSelectedGroupsTotal > 0" style="color: #fff;font-size: 12px">&nbsp;&nbsp;已选择（{{getAllSelectedGroupsTotal}}）个群聊</span>
+								</el-button>
+							</el-form-item>
+							<!-- 执行方式 -->
+							<el-form-item label="执行方式">
+								<el-radio-group @change="exTypeChange" v-model="replyForm.ex_type" class="ex-type-class" size="mini">
+									<el-radio label="timing">定时执行</el-radio>
+									<el-radio label="timing_week">本周定时执行</el-radio>
+									<el-radio label="day">重复执行(每天)</el-radio>
+									<el-radio label="month">重复执行(每月)</el-radio>
+									<el-radio label="now">立即执行</el-radio>
+								</el-radio-group>
+							</el-form-item>
+
+							<!-- 执行时间/方式 -->
+							<el-form-item label="执行时间" v-if="replyForm.ex_type != 'now'">
+								<!-- 周日期选择 -->
+								<el-checkbox-group v-show="replyForm.ex_type == 'timing_week' || replyForm.ex_type == 'day'" v-model="replyForm.ex_day_week" class="ex-type-check-class">
+									<el-checkbox label="1" :disabled="zhou_day > 1 && replyForm.ex_type == 'timing_week'">周一</el-checkbox>
+									<el-checkbox label="2" :disabled="zhou_day > 2 && replyForm.ex_type == 'timing_week'">周二</el-checkbox>
+									<el-checkbox label="3" :disabled="zhou_day > 3 && replyForm.ex_type == 'timing_week'">周三</el-checkbox>
+									<el-checkbox label="4" :disabled="zhou_day > 4 && replyForm.ex_type == 'timing_week'">周四</el-checkbox>
+									<el-checkbox label="5" :disabled="zhou_day > 5 && replyForm.ex_type == 'timing_week'">周五</el-checkbox>
+									<el-checkbox label="6" :disabled="zhou_day > 6 && replyForm.ex_type == 'timing_week'">周六</el-checkbox>
+									<el-checkbox label="7" :disabled="zhou_day > 7 && replyForm.ex_type == 'timing_week'" style="margin-right: 0;">周日</el-checkbox>
+								</el-checkbox-group>
+								
+								<!-- 定时执行时间选择 -->
+								<div v-if="replyForm.ex_type=='timing'">
+									<el-date-picker size="mini" value-format="yyyy/MM/dd HH:mm:ss" :editable="false"
+										format="yyyy/MM/dd HH:mm:ss" @change='calcFinishTime'
+										v-model="replyForm.ex_time" type="datetime" placeholder="选择日期时间">
+									</el-date-picker>
+									
+									<el-popover v-if="send_time_zhuijia=='N'">
+										<div style="display: flex;align-items: center;">
+											<span style="font-size:12px;padding-right:10px;">每次进入自动设置</span>
+											<el-input-number size="mini" :min='0' v-model="zidingyi_timer" label="自定义追加时间"></el-input-number>
+											<span style="font-size:12px;padding-left:10px;">分钟后</span>
+										</div>
+										<el-button type="text" size="mini" style="display: inline-block;" slot="reference">更多高级设置</el-button>
+									</el-popover>
+									
+									<el-tooltip v-if="send_time_zhuijia=='N'" class="item" effect="dark" placement="top">
+										<div slot="content">
+											如果上次时间大于当前时间,则该时间为"上次设置时间" + "高级设置时间",<br/>
+											如果上次设置时间小于当前时间,则该时间为"当前时间"+"高级设置时间"
+										</div>
+										<el-i class="el-icon-question"></el-i>
+									</el-tooltip>
+									
+									<!-- 快速时间选择 -->
+									<div style="margin-top: 8px;">
+										<div class="timeBox">
+											<el-tag 
+												v-for="minutes in [1, 10, 30]" 
+												:key="minutes" 
+												@click="setDingshi(minutes)" 
+												type="primary" 
+												size="mini" 
+												style="margin-right: 5px; cursor: pointer;">
+												{{ (send_time_zhuijia === 'Y' ? '+' : '') + minutes + '分钟' + (send_time_zhuijia === 'N' ? '后' : '') }}
+											</el-tag>
+										</div>
+										
+										<el-tooltip class="item" effect="dark" style="margin-left: 5px;" content="勾选后，在已设置定时基础上追加xx分钟（可多次点击）" placement="top-start" open-delay=500>
+											<el-checkbox @change="sendTimeZhuijiaChange" v-model="send_time_zhuijia" true-label="Y" false-label="N">
+												<span style="font-size:12px;">追加时间</span>
+											</el-checkbox>
+										</el-tooltip>
+									</div>
+								</div>
+								
+								<!-- 月份日期选择和时间选择器 -->
+								<div v-if="replyForm.ex_type=='month'" style="display: flex; align-items: center; gap: 8px;">
+									<!-- 月份日期选择 -->
+									<el-select clearable filterable size="mini" placeholder="请选择日期" multiple collapse-tags v-model="replyForm.ex_day_month" style="width: 65%;">
+										<el-option v-for="item in 31" :key="item" :label="item" :value="`${item}`"></el-option>
+									</el-select>
+									
+									<!-- 时间选择器 -->
+									<el-time-picker size="mini" value-format="HH:mm:ss" @change='calcFinishTime' format="HH:mm:ss" v-model="replyForm.ex_time" 
+										:picker-options="{selectableRange: '00:00:00 - 23:59:59'}" placeholder="任意时间点">
+									</el-time-picker>
+								</div>
+
+								<!-- 只有时间选择器 (日/周) -->
+								<el-time-picker v-if="replyForm.ex_type=='day' || replyForm.ex_type == 'timing_week'" size="mini" value-format="HH:mm:ss"
+									@change='calcFinishTime' format="HH:mm:ss" v-model="replyForm.ex_time" 
+									:picker-options="{selectableRange: '00:00:00 - 23:59:59'}" placeholder="任意时间点">
+								</el-time-picker>
+								
+								
+								<!-- 月份执行提示 -->
+								<div v-if="replyForm.ex_type == 'month'">
+									<el-link style="font-size: 12px;" type="danger" :underline="false">
+										如果当前月份没有指定的日期天数，则跳过该日期，顺延到后续月份执行。
+									</el-link>
+								</div>
+							</el-form-item>
+							<!-- 分割线 -->
+							<div class="line-row"></div>
+							<!-- 内容区域主体部分 -->
+							<h4 class="title-main-msg">
+								内容设置
+								<div>
+									<span style="font-size: 12px;">{{ allMessagesCollapsed ? '全部折叠' : '全部展开' }}</span>
+									<el-switch v-model="allMessagesCollapsed" @change="toggleCollapseAll" size="mini">
+									</el-switch>
+								</div>
+							</h4>
+							<el-form-item label-width="0px">
+								<draggable v-model="replyForm.msg" ref="messageList" ghost-class="ghost" fallback-tolerance="3" chosen-class="chosen" force-fallback="true" animation="300" class="moveclass message-list" @update="datadragEnd"
+									handle=".message-item-drag-handle">
+									<div v-for="(item, index) in replyForm.msg" :key="item.id" class="message-item">
+										<span class="message-item-drag-handle"><i class="el-icon-rank"></i></span>
+										<div class="message-list-content__wrapper">
+											<div class="message-item-header">
+												<div>
+													<span style="margin-right: 5px;">推送类型</span>
+													<el-select v-model="item.msg_type_reply" placeholder="选择类型" size="mini" style="width: 80px;" @change="onMessageTypeChange(item)">
+														<el-option label="文本" value="txt"></el-option>
+														<el-option label="图片" value="img"></el-option>
+														<el-option label="视频" value="video"></el-option>
+														<el-option label="卡片" value="card"></el-option>
+														<el-option label="动态表情" value="sticker"></el-option>
+														<el-option label="小程序" value="miniprogram"></el-option>
+														<el-option label="视频号" value="channels_video"></el-option>
+														<el-option label="文件" value="file"></el-option>
+														<el-option label="聊天记录" value="chat_record"></el-option>
+														<el-option label="语音" value="voice"></el-option>
+														<el-option label="收藏笔记" value="favorite_note"></el-option>
+													</el-select>
+												</div>
+							
+												<div style="display: flex; align-items: center;">
+													<span style="margin-left: 15px; margin-right: 5px;">上一条消息发送</span>
+													<el-input-number v-model="item.delaySeconds" controls-position="right" :min="0" size="mini" style="width: 90px;"></el-input-number>
+													<span style="margin-left: 5px;">秒后发送</span>
+													<el-button type="text" size="mini" :icon="item.collapsed ? 'el-icon-caret-left' : 'el-icon-caret-bottom'" @click="toggleCollapseMessage(item)"
+														style="padding: 0 5px; font-size: 16px; margin-left: 4px; color: #303133;" :title="item.collapsed ? '展开' : '折叠'">
+													</el-button>
+												</div>
+							
+											</div>
+											<transition name="collapse">
+												<div v-show="!item.collapsed" class="message-editor-content">
+													<!-- 文本类型 -->
+													<el-form-item v-if="item.msg_type_reply === 'txt'" label-width="0" label="" :key="item.id + '-txt'">
+														<paratext v-model="item.msg" ref="paratext" background-color="#fff"  @backref="(prove,quill) => {paratextDom = $refs.paratext}" placeholder="请输入需要发送的内容"></paratext>
+													</el-form-item>
+													<!-- 图片类型 -->
+													<el-form-item v-if="item.msg_type_reply === 'img'"
+														label-width="0"
+														label=""
+														:key="item.id + '-image'">
+														<el-upload class="avatar-uploader"
+															drag
+															action="/wx/FenWei_rw/Uploadpic"
+															:show-file-list="false"
+															name='msg_img'
+															:data="{path:'PaiDan',replymsg_index:0,p_index:0}"
+															:on-success="(res,file) => handleAvatarSuccess_reply(res,file,item)"
+															:before-upload="beforeAvatarUpload">
+															<el-image fit="contain"
+																v-if="item.img_src"
+																:src="item.img_src"
+																class="avatar"></el-image>
+															<i v-else
+																class="el-icon-upload avatar-uploader-icon"></i>
+															<div class="el-upload__text">将图片拖到此处，或<em>点击上传</em></div>
+														</el-upload>
+													
+														<div class="jisu_stuatus"
+															style="margin-top: 8px;">
+															<span v-if="item.img_src && item.jisu_stuatus=='准备中'"
+																style="color: #e6a23c; margin-right: 5px;">个微极速准备中...</span>
+															<span v-if="item.img_src && item.jisu_stuatus=='未就绪'"
+																style="color: #f56c6c; margin-right: 5px;">个微极速未就绪</span>
+															<span v-if="item.img_src && item.jisu_stuatus=='就绪'"
+																style="color: #67c23a; margin-right: 5px;">个微极速就绪</span>
+													
+															<span v-if="item.img_src && item.jisu_stuatus_qy=='准备中'"
+																style="color: #e6a23c; margin-right: 5px;">企微极速准备中...</span>
+															<span v-if="item.img_src && item.jisu_stuatus_qy=='未就绪'"
+																style="color: #f56c6c; margin-right: 5px;">企微极速未就绪</span>
+															<span v-if="item.img_src && item.jisu_stuatus_qy=='就绪'"
+																style="color: #67c23a; margin-right: 5px;">企微极速就绪</span>
+													
+															<div style="margin-top: 5px;">
+																<el-link type='primary'
+																	v-if="item.jisu_stuatus!='就绪' || item.jisu_stuatus_qy!='就绪'"
+																	size='mini'
+																	@click="reExUploadCDN(item,'N')">重新检测</el-link>
+																<el-link type='primary'
+																	size='mini'
+																	style="margin-left: 5px;"
+																	@click="reExUploadCDN(item,'Y')">重新上传</el-link>
+															</div>
+														</div>
+													
+														<div class="el-upload__text"
+															style="margin-top: 5px;">
+															<span v-if="item.file_size!=''&&item.file_size!=null&&item.file_size!=0">文件大小: {{item.file_size}}kb</span>
+															<div style="margin-top: 5px;">
+																<el-button type="text"
+																	size="mini"
+																	@click="tlj_product_img_paste(0,0)">粘贴图片</el-button>
+																<el-button type="text"
+																	size="mini"
+																	v-if="item.img_src"
+																	@click="imgPreview(item.img_src)">预览图片</el-button>
+															</div>
+														</div>
+													</el-form-item>
+
+												</div>
+											</transition>
+										</div>
+									</div>
+								</draggable>
+								<el-button type="primary" size="mini" plain icon="el-icon-plus" @click="addMessage(undefined, undefined,'txt')" style="width: 100%; margin-top: 16px;">
+									添加新消息
+								</el-button>
+							</el-form-item>
+
+							 
+						</el-form>
+					</el-col>
+					<el-col :span="10" class="npadding-col">
+						<div class="preview-wrapper">
+							<div class="preview-device">
+								<div class="preview-content">
+									<div v-if="replyForm.msg.length === 0" class="empty-message">
+										<i class="el-icon-chat-dot-round"></i>
+										<span>当前任务暂无消息，请在左侧添加</span>
+									</div>
+									<transition-group v-else name="list-preview" tag="div">
+										<div v-for="(msg, idx) in replyForm.msg" :key="msg.id" class="chat-message" :ref="'chatMessage_' + msg.id">
+											<div class="chat-avatar">
+												<i class="el-icon-user"></i>
+											</div>
+											<component :is="getPreviewComponent(msg.type)" :message="msg"></component>
+										</div>
+									</transition-group>
+								</div>
+							</div>
+						</div>
+					</el-col>
+				</el-row>
+			</div>
+		</el-dialog>
+
+	<el-dialog title="联盟选品配置" :close-on-click-modal="false" @close="do_close_setting" :visible.sync="show_add_setting" width="800px" top="40px">
+
+		<el-form ref="form" :model="setting_params" label-width="110px" size="mini">
+			<el-form-item label="方案名称">
+				<el-input v-model="setting_params.title" style="width: 260px;" placeholder="设置一个名字，用于区分"></el-input>
+			</el-form-item>
+
+			<el-form-item label="选择接收联盟">
+				<el-select style="width: 340px;" v-model="setting_params.lm_id" placeholder="请选择接收联盟号">
+					<el-option v-for="(item,index) in taobaoAccountlist" :key="item.mm_pid"
+						:label="(index + 1) + '、' + item.taobao_user_nick + '(' + item.mm_pid + ')'"
+						:value="item.mm_pid">
+					</el-option>
+				</el-select>
+				<el-link :href="tb_auth_url" target="_blank">
+					<el-button type="primary" plain>新增联盟</el-button>
+				</el-link>
+			</el-form-item>
+
+			<el-form-item label="设置延时">
+				文本：<el-input v-model="setting_params.config.text_ys" type="number" style="width: 80px;"></el-input>秒
+				图片：<el-input v-model="setting_params.config.pic_ys" type="number" style="width: 80px;"></el-input>秒
+				视频：<el-input v-model="setting_params.config.video_ys" type="number" style="width: 80px;"></el-input>秒
+				动图：<el-input v-model="setting_params.config.gif_ys" type="number" style="width: 80px;"></el-input>秒
+
+			</el-form-item>
+			<el-form-item label="发单方案">
+				<div class='fuhe' style="width:396px;vertical-align: middle;">
+					<el-select filterable placeholder='选择分组' clearable @change='setting_params.fangan_sel = []' v-model='select_group' size='mini' style="width: 100px;">
+						<el-option v-for="(item,index) in group_list.filter(item=>{return item.id != ''})" :label='item.name' :value='item.id' :key='index'></el-option>
+					</el-select>
+					<el-select style="width: 290px;" collapse-tags multiple v-model="setting_params.fangan_sel" @focus="getFanganList"
+						placeholder="请选择发单方案（可选择多个）">
+						<el-option v-for="(item,index) in fangan_list.filter(item=>{return !select_group || item.group_id == select_group})" :key="item.id" :label="(index + 1) + '、' + item.name"
+							:value="item.id" :style="{color: item.status == 'N' ? 'red' : ''}"
+							:title="item.status == 'N' ? '发单方案未启动' : ''">
+						</el-option>
+					</el-select>
+				</div>
+				<el-link href="/wx/FaDan" target="_blank">
+					<el-button type="primary" plain>新增方案</el-button>
+				</el-link>
+
+			</el-form-item>
+
+			<el-form-item label="定时发单状态" style="display: none;">
+				<el-radio v-model="setting_params.fadan_status" label="N">关闭</el-radio>
+				<el-radio v-model="setting_params.fadan_status" label="Y">开启</el-radio>
+			</el-form-item>
+
+			<el-form-item label="接收状态">
+				<el-radio v-model="setting_params.status" label="N">关闭</el-radio>
+				<el-radio v-model="setting_params.status" label="Y">开启</el-radio>
+			</el-form-item>
+			<el-form-item style="text-align: right;">
+				<el-button @click="show_add_setting=false">取消</el-button>
+				<el-button type="primary" @click="create_setting">保存配置</el-button>
+			</el-form-item>
+		</el-form>
+
+
+	</el-dialog>
+
+
+  <el-dialog title="获取联盟推送记录" :close-on-click-modal="true" @close="do_close_setting" :visible.sync="show_rule_log" width="900px" >
+
+    <el-table ref="multipleTable_job" :data="rule_log_data.list" header-row-class-name="iyunzk_table" header-cell-class-name="iyunzk_table" cell-class-name="iyunzk_table" empty-text >
+        <el-table-column label ="基础信息" width="240" show-overflow-tooltip>
+          <template slot-scope="scope">
+
+            <p>商品ID：<el-link type="primary" target="_blank" :href="'https://uland.taobao.com/item/edetail?id=' + scope.row.item_id">{{scope.row.item_id}}</el-link></p>
+            <p>处理状态：{{scope.row.status == 1 ? '素材处理已完成' : '已接收，素材待处理'}}</p>
+            <p>接收时间：{{timestampToTime(scope.row.create_time)}}</p>
+          </template>
+        </el-table-column>
+        <!-- <el-table-column prop ="tk_pub_id" label ="联盟ID" width="130" show-overflow-tooltip></el-table-column> -->
+        <!-- <el-table-column prop ="item_id" label ="商品ID" width="180" show-overflow-tooltip> -->
+
+        <!-- </el-table-column> -->
+        <!-- <el-table-column label ="状态" width="110">
+          <template slot-scope="scope">
+            <span>{{scope.row.status == 1 ? '素材处理已完成' : '已接收，素材待处理'}}</span>
+          </template>
+        </el-table-column> -->
+			<el-table-column prop="material_info" label="消息" show-overflow-tooltip>
+				<template slot-scope="scope">
+					<el-input type="textarea" :rows="4" v-model="scope.row.material_info" :autosize="{ minRows: 2}">
+					</el-input>
+				</template>
+			</el-table-column>
+		</el-table>
+
+		<!-- 分页 -->
+		<el-pagination v-if="rule_log_data.totalPage>1" @size-change="pSizeChange" @current-change="pCurrentChange"
+			:current-page="searchParams.page" :page-sizes="[5,10,20,50]" :page-size="5"
+			layout="total, sizes, prev, pager, next, jumper" :total="rule_log_data.total">
+		</el-pagination>
+
+
+
+	</el-dialog>
+	<!-- 开启提示框 -->
+	<el-dialog title="提示" :visible.sync="tipsFlag"  width="410px" top="25vh" :close-on-click-modal="false"  @close="resetTips" append-to-body class="tipsBox">
+		<div>
+			<div style="font-size: 14px;">{{msg}}</div>
+			<div >
+				<p style="padding: 12px 0;display: flex;justify-content: flex-start;align-items: center;position: relative;">
+					<span style="font-size: 12px;margin-right: 8px;margin-bottom: 3px;display: inline-block;">设置开启内容</span>
+					<span style="font-size: 12px;position: absolute;right:65px;top:8px">从第<el-input-number size="mini" :min="1" v-model="setNum" style="width: 100px;margin:0 5px;" controls-position="right"></el-input-number>条开始执行发单</span>
+				</p>
+				<div>
+					<el-checkbox v-model="disposable" @change='changeDefaultTime' true-label='1' false-label='0' class='nowTime'>
+						<span>立即从当前时间开始执行</span>
+						<el-tooltip class='item' content='' placement='top-start'>
+							<div slot='content' style="width:300px;line-height: 18px;">
+								当前日期有可执行任务时，任务会根据以下规则生效：<br>
+								1. 如果指定了执行时间，任务将从指定时间开始执行。<br>
+								2. 如果没有指定执行时间，任务将从当前时间延迟5秒后执行。<br><br>
+								需要注意的是，本次设置单次有效。当任务再次执行时，会恢复到初始设置的执行时间，不会保留本次时间设置。
+							</div>
+							<i class='el-icon-info'></i>
+						</el-tooltip>
+					</el-checkbox>
+					<el-time-picker format='HH:mm:ss' value-format='yyyy-MM-dd HH:mm:ss' v-if='disposable == "1"' v-model="exTime" size='mini' style="width:200px" placeholder="选择执行时间"> </el-date-picker>
+				</div>
+			</div>
+		</div>
+		<div slot="footer" class="dialog-footer">
+			<el-button @click="tipsFlag = false" size="small">取消</el-button>
+			<el-button type="primary" size="small" @click="setStart()">立即开启</el-button>
+		</div>
+	</el-dialog>
+	<!-- 修改执行时间 -->
+	<el-dialog title="重置执行时间" :visible.sync="timeVisible" @close="time_stamp=''"  width="450px" top="25vh" :close-on-click-modal="false" class="timeBox">
+		<el-form  label-width="100px" size="mini">
+			<el-form-item label="任务类型">
+				<el-radio-group v-model="taskType">
+					<el-radio label="1">增加</el-radio>
+					<el-radio label="2">减少</el-radio>
+				</el-radio-group>
+			</el-form-item>
+			<el-form-item label="天数">
+				<el-input v-model="days" type="number" :min="0" placeholder="请输入"></el-input>
+			</el-form-item>
+			<el-form-item label="任务名称">
+				<el-tag size="mini" v-for="(item,index) in multipleSelection" style="margin-right: 5px;" :key="item.id" >{{item.name}}</el-tag>
+			</el-form-item>
+			<el-form-item>
+				<el-button type="primary" size="mini" @click="_resetTaskTime">确定</el-button>
+				<el-button size="mini" @click="timeVisible = false">取消</el-button>
+			</el-form-item>
+		</el-form>
+	</el-dialog>
+	<!-- 同步内容到其他发单任务 -->
+	<el-dialog class='customDialog' title='同步内容到发单任务' @close='closeAsync' width='1200px' top='8vh' :visible.sync='asyncDialog'>
+		<div class='tips' style="font-size: 12px;color:#E6A23C;padding-bottom: 5px;">同步发单内容到选中的发单任务，仅同步内容，其他信息不修改</div>
+		<div>
+			<el-input v-model='asyncSearch.bianhao' placeholder='编号搜索' size='mini' style="width:120px"></el-input>
+			<el-input v-model='asyncSearch.kw' size="mini" placeholder="任务名称" style="width: 120px;"></el-input>
+			<div class='fuhe' style="height: 30px;">
+				<el-select @change='asyncSearch.fangan_id = ""' v-model='asyncSearch.cur_group' filterable placeholder='选择分组' clearable size='mini' style="width: 130px;">
+					<el-option v-for="(item,index) in group_list.filter(item=>{return item.id != ''})" :label='item.name' :value='item.id' :key='index'></el-option>
+				</el-select>
+				<el-select style="width: 140px;" v-model='asyncSearch.fangan_id' size="mini" placeholder="请选择发单方案" filterable clearable>
+					<el-option v-for="(item,index) in fangan_list.filter((item)=>{return !cur_group || item.group_id == cur_group})" :key="item.id" :label="(index + 1) + '、' + item.name" :value="item.id" :style="{color: item.status == 'N' ? 'red' : ''}" :title="item.status == 'N' ? '发单方案未启动' : ''"></el-option>
+				</el-select>
+			</div>
+			<el-select style="width: 120px;" v-model="asyncSearch.ex_status" clearable placeholder="执行状态" size="mini">
+			  <el-option label="未执行" value="1"></el-option>
+			  <el-option label="执行中" value="2"></el-option>
+			  <el-option label="已完成" value="3"></el-option>
+			  <el-option label="已终止" value="4"></el-option>
+			</el-select>
+			<el-select style="width: 120px;" v-model="asyncSearch.ex_type" clearable placeholder="任务类型" size="mini">
+			  <el-option label="定时执行" value="timing"></el-option>
+			  <el-option label="重复执行（每天）" value="day"></el-option>
+			  <el-option label="立即执行" value="now"></el-option>
+			</el-select>
+			<el-button size='mini' type='primary' @click='getAsyncList(1)'>搜索</el-button>
+		</div>
+		<el-table ref='asyncList' row-key='id' @select='selSyncOne' @selection-change='selSync' :data='asyncList' v-loading='asyncLoad' height='calc(100vh - 14px * 20)' style="min-height: 400px;" size='mini'>
+			<el-table-column :selectable='controlSelect' :reserve-selection='true' type='selection' width='30px' align='center'></el-table-column>
+			<el-table-column label='编号' prop='id' width="80" show-overflow-tooltip></el-table-column>
+			<el-table-column label='任务名' prop='name'>
+				<template slot-scope='scope'>
+					<strong>{{scope.row.name}}</strong>
+				</template>
+			</el-table-column>
+			<el-table-column label='方案'>
+				<template slot-scope="scope">
+					<p v-for="(item) in scope.row.fangan_ids" style="line-height: 15px;">
+						<block v-if="fangan_list_id2index[item]">
+							<el-link :href="'/wx/FaDan#' + item">
+								<el-tooltip v-if="fangan_list_id2index[item].status == 'N'" class="item"
+									effect="dark" content="发单方案未启动" placement="left">
+									<span style="color:red">{{fangan_list_id2index[item].name}}</span>
+								</el-tooltip>
+								<span v-else>{{fangan_list_id2index[item].name}}</span>
+							</el-link>
+						</block>
+						<block v-else>
+							<span :title="'方案ID:' + item" style="color:gray;">方案不存在</span>
+						</block>
+					</p>
+				</template>
+			</el-table-column>
+			<el-table-column label='进度' width='60px'>
+				<template slot-scope="scope">
+					<!-- style="color: #66b1ff;cursor:pointer" @click="editFadanTiming(scope.row,'edit')" -->
+					<span >{{scope.row.status1}}/{{scope.row.msg_count}}</span>
+				</template>
+			</el-table-column>
+			<el-table-column label='发送模式'>
+				<template slot-scope="scope">
+					<div>
+						<span v-if='scope.row.ex_type=="timing"'><i
+								class="el-icon-alarm-clock"></i>定时执行<br><span
+								style="color: #9e9e9e;">({{scope.row.job_time_str}})</span></span>
+							<span v-if='scope.row.ex_type=="timing_week"'><i
+								class="el-icon-alarm-clock"></i>本周定时执行<br>
+								<span style="color: #9e9e9e;">
+									{{convertDayWeek(scope.row.ex_day_week)}}
+									({{scope.row.job_time_str}})
+								</span>
+							</span>
+						<span v-if='scope.row.ex_type=="day"'><i
+								class="el-icon-timer"></i>重复执行<br><span
+								style="color: #9e9e9e; width: 100%; display: block; overflow: hidden; white-space: normal;">
+								{{scope.row.ex_day_week.length == 0 || scope.row.ex_day_week.length > 6 ? '（每天）' : convertDayWeek(scope.row.ex_day_week) }}
+								({{scope.row.job_time_str}})</span>
+							</span>
+						<span v-if='scope.row.ex_type=="now"'><i
+								class="el-icon-position"></i>立即执行</span>
+					</div>
+				</template>
+			</el-table-column>
+			<el-table-column label='执行状态'>
+				<template slot-scope="scope">
+					<div v-if="scope.row.ex_type=='timing'||scope.row.ex_type=='now'">
+						<el-tooltip v-if="scope.row.remark" class="item" effect="dark" :content="scope.row.remark" placement="right">
+							<span v-html="scope.row.status_str" ></span>
+						</el-tooltip>
+						<span v-else v-html="scope.row.status_str" ></span>
+						<!-- <el-link v-if='scope.row.status==0' type='danger' :underline="false">未执行</el-link>
+						<el-link v-if='scope.row.status==1' type='success' :underline="false">已执行</el-link>
+						<el-link v-if='scope.row.status==2' type='success' :underline="false">已取消</el-link> -->
+					</div>
+					<span v-if="scope.row.ex_type=='timing_week'">
+						<div v-if="scope.row.status_str_day != '--'">下次执行时间</div>
+						<span  v-if="scope.row.status_str_day != '--'" style="color: #9e9e9e;">{{scope.row.status_str_day}}</span>
+						<el-tooltip v-if="scope.row.remark" class="item" effect="dark" :content="scope.row.remark" placement="right">
+							<span v-html="scope.row.status_str" ></span>
+						  </el-tooltip>
+						<span v-else v-html="scope.row.status_str" ></span>
+					</span>
+					<span v-if="scope.row.ex_type=='day' || scope.row.ex_type=='month'">
+						<div v-if="scope.row.status_str_day != '--'">下次执行时间</div>
+						<span style="color: #9e9e9e;">{{scope.row.status_str_day}}</span>
+					</span>
+				</template>
+			</el-table-column>
+			<el-table-column label='发送、完成时间' show-overflow-tooltip>
+				<template slot-scope="scope">
+					<p>发送：{{scope.row.start_datetime}} </p>
+					<p>完成：{{scope.row.end_datetime}} </p>
+				</template>
+			</el-table-column>
+			<el-table-column label='创建、预计完成时间' show-overflow-tooltip>
+				<template slot-scope="scope">
+					<p>创建：{{scope.row.create_datetime}} </p>
+					<p>预计：{{scope.row.yuji_time}} </p>
+				</template>
+			</el-table-column>
+			<!-- <el-table-column label='操作'></el-table-column> -->
+		</el-table>
+		<div style="padding-top: 5px;display: flex;justify-content: space-between;">
+			<el-pagination @size-change="syncSizeChange" @current-change="getAsyncList"
+				:current-page="asyncSearch.page" :page-sizes="[20,50,100,200]" :page-size="asyncSearch.size"
+				layout="total, sizes, prev, pager, next, jumper" :total="asyncSearch.total">
+			</el-pagination>
+			<div>
+				<el-button size='mini' @click='asyncDialog = false'>取消</el-button>
+				<el-button size='mini' type='primary' @click='subSyncList'>确认同步</el-button>
+			</div>
+		</div>
+	</el-dialog>
+	<!-- 同步内容到其他发单任务 结束-->
+	<el-dialog title="批量设置发单方案" :visible.sync="plSchemeDialog" @close="schemeForm={ids:[],fangan_sel:[],type:'zhuijia'}"  width="500px" top="25vh" :close-on-click-modal="false" >
+		<el-form  label-width="100px" size="mini">
+			<el-form-item label="设置类型">
+				<el-radio-group v-model="schemeForm.type">
+					<el-radio label="zhuijia">
+						追加
+						<el-tooltip  class="item" effect="dark" content="在当前任务下原有的方案基础上增加所选的方案" placement="right">
+							<i class="el-icon-info"></i>
+						</el-tooltip>
+					</el-radio>
+					<el-radio label="fugai">
+						覆盖
+						<el-tooltip  class="item" effect="dark" content="将当前任务下的方案完全替换为所选方案" placement="right">
+							<i class="el-icon-info"></i>
+						</el-tooltip>
+					</el-radio>
+				</el-radio-group>
+			</el-form-item>
+			<el-form-item label="方案名称">
+				<div class='fuhe editFangan' style="vertical-align: middle;">
+					<el-select @change='schemeForm.fangan_sel = []' filterable placeholder='选择分组' clearable v-model='schemeForm.cur_group' size='mini' style="width: 130px;">
+						<el-option v-for="(item,index) in group_list.filter(item=>{return item.id != ''})" :label='item.name' :value='item.id' :key='index'></el-option>
+					</el-select>
+					<el-select style="width: 200px;" multiple v-model="schemeForm.fangan_sel" size="mini" placeholder="请选择发单方案" filterable clearable collapse-tags>
+						<el-option v-for="(item,index) in fangan_list.filter((item)=>{return !schemeForm.cur_group || item.group_id == schemeForm.cur_group})" :key="item.id" :label="(index + 1) + '、' + item.name" :value="item.id" :style="{color: item.status == 'N' ? 'red' : ''}" :title="item.status == 'N' ? '发单方案未启动' : ''"></el-option>
+					</el-select>
+				</div>
+			</el-form-item>
+			<el-form-item label="任务名称">
+				<el-tag size="mini" v-for="(item,index) in multipleSelection" style="margin-right: 5px;" :key="item.id" >{{item.name}}</el-tag>
+			</el-form-item>
+			<el-form-item>
+				<el-button type="primary" size="mini" @click="plSetFaDanTimingFangan">确定</el-button>
+				<el-button size="mini" @click="plSchemeDialog = false">取消</el-button>
+			</el-form-item>
+		</el-form>
+	</el-dialog>
+	<!-- 选择语音-弹框-开始 -->
+		<el-dialog title="采集语音" :visible.sync="voiceDialog" width="890px" :destroy-on-close="true"  >
+			<el-alert  title="仅企微机器人以及云设备个微支持采集语音" type="warning" style="margin-bottom: calc(14px * 1)" closable="false" > </el-alert>
+			<el-alert  title="仅支持个微发送采集语音" type="warning" style="margin-bottom: calc(14px * 1)" closable="false" > </el-alert>
+			<div class="collection-operation-box" >
+				<el-select class="saerch-input-box  collection-select-robot char-tool-robot-select fl " style="background-color:#F8F9FD"
+					v-model="voiceRobotSelect" @change="getCollectionList()" clearable filterable size="mini" placeholder="请选择机器人">
+					<el-option class="replace-robot-option" v-for="(item,index) in voiceRobotList.filter(item => item.status_str == '未到期')"
+					 :label="`${item.nickname}(${item.wxid})`" :value="item.wxid" :key='index'>
+						<div class="replace-robot clearfix">
+							<div class="replace-robot-header fl">
+								<el-avatar class="replace-robot-header-image" :size="35" :src="item.headimgurl"></el-avatar>
+								<div class="replace-robot-header-type">
+									<img v-if="item.type =='gr_b'" src="/assets/images/logo/wx2.png" />
+									<img v-if="item.type == 'wx_pad_a'" src="/assets/images/logo/wx_pad_a.png?v=2" />
+									<img v-if="item.type == 'qy'" src="/assets/images/logo/wx_work.png" />
+									<img v-if="item.type == 'qy_pad_a'" src="/assets/images/logo/qy_pad_a.png?v=2" />
+								</div>
+							</div>
+							<div class="replace-robot-data fl">
+								<div class="replace-robot-data-name">
+									{{item.nickname}}
+									<el-tag v-if="item.online == 'N'" type="info" size="mini" >离线</el-tag>
+								</div>
+								<div class="replace-robot-data-id">{{item.wxid}}</div>
+							</div>
+						</div>
+					</el-option>
+				</el-select>
+				<div class="saerch-input-box fl" style="display: flex;margin-left: 10px;">
+					<el-input class="saerch-input" v-model="collectionData.remark" @change="getCollectionList" clearable
+						size="mini" placeholder="请输入关键词"></el-input>
+					<el-button type="primary" class="saerch-input-btn" size="mini" @click="getCollectionList(1)" >搜索</el-button>
+
+				</div>
+				<el-button type="primary"  class="saerch-reset fr"  size="mini" @click="hadleCommand" >机器人采集</el-button>
+			</div>
+			<el-table :data="collectionData.list" height="400px" class="collection-voice-table" v-loading="collectionData.loading">
+				<el-table-column label="语音" width="250px"  >
+					<template slot-scope="scope" >
+						<audio  class="voice-audio-item" :src="scope.row.mp3_file" controls="controls"></audio>
+					</template>
+				</el-table-column>
+				<el-table-column label="信息" width="200px"  >
+					<template slot-scope="scope" >
+						<div style="font-size: 12px;" >语音时长:{{scope.row.robot_type == 'gr' ? (JSON.parse(scope.row.cdn_data).voice_time / 1024).toFixed(1) : JSON.parse(scope.row.cdn_data).voice_time}}s</div>
+                        <div style="font-size: 12px;">
+                            语音大小:{{(Number(JSON.parse(scope.row.cdn_data).size ) / 1024 ).toFixed(1)}}Kb
+                        </div>
+					</template>
+				</el-table-column>
+				<el-table-column label="备注" width="150px" >
+					<template slot-scope="scope" >
+						<div v-show="!scope.row.edit_type" class="collection-remark" @click="eidtCollectionRemark(scope.row)"
+							:autofocus="true">
+							<span
+								:style="!scope.row.remark ? 'color: #c0c4cc;' : '' ">{{scope.row.remark ? scope.row.remark:'编辑备注'}}</span>
+							<i class="el-icon-edit-outline"  style="margin-left: 5px;" ></i>
+						</div>
+						<div v-show="scope.row.edit_type">
+							<el-input :ref="'ref'+scope.row.id" v-model="scope.row.new_remark" @blur="handleBlur(scope.row)" @change="editRemarek(scope.row)"
+							size="mini" placeholder="请输入备注" clearable  ></el-input>
+						</div>
+					</template>
+				</el-table-column>
+				<el-table-column label="操作">
+					<template slot-scope="scope">
+						<el-button v-if="!scope.row.mp3_file" style="border-color:#ecf5ff;" type="primary"
+                        :loading="scope.row.dVoiceLoading" @click="dVoice(scope.row)" size="mini" plain>播放下载</el-button>
+						<el-button style="border-color:#ecf5ff"  type="primary" @click="selectcaijiVoice(scope.row)" size="mini"
+                        plain>选择</el-button>
+						<el-button style="border-color:#fef0f0" type="danger" @click="delVoice(scope.row)" size="mini"
+                        plain>删除</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+			<el-pagination class="collection-page-box"  style="margin-top: 10px;"
+            	@current-change="getCollectionList" background layout="prev, pager, next"
+            	:page-size="collectionData.size" :total="collectionData.total" :current-page="collectionData.currPage" >
+			</el-pagination>
+		</el-dialog>
+	<!-- 选择语音-弹框-结束 -->
+	 <!-- 采集新的语音-弹框-开始 -->
+		<el-dialog width="480px" :title="`采集新的语音`" class="new-voice-dialog" :visible.sync="newVoiceDialog" @close="newVoiceDialogClose" append-to-body>
+			<el-alert type="success" style="margin-bottom: calc(14px * 0.5)"  :closable="false" >
+				<template slot="title" >
+					<div>当前采集机器人：{{(voiceRobotList.find(robot => robot.wxid === voiceRobotSelect) || {}).nickname  || '未知机器人'}}（wxid:{{voiceRobotSelect}}）</div>
+				</template>
+			</el-alert>
+			<el-alert :title="`请用机器人给文件助手或自己发送一个语音`" type="warning" style="margin-bottom: calc(14px * 0.5)"  :closable="false" ></el-alert>
+            <div class="new-voice-box" v-loading="newVoiceLoading" :element-loading-text="`请给自己或文件传输助手发送语音`">
+				<template v-if="newVoicerData">
+                    <div class="new-voice-msg">
+                        <span>语音时长:{{ (voiceRobotList.find(robot => robot.wxid === voiceRobotSelect).type).indexOf('qy') != -1 ? newVoicerData.voice.voice_time : (newVoicerData.voice.voice_time / 1024).toFixed(1)}}s</span><span
+                            style="margin-left: 18px;">语音大小:{{(Number(newVoicerData.voice.size) / 1024 ).toFixed(1)}}Kb</span>
+                    </div>
+                    <div class="new-voice-timer">
+                        采集时间:{{newVoicerData.time}}
+                    </div>
+                </template>
+				<el-input v-model="newVoiceremarks" style="width:180px;margin:0 auto;margin-top:calc(14px * 0.5);"
+					placeholder="请输入备注" size="mini">
+				</el-input>
+			</div>
+			<div class="new-voice-operation">
+				<el-button size="mini" plain @click="newVoiceDialog = false">取消</el-button>
+				<el-button size="mini" plain @click="newVoice()">重新收集</el-button>
+				<el-button type="primary" style="border-color:#ecf5ff" size="mini" plain @click="preservation(true)">确定保存</el-button>
+				<el-button type="success" style="border-color:#f0f9eb" size="mini" plain @click="preservation()">保存并继续</el-button>
+			</div>
+	   </el-dialog>
+	<!-- 采集新的语音-弹框-结束 -->
+	<!-- 压缩图片 开始-->
+	<el-dialog class="compress" title="压缩后上传" :visible.sync="compressDialog" @closed="submitCompressImage('clearfix')" top="10vh" width="440px" append-to-body :close-on-click-modal="false">
+		<!-- <el-alert title="图片体积过大，请确认压缩效果后上传(点击可放大)" :closable="false" style="margin-bottom: 10px;" type="warning" effect="dark"> </el-alert> -->
+		<div class="dialog-alert">
+			1. 图片体积超过2M或者尺寸过大都会影响图片发送稳定性和成功率<br />
+			2. 可能会导致机器人处理异常或发送时网络堵塞<br />
+			3. 请选择合适的清晰度后压缩上传<br />
+			4. 请确认压缩效果后上传(点击可放大)
+		</div>
+		<div v-loading="compressLoading">
+			<div class="compress-live-box"> 
+				<!-- <div class="compress-live"> -->
+				<el-image class="compress-live" :src="compressAfter64" :preview-src-list="[compressAfter64]" fit="contain"> </el-image>
+				<!-- </div> -->
+				<div class="compress-live-size" :class="[{'error': (compressAfterSize / 1024 / 1024) > 10}]">
+					压缩后体积：
+					<template v-if="(compressAfterSize / 1024) < 1024">
+						{{(compressAfterSize / 1024).toFixed(1)}} KB
+					</template>
+					<template v-else>
+						{{(compressAfterSize / 1024 / 1024).toFixed(1)}} MB
+					</template>
+				</div>
+			</div>
+			<div class="compress-slider-box">
+				<div class="compress-slider-title">图片体积</div>
+				<el-slider v-model="compressRank" @change="compressImage" class="compress-slider" :min="1" :max="10" :step="1" :show-tooltip="false"> </el-slider>
+			</div>
+			<div class="compress-footer">
+			    <el-button @click="compressDialog = false" size="small">自行压缩后重传</el-button>
+			    <el-button @click="submitCompressImage('submit')" type="primary" size="small">确认上传</el-button>
+			</div>
+		</div>
+	</el-dialog>
+	<!-- 选择补发群弹窗 showFadanRobotGroup -->
+						<el-dialog :visible.sync="showGroupSelectDialog" width="800px" top="40px" append-to-body 
+							:close-on-click-modal="false" custom-class="bufa-group-dialog" 
+						>
+							<template #title>
+								<span class="el-dialog__title">选择补发群</span>
+								<span v-if="getAllSelectedGroupsTotal > 0">已选择{{getAllSelectedGroupsTotal}}个群聊</span>
+							</template>
+							<el-row style="height: 500px;border: 1px solid #ebf7ff;">
+								<!-- 左侧机器人列表 -->
+								<el-col :span="8" class="robot-col">
+									<!--机器人列表搜索-->
+									<div class="search-line clearfix">
+										<div class="search-item" style="margin-bottom: 0;">
+											<div class="search-title">昵称</div>
+											<el-input class="search-input" size="mini" v-model="robotSearchText" clearable placeholder="搜索机器人名称"></el-input>
+										</div>
+									</div>
+									<div v-for="(robot, robotIndex) in filteredFadanRobotList" :key="robotIndex" :class="['robot-col-for', selectedRobotIndex === robotIndex ? 'robot-col-for__active' : '']" @click="setCurrentGroupList(robot, robotIndex)">
+										<!-- <el-checkbox v-model="robot.isSelected" @change="(val) => changeRobotList(robot,val,robotIndex)"></el-checkbox> -->
+										<img :src="robot.headimgurl" class="left-avatar" />
+										<div class="for-right">
+											<p>{{robot.nickname}}</p>
+											<p>{{robot.wxid}}</p>
+										</div>
+									</div>
+									<template v-if="filteredFadanRobotList.length == 0">
+										<el-empty description="暂无数据" :image-size="48"></el-empty>
+									</template>
+								</el-col>
+								<!-- 右侧群列表 -->
+								<el-col class="group-col" :span="16" style="height: 100%;overflow-y: auto">
+									<div class="search-line clearfix">
+										<div class="search-item">
+											<div class="search-title">群名称</div>
+											<el-input class="search-input" size="mini" v-model="groupSearchText" clearable placeholder="搜索群名称" @keyup.enter.native="searchGroups" @clear="searchGroups"></el-input>
+										</div>
+										<el-button type="primary" class="search-btn" size="mini" @click="searchGroups">搜索</el-button>
+									</div>
+									<u-table 
+										ref="groupTable"
+										:data="getCurrentRobotGroupList" 
+										:height="498 - 40"
+										@select="handleGroupSelectionChange"
+										@select-all="handleGroupSelectionChangeAll"
+										:border="false"
+										use-virtual
+										big-data-checkbox
+										row-key="conversation_id">
+										<!-- <el-table-column type="selection" width="50" reserve-selection :selectable="canSelectable"></el-table-column> -->
+										<el-table-column type="selection" width="50" reserve-selection></el-table-column>
+										<el-table-column prop="name" label="群聊信息">
+											<!-- 自定义头部 -->
+											<template slot="header" slot-scope="scope">
+												群聊信息
+												[已选择{{getAllSelectedGroupsTotal}}个群聊]
+												<el-button type="text" size="mini" @click.stop="showAllSelectedGroup(showAllPMode)">{{!showAllPMode ? '展示已选群聊' : '返回群列表'}}</el-button>
+											</template>
+											<template slot-scope="{row}">
+												<el-tooltip class="item" effect="dark" :content="`群名称：${row.nickname} \n (${row.conversation_id})`" :open-delay='500' placement="top-start" :open-delay='500' popper-class="tooltop-pov">
+													<div>
+														<p class="group-name">{{row.nickname}}</p><span class="count">{{row.count}}人</span>
+													</div>
+												</el-tooltip>
+												<p class="group-conversation_id gray_text">{{row.conversation_id}}</p>
+												<!-- 查询所属机器人 -->
+												<p class="group-wxid gray_text" v-if="showAllPMode">所属机器人: {{row.parent.nickname}} ({{row.parent.wxid}})</p>
+											</template>
+										</el-table-column>
+									</u-table>
+								</el-col>
+							</el-row>
+							<span slot='footer' class='dialog-footer'>
+								<el-button size='mini' @click='showGroupSelectDialog = false'>取消</el-button>
+								<el-button size='mini' type='primary' @click='confirmSelectGroups'>确定</el-button>
+							</span>
+						</el-dialog>
+	<!-- 压缩图片结束 -->
+	</div>
+
+		<script type="text/x-template" id="preview-text-message">
+      <div class="chat-bubble">
+        <div class="chat-bubble-content">{{ message || '请输入文本内容' }}</div>
+      </div>
+    </script>
+<script type="text/javascript">
+	var pageData = {
+	  uid: "<?php echo $this->userInfo['current_uid']; ?>",
+	}
+  </script>
+<?php echo $js; ?>
+<?php echo $footer; ?>

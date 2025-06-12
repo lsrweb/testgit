@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <title>底部弧形容器</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 50px;
+    }
+
+    .arc-container {
+      width: 600px;
+      height: 350px;
+      background: #ffffff;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .content {
+      position: relative;padding: 40px;height: 100%;display: flex;flex-direction: column;justify-content: center;align-items: center;text-align: center;
+    }
+
+    .content::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);  
+      width: 100%;
+      height: 40px;
+      background: #ffffff;
+      border-radius: 50%;
+    }
+
+    .content h1 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 2.5em;
+    }
+
+    .content p {
+      color: #666;
+      font-size: 1.2em;
+      line-height: 1.6;
+      max-width: 400px;
+    }
+
+    .demo-box {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      border-radius: 50%;
+      margin: 20px auto;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="arc-container">
+    <div class="content">
+      <h1>弧形容器</h1>
+      <div class="demo-box"></div>
+      <p>这是一个高度为350px的容器，底部具有向外突出的圆润弧形效果。</p>
+    </div>
+  </div>
+</body>
+
+</html>

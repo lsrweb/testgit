@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>内存监测API示例</title>
+  <script src="./vue-prod.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .memory-info {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    .button-group {
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 4px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .data-display {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .console-output {
+      background: #000;
+      color: #0f0;
+      padding: 15px;
+      border-radius: 4px;
+      height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="app">
+  <h1>浏览器内存监测API示例</h1>
+  
+  <!-- 内存信息显示 -->
+  <div class="memory-info">
+    <h3>当前内存使用情况</h3>
+    <div v-if="memoryInfo.supported">
+      <p><strong>已使用堆内存:</strong> {{ formatBytes(memoryInfo.usedJSHeapSize) }}</p>
+      <p><strong>总堆内存:</strong> {{ formatBytes(memoryInfo.totalJSHeapSize) }}</p>
+      <p><strong>堆内存限制:</strong> {{ formatBytes(memoryInfo.jsHeapSizeLimit) }}</p>
+      <p><strong>内存使用率:</strong> {{ memoryUsagePercent }}%</p>
+    </div>
+    <div v-else>
+      <p style="color: red;">当前浏览器不支持 performance.memory API</p>
+    </div>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="button-group">
+    <button @click="createNormalData">创建普通响应式数据(1000条)</button>
+    <button @click="createFrozenData">创建冻结数据(1000条)</button>
+    <button @click="createLargeData">创建大量数据(10000条)</button>
+    <button @click="clearData">清空数据</button>
+    <button @click="forceGC">强制垃圾回收(如果支持)</button>
+    <button @click="measureObjectSize">测量对象大小</button>
+    <button @click="startMemoryMonitoring">开始内存监控</button>
+    <button @click="stopMemoryMonitoring">停止内存监控</button>
+  </div>
+
+  <!-- 数据显示 -->
+  <div class="data-display">
+    <div>
+      <h4>普通响应式数据 ({{ normalData.length }} 条)</h4>
+      <div v-if="normalData.length > 0">
+        <p>首条数据: {{ normalData[0] }}</p>
+      </div>
+    </div>
+    <div>
+      <h4>冻结数据 ({{ frozenData.length }} 条)</h4>
+      <div v-if="frozenData.length > 0">
+        <p>首条数据: {{ frozenData[0] }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 内存变化记录 -->
+  <div class="memory-info">
+    <h3>内存变化记录</h3>
+    <div v-for="record in memoryRecords" :key="record.id" style="margin: 5px 0;">
+      <strong>{{ record.action }}:</strong> 
+      变化量: {{ formatBytes(record.memoryDiff) }} | 
+      总内存: {{ formatBytes(record.totalMemory) }} | 
+      时间: {{ record.timestamp }}
+    </div>
+  </div>
+
+  <!-- 控制台输出 -->
+  <div class="console-output" ref="consoleOutput">
+    <div v-for="log in consoleLogs" :key="log.id">
+      [{{ log.timestamp }}] {{ log.message }}
+    </div>
+  </div>
+</div>
+
+<script>
+new Vue({
+  el: '#app',
+  data: {
+    normalData: [],
+    frozenData: [],
+    memoryInfo: {
+      supported: false,
+      usedJSHeapSize: 0,
+      totalJSHeapSize: 0,
+      jsHeapSizeLimit: 0
+    },
+    memoryRecords: [],
+    consoleLogs: [],
+    monitoringInterval: null,
+    baselineMemory: 0
+  },
+  computed: {
+    memoryUsagePercent() {
+      if (this.memoryInfo.totalJSHeapSize === 0) return 0;
+      return Math.round((this.memoryInfo.usedJSHeapSize / this.memoryInfo.totalJSHeapSize) * 100);
+    }
+  },
+  mounted() {
+    this.updateMemoryInfo();
+    this.log('页面加载完成，开始内存监测');
+  },
+  methods: {
+    // 更新内存信息
+    updateMemoryInfo() {
+      if (performance.memory) {
+        this.memoryInfo = {
+          supported: true,
+          usedJSHeapSize: performance.memory.usedJSHeapSize,
+          totalJSHeapSize: performance.memory.totalJSHeapSize,
+          jsHeapSizeLimit: performance.memory.jsHeapSizeLimit
+        };
+      } else {
+        this.memoryInfo.supported = false;
+        this.log('警告: 当前浏览器不支持 performance.memory API');
+      }
+    },
+
+    // 记录内存变化
+    recordMemoryChange(action) {
+      const currentMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      const memoryDiff = currentMemory - this.baselineMemory;
+      
+      this.memoryRecords.unshift({
+        id: Date.now(),
+        action,
+        memoryDiff,
+        totalMemory: currentMemory,
+        timestamp: new Date().toLocaleTimeString()
+      });
+      
+      if (this.memoryRecords.length > 10) {
+        this.memoryRecords.pop();
+      }
+      
+      this.baselineMemory = currentMemory;
+      this.updateMemoryInfo();
+    },
+
+    // 创建普通响应式数据
+    createNormalData() {
+      this.log('开始创建普通响应式数据...');
+      const startTime = performance.now();
+      const startMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      
+      const data = [];
+      for (let i = 0; i < 1000; i++) {
+        data.push({
+          id: i,
+          name: `用户${i}`,
+          email: `user${i}@example.com`,
+          age: Math.floor(Math.random() * 50) + 20,
+          address: `地址${i}`,
+          phone: `1380000${i.toString().padStart(4, '0')}`,
+          status: Math.random() > 0.5 ? 'active' : 'inactive',
+          metadata: {
+            createdAt: new Date(),
+            tags: [`tag${i}`, `category${i % 5}`],
+            settings: { theme: 'default', language: 'zh' }
+          }
+        });
+      }
+      this.normalData = data;
+      
+      const endTime = performance.now();
+      const endMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      
+      this.log(`普通响应式数据创建完成: ${endTime - startTime}ms, 内存增加: ${this.formatBytes(endMemory - startMemory)}`);
+      this.recordMemoryChange('创建普通响应式数据');
+    },
+
+    // 创建冻结数据
+    createFrozenData() {
+      this.log('开始创建冻结数据...');
+      const startTime = performance.now();
+      const startMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      
+      const data = [];
+      for (let i = 0; i < 1000; i++) {
+        const item = {
+          id: i,
+          name: `用户${i}`,
+          email: `user${i}@example.com`,
+          age: Math.floor(Math.random() * 50) + 20,
+          address: `地址${i}`,
+          phone: `1380000${i.toString().padStart(4, '0')}`,
+          status: Math.random() > 0.5 ? 'active' : 'inactive',
+          metadata: {
+            createdAt: new Date(),
+            tags: [`tag${i}`, `category${i % 5}`],
+            settings: { theme: 'default', language: 'zh' }
+          }
+        };
+        data.push(Object.freeze(item));
+      }
+      this.frozenData = Object.freeze(data);
+      
+      const endTime = performance.now();
+      const endMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      
+      this.log(`冻结数据创建完成: ${endTime - startTime}ms, 内存增加: ${this.formatBytes(endMemory - startMemory)}`);
+      this.recordMemoryChange('创建冻结数据');
+    },
+
+    // 创建大量数据
+    createLargeData() {
+      this.log('开始创建大量数据...');
+      const startTime = performance.now();
+      const startMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      
+      const data = [];
+      for (let i = 0; i < 10000; i++) {
+        data.push({
+          id: i,
+          name: `用户${i}`,
+          email: `user${i}@example.com`,
+          age: Math.floor(Math.random() * 50) + 20,
+          address: `地址${i}`,
+          phone: `1380000${i.toString().padStart(4, '0')}`,
+          status: Math.random() > 0.5 ? 'active' : 'inactive',
+          largeText: 'x'.repeat(1000),
+          metadata: {
+            createdAt: new Date(),
+            tags: Array.from({length: 10}, (_, j) => `tag${i}_${j}`),
+            settings: { theme: 'default', language: 'zh' }
+          }
+        });
+      }
+      this.normalData = data;
+      
+      const endTime = performance.now();
+      const endMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      
+      this.log(`大量数据创建完成: ${endTime - startTime}ms, 内存增加: ${this.formatBytes(endMemory - startMemory)}`);
+      this.recordMemoryChange('创建大量数据');
+    },
+
+    // 清空数据
+    clearData() {
+      this.log('开始清空数据...');
+      const startMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      
+      this.normalData = [];
+      this.frozenData = [];
+      
+      setTimeout(() => {
+        const endMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+        this.log(`数据已清空, 内存变化: ${this.formatBytes(endMemory - startMemory)}`);
+        this.recordMemoryChange('清空数据');
+      }, 100);
+    },
+
+    // 强制垃圾回收
+    forceGC() {
+      this.log('尝试强制垃圾回收...');
+      
+      if (window.gc) {
+        window.gc();
+        this.log('垃圾回收执行完成');
+        this.recordMemoryChange('强制垃圾回收');
+      } else {
+        this.log('当前环境不支持强制垃圾回收 (需要启动Chrome时加上 --js-flags="--expose-gc")');
+      }
+    },
+
+    // 测量对象大小 (近似)
+    measureObjectSize() {
+      this.log('开始测量对象大小...');
+      
+      const testObject = {
+        id: 1,
+        name: '测试用户',
+        email: 'test@example.com',
+        data: new Array(1000).fill('x').join('')
+      };
+      
+      const startMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      const objectArray = [];
+      
+      for (let i = 0; i < 1000; i++) {
+        objectArray.push(JSON.parse(JSON.stringify(testObject)));
+      }
+      
+      setTimeout(() => {
+        const endMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+        const approximateSize = (endMemory - startMemory) / 1000;
+        
+        this.log(`1000个测试对象大约占用: ${this.formatBytes(endMemory - startMemory)}`);
+        this.log(`单个对象大约占用: ${this.formatBytes(approximateSize)}`);
+        
+        objectArray.length = 0;
+        this.recordMemoryChange('对象大小测量');
+      }, 100);
+    },
+
+    // 开始内存监控
+    startMemoryMonitoring() {
+      if (this.monitoringInterval) {
+        this.stopMemoryMonitoring();
+      }
+      
+      this.log('开始内存监控...');
+      this.monitoringInterval = setInterval(() => {
+        this.updateMemoryInfo();
+      }, 1000);
+    },
+
+    // 停止内存监控
+    stopMemoryMonitoring() {
+      if (this.monitoringInterval) {
+        clearInterval(this.monitoringInterval);
+        this.monitoringInterval = null;
+        this.log('内存监控已停止');
+      }
+    },
+
+    // 格式化字节数
+    formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    },
+
+    // 日志记录
+    log(message) {
+      this.consoleLogs.unshift({
+        id: Date.now(),
+        message,
+        timestamp: new Date().toLocaleTimeString()
+      });
+      
+      if (this.consoleLogs.length > 50) {
+        this.consoleLogs.pop();
+      }
+      
+      this.$nextTick(() => {
+        if (this.$refs.consoleOutput) {
+          this.$refs.consoleOutput.scrollTop = 0;
+        }
+      });
+    }
+  },
+  
+  beforeDestroy() {
+    this.stopMemoryMonitoring();
+  }
+});
+</script>
+</body>
+
+</html>

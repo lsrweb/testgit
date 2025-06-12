@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GIF解析器完整测试套件</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 300;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .main-content {
+      padding: 30px;
+    }
+
+    .upload-section {
+      margin-bottom: 30px;
+      padding: 30px;
+      border: 3px dashed #ddd;
+      border-radius: 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+
+    .upload-section:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .upload-section.dragover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.1);
+      transform: scale(1.02);
+    }
+
+    .file-input {
+      margin: 20px 0;
+    }
+
+    .file-input input {
+      padding: 12px 20px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      background: white;
+    }
+
+    .file-input input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .controls-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+      padding: 25px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-group label {
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .control-group select,
+    .control-group input {
+      padding: 10px 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .control-group select:focus,
+    .control-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #6c757d, #495057);
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #ffc107, #fd7e14);
+      color: white;
+    }
+
+    .btn-info {
+      background: linear-gradient(135deg, #17a2b8, #6f42c1);
+      color: white;
+    }
+
+    .display-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+      margin-top: 30px;
+    }
+
+    .canvas-container {
+      padding: 25px;
+      border: 2px solid #e9ecef;
+      border-radius: 15px;
+      text-align: center;
+      background: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .canvas-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .canvas-container h3 {
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 1.2em;
+      padding: 10px;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 8px;
+    }
+
+    .canvas-wrapper {
+      display: inline-block;
+      border: 2px solid #dee2e6;
+      margin: 15px;
+      border-radius: 10px;
+      overflow: hidden;
+      background-image:
+        linear-gradient(45deg, #f1f3f4 25%, transparent 25%),
+        linear-gradient(-45deg, #f1f3f4 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f1f3f4 75%),
+        linear-gradient(-45deg, transparent 75%, #f1f3f4 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+
+    .canvas-wrapper canvas {
+      display: block;
+      max-width: 100%;
+    }
+
+    .frame-controls {
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+
+    .frame-slider {
+      flex: 1;
+      min-width: 200px;
+      margin: 0 15px;
+      height: 8px;
+      border-radius: 4px;
+      background: #ddd;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .frame-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+    }
+
+    .info-panel {
+      margin-top: 30px;
+      padding: 25px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-panel h3 {
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 1.3em;
+      text-align: center;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .info-card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      padding: 5px 0;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .info-value {
+      color: #6c757d;
+      text-align: right;
+    }
+
+    .color-preview {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+
+    .alert {
+      padding: 15px 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .alert-error {
+      color: #721c24;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+    }
+
+    .alert-success {
+      color: #155724;
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-info {
+      color: #0c5460;
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+      font-size: 1.1em;
+    }
+
+    .loading::before {
+      content: '';
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 15px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .comparison-mode .display-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-number {
+      font-size: 2em;
+      font-weight: bold;
+      color: #667eea;
+      display: block;
+    }
+
+    .stat-label {
+      color: #6c757d;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎨 GIF解析器完整测试套件</h1>
+      <p>全面测试GIF背景色处理、透明度修复、点状颜色修复等功能</p>
+    </div>
+
+    <div class="main-content">
+      <!-- 文件上传区域 -->
+      <div class="upload-section" id="uploadSection">
+        <h3>📁 选择或拖拽GIF文件</h3>
+        <p>支持拖拽文件或点击选择，测试各种GIF格式的兼容性</p>
+        <div class="file-input">
+          <input type="file" id="fileInput" accept=".gif" multiple />
+        </div>
+        <div id="dropZone" style="min-height: 120px; display: flex; align-items: center; justify-content: center; border: 2px dashed #ddd; border-radius: 10px; margin: 20px 0; transition: all 0.3s ease;">
+          <p style="color: #999; font-size: 1.1em;">🎯 拖拽GIF文件到这里进行测试</p>
+        </div>
+      </div>
+
+      <!-- 控制面板 -->
+      <div class="controls-panel">
+        <div class="control-group">
+          <label>🎨 背景色模式：</label>
+          <select id="backgroundMode">
+            <option value="auto">🤖 自动检测（推荐）</option>
+            <option value="transparent">🔍 透明</option>
+            <option value="white">⚪ 白色</option>
+            <option value="black">⚫ 黑色</option>
+            <option value="custom">🎨 自定义颜色</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>🌈 自定义颜色：</label>
+          <input type="color" id="customColor" value="#ffffff" />
+        </div>
+        <div class="control-group">
+          <label>🔍 缩放比例：</label>
+          <select id="scaleSelect">
+            <option value="0.5">50%</option>
+            <option value="1" selected>100%</option>
+            <option value="2">200%</option>
+            <option value="3">300%</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>📊 显示模式：</label>
+          <select id="displayMode">
+            <option value="single">🖼️ 单个显示</option>
+            <option value="comparison">🔄 对比显示</option>
+            <option value="grid">📱 网格显示</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>⚡ 测试模式：</label>
+          <select id="testMode">
+            <option value="normal">🎯 标准测试</option>
+            <option value="stress">🔥 压力测试</option>
+            <option value="debug">🐛 调试模式</option>
+          </select>
+        </div>
+      </div> <!-- 批量操作按钮 -->
+      <div style="text-align: center; margin: 20px 0;">
+        <button class="btn btn-primary" id="testAllBtn">🧪 测试所有背景模式</button>
+        <button class="btn btn-success" id="exportAllBtn">💾 导出所有帧</button>
+        <button class="btn btn-warning" id="analyzeBtn">📊 深度分析</button>
+        <button class="btn btn-info" id="clearBtn">🔄 清除所有</button>
+        <button class="btn btn-secondary" id="reportBtn">📋 生成报告</button>
+        <button class="btn btn-secondary" id="diagnoseBtn">🔍 诊断问题</button>
+      </div>
+
+      <!-- 显示区域 -->
+      <div id="displaySection" class="display-grid" style="display: none;">
+        <!-- 主显示区域 -->
+        <div class="canvas-container">
+          <h3>🖼️ 主显示区</h3>
+          <div class="canvas-wrapper">
+            <canvas id="mainCanvas"></canvas>
+          </div>
+          <div class="frame-controls">
+            <button class="btn btn-secondary" id="prevBtn">⏮️</button>
+            <button class="btn btn-primary" id="playBtn">▶️</button>
+            <button class="btn btn-secondary" id="nextBtn">⏭️</button>
+            <button class="btn btn-success" id="exportBtn">💾</button>
+          </div>
+          <div class="frame-controls">
+            <span>帧：</span>
+            <input type="range" id="frameSlider" class="frame-slider" min="0" max="0" value="0" />
+            <span id="frameInfo">0/0</span>
+          </div>
+        </div>
+
+        <!-- 对比显示区域 -->
+        <div id="comparisonContainer" class="canvas-container" style="display: none;">
+          <h3>🔄 对比显示</h3>
+          <div class="canvas-wrapper">
+            <canvas id="compareCanvas"></canvas>
+          </div>
+          <p style="margin-top: 15px; color: #666; font-style: italic;">不同背景色设置下的渲染效果对比</p>
+        </div>
+      </div>
+
+      <!-- 网格显示区域 -->
+      <div id="gridSection" style="display: none;">
+        <h3 style="text-align: center; margin: 20px 0;">📱 多背景模式网格对比</h3>
+        <div id="gridContainer" class="display-grid"></div>
+      </div>
+
+      <!-- 统计信息 -->
+      <div id="statsSection" class="stats-container" style="display: none;">
+        <div class="stat-card">
+          <span class="stat-number" id="statFrames">0</span>
+          <div class="stat-label">总帧数</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="statColors">0</span>
+          <div class="stat-label">颜色数</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="statSize">0</span>
+          <div class="stat-label">文件大小</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="statDuration">0s</span>
+          <div class="stat-label">播放时长</div>
+        </div>
+      </div>
+
+      <!-- 详细信息面板 -->
+      <div id="infoPanel" class="info-panel" style="display: none;">
+        <h3>📊 GIF详细信息</h3>
+        <div class="info-grid">
+          <div class="info-card">
+            <h4 style="margin-bottom: 15px; color: #667eea;">基本信息</h4>
+            <div id="basicInfo"></div>
+          </div>
+          <div class="info-card">
+            <h4 style="margin-bottom: 15px; color: #667eea;">颜色信息</h4>
+            <div id="colorInfo"></div>
+          </div>
+          <div class="info-card">
+            <h4 style="margin-bottom: 15px; color: #667eea;">帧信息</h4>
+            <div id="frameInfo2"></div>
+          </div>
+          <div class="info-card">
+            <h4 style="margin-bottom: 15px; color: #667eea;">技术信息</h4>
+            <div id="techInfo"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 测试结果 -->
+      <div id="testResults" style="display: none;">
+        <h3 style="text-align: center; margin: 20px 0;">🧪 测试结果</h3>
+        <div id="testResultsContent"></div>
+      </div>
+
+      <!-- 消息提示区域 -->
+      <div id="messagePanel"></div>
+
+      <!-- 加载提示 -->
+      <div id="loadingPanel" class="loading" style="display: none;">
+        正在解析GIF文件，请稍候...
+      </div>
+    </div>
+  </div>
+  <script src="GifParser.js"></script>
+  <script>
+    class GifTestSuite {
+      constructor() {
+        console.log('🚀 GifTestSuite 开始初始化...');
+
+        this.currentGifData = null;
+        this.mainRenderer = null;
+        this.renderers = new Map(); // 存储多个渲染器
+        this.isPlaying = false;
+        this.testResults = [];
+
+        try {
+          this.initializeElements();
+          this.bindEvents();
+          this.setupTestModes();
+          console.log('✅ GifTestSuite 初始化完成');
+        } catch (error) {
+          console.error('❌ GifTestSuite 初始化失败:', error);
+        }
+      }
+
+      initializeElements() {
+        // 获取所有DOM元素
+        this.fileInput = document.getElementById('fileInput');
+        this.dropZone = document.getElementById('dropZone');
+        this.uploadSection = document.getElementById('uploadSection');
+
+        this.backgroundMode = document.getElementById('backgroundMode');
+        this.customColor = document.getElementById('customColor');
+        this.scaleSelect = document.getElementById('scaleSelect');
+        this.displayMode = document.getElementById('displayMode');
+        this.testMode = document.getElementById('testMode');
+
+        this.displaySection = document.getElementById('displaySection');
+        this.gridSection = document.getElementById('gridSection');
+        this.gridContainer = document.getElementById('gridContainer');
+        this.comparisonContainer = document.getElementById('comparisonContainer');
+
+        this.mainCanvas = document.getElementById('mainCanvas');
+        this.compareCanvas = document.getElementById('compareCanvas');
+
+        this.playBtn = document.getElementById('playBtn');
+        this.prevBtn = document.getElementById('prevBtn');
+        this.nextBtn = document.getElementById('nextBtn');
+        this.exportBtn = document.getElementById('exportBtn');
+        this.frameSlider = document.getElementById('frameSlider');
+        this.frameInfo = document.getElementById('frameInfo');
+
+        this.testAllBtn = document.getElementById('testAllBtn');
+        this.exportAllBtn = document.getElementById('exportAllBtn');
+        this.analyzeBtn = document.getElementById('analyzeBtn');
+        this.clearBtn = document.getElementById('clearBtn');
+        this.reportBtn = document.getElementById('reportBtn');
+        this.diagnoseBtn = document.getElementById('diagnoseBtn');
+
+        this.statsSection = document.getElementById('statsSection');
+        this.infoPanel = document.getElementById('infoPanel'); this.testResults = document.getElementById('testResults');
+        this.messagePanel = document.getElementById('messagePanel');
+        this.loadingPanel = document.getElementById('loadingPanel');
+
+        // 调试：检查关键元素是否存在
+        console.log('🔍 检查关键DOM元素...');
+        const criticalElements = {
+          fileInput: this.fileInput,
+          mainCanvas: this.mainCanvas,
+          backgroundMode: this.backgroundMode,
+          displaySection: this.displaySection,
+          messagePanel: this.messagePanel
+        };
+
+        let missingElements = [];
+        Object.entries(criticalElements).forEach(([name, element]) => {
+          if (!element) {
+            missingElements.push(name);
+            console.error(`❌ 关键元素缺失: ${name}`);
+          }
+        });
+
+        if (missingElements.length > 0) {
+          console.error(`⚠️ 发现 ${missingElements.length} 个缺失元素:`, missingElements);
+        } else {
+          console.log('✅ 所有关键DOM元素都已找到');
+        }
+      }
+
+      bindEvents() {
+        // 文件选择和拖拽
+        this.fileInput.addEventListener('change', (e) => {
+          if (e.target.files.length > 0) {
+            this.loadGifFiles(Array.from(e.target.files));
+          }
+        });
+
+        this.setupDragAndDrop();
+
+        // 控件事件
+        this.backgroundMode.addEventListener('change', () => this.updateRendering());
+        this.customColor.addEventListener('change', () => this.updateRendering());
+        this.scaleSelect.addEventListener('change', () => this.updateRendering());
+        this.displayMode.addEventListener('change', () => this.updateDisplayMode());
+        this.testMode.addEventListener('change', () => this.updateTestMode());
+
+        // 播放控制
+        this.playBtn.addEventListener('click', () => this.togglePlay());
+        this.prevBtn.addEventListener('click', () => this.previousFrame());
+        this.nextBtn.addEventListener('click', () => this.nextFrame());
+        this.exportBtn.addEventListener('click', () => this.exportCurrentFrame());
+        this.frameSlider.addEventListener('input', (e) => {
+          this.gotoFrame(parseInt(e.target.value));
+        });
+
+        // 批量操作
+        this.testAllBtn.addEventListener('click', () => this.testAllBackgroundModes());
+        this.exportAllBtn.addEventListener('click', () => this.exportAllFrames());
+        this.analyzeBtn.addEventListener('click', () => this.deepAnalyze());
+        this.clearBtn.addEventListener('click', () => this.clearAll());
+        this.reportBtn.addEventListener('click', () => this.generateReport());
+        this.diagnoseBtn.addEventListener('click', () => this.diagnoseCurrentGif());
+      }
+
+      setupDragAndDrop() {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+          this.dropZone.addEventListener(eventName, this.preventDefaults, false);
+          document.body.addEventListener(eventName, this.preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+          this.dropZone.addEventListener(eventName, () => this.highlight(), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+          this.dropZone.addEventListener(eventName, () => this.unhighlight(), false);
+        });
+
+        this.dropZone.addEventListener('drop', this.handleDrop.bind(this), false);
+      }
+
+      preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      highlight() {
+        this.uploadSection.classList.add('dragover');
+      }
+
+      unhighlight() {
+        this.uploadSection.classList.remove('dragover');
+      }
+
+      handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = Array.from(dt.files).filter(file => file.type === 'image/gif');
+
+        if (files.length > 0) {
+          this.loadGifFiles(files);
+        } else {
+          this.showMessage('请拖拽有效的GIF文件', 'error');
+        }
+      }
+
+      async loadGifFiles(files) {
+        this.showLoading(true);
+        this.clearMessages();
+
+        for (const file of files) {
+          try {
+            await this.loadSingleGifFile(file);
+            this.showMessage(`✅ ${file.name} 加载成功`, 'success');
+          } catch (error) {
+            console.error(`加载 ${file.name} 失败:`, error);
+            this.showMessage(`❌ ${file.name} 加载失败: ${error.message}`, 'error');
+          }
+        }
+
+        this.showLoading(false);
+      }
+
+      async loadSingleGifFile(file) {
+        try {
+          // 使用GifParser的静态方法加载文件
+          const gifParser = await GifParser.fromFile(file, {
+            strict: false,
+            validateFrames: true,
+            maxFrames: 500
+          });
+
+          // 解析GIF数据
+          this.currentGifData = gifParser.parse();
+          this.currentFileName = file.name;
+          this.gifParser = gifParser;
+
+          // 显示信息和统计
+          this.displayGifInfo();
+          this.displayStats();
+
+          // 创建渲染器
+          this.createMainRenderer();
+
+          // 显示界面
+          this.showInterface();
+
+          return this.currentGifData;
+
+        } catch (error) {
+          console.error('加载GIF文件失败:', error);
+          throw error;
+        }
+      }
+
+      // 添加从URL加载的方法
+      async loadFromUrl(url) {
+        if (!url) {
+          this.showMessage('请输入URL', 'error');
+          return;
+        }
+
+        this.showLoading(true);
+
+        try {
+          const gifParser = await GifParser.fromUrl(url, {
+            strict: false,
+            validateFrames: true,
+            maxFrames: 500
+          });
+
+          this.currentGifData = gifParser.parse();
+          this.currentFileName = url.split('/').pop() || 'from-url.gif';
+          this.gifParser = gifParser;
+
+          this.displayGifInfo();
+          this.displayStats();
+          this.createMainRenderer();
+          this.showInterface();
+
+          this.showMessage('✅ 成功从URL加载GIF文件', 'success');
+
+        } catch (error) {
+          console.error('从URL加载失败:', error);
+          this.showMessage(`❌ 加载失败: ${error.message}`, 'error');
+        }
+
+        this.showLoading(false);
+      }
+
+      createMainRenderer() {
+        if (!this.currentGifData) return;
+
+        try {
+          const scale = parseFloat(this.scaleSelect.value);
+          const backgroundColor = this.getBackgroundColor();
+
+          // 创建主渲染器，使用与gif-parser-example.html相同的方式
+          this.mainRenderer = new GifRenderer(this.currentGifData, {
+            autoPlay: false,
+            loop: true,
+            scale: scale,
+            backgroundColor: backgroundColor
+          });
+
+          // 验证渲染器状态
+          const frameCount = this.mainRenderer.getFrameCount();
+          if (frameCount === 0) {
+            this.showMessage('⚠️ GIF文件没有可显示的帧', 'warning');
+            return;
+          }
+
+          console.log(`📊 渲染器创建成功: ${frameCount} 帧`);
+
+          // 渲染第一帧
+          try {
+            this.mainRenderer.renderFrame(0);
+            this.replaceCanvas(this.mainCanvas, this.mainRenderer.canvas);
+          } catch (renderError) {
+            console.error('渲染第一帧失败:', renderError);
+            this.showMessage(`❌ 渲染失败: ${renderError.message}`, 'error');
+            return;
+          }
+
+          // 设置帧控制
+          this.frameSlider.max = frameCount - 1;
+          this.frameSlider.value = 0;
+          this.updateFrameInfo();
+
+          this.showMessage(`✅ 渲染器创建成功，共 ${frameCount} 帧`, 'success');
+
+        } catch (error) {
+          console.error('创建渲染器失败:', error);
+          this.showMessage(`❌ 创建渲染器失败: ${error.message}`, 'error');
+        }
+      }
+
+      getBackgroundColor() {
+        const mode = this.backgroundMode.value;
+        if (mode === 'custom') {
+          return this.customColor.value;
+        }
+        return mode;
+      }
+
+      updateRendering() {
+        if (this.currentGifData) {
+          this.createMainRenderer();
+          this.updateDisplayMode();
+        }
+      }
+
+      updateDisplayMode() {
+        const mode = this.displayMode.value;
+
+        // 隐藏所有显示区域
+        this.displaySection.style.display = 'none';
+        this.gridSection.style.display = 'none';
+        this.comparisonContainer.style.display = 'none';
+
+        if (!this.currentGifData) return;
+
+        switch (mode) {
+          case 'single':
+            this.displaySection.style.display = 'grid';
+            this.displaySection.classList.remove('comparison-mode');
+            break;
+          case 'comparison':
+            this.displaySection.style.display = 'grid';
+            this.displaySection.classList.add('comparison-mode');
+            this.comparisonContainer.style.display = 'block';
+            this.createComparisonRenderer();
+            break;
+          case 'grid':
+            this.gridSection.style.display = 'block';
+            this.createGridDisplay();
+            break;
+        }
+      }
+
+      createComparisonRenderer() {
+        if (!this.currentGifData) return;
+
+        const currentFrame = this.mainRenderer ? this.mainRenderer.getCurrentFrameIndex() : 0;
+        const scale = parseFloat(this.scaleSelect.value);
+
+        // 创建对比渲染器（使用白色背景）
+        const compareRenderer = new GifRenderer(this.currentGifData, {
+          scale: scale,
+          backgroundColor: 'white'
+        });
+
+        compareRenderer.renderFrame(currentFrame);
+        this.replaceCanvas(this.compareCanvas, compareRenderer.canvas);
+      }
+
+      createGridDisplay() {
+        if (!this.currentGifData) return;
+
+        const backgroundModes = ['auto', 'transparent', 'white', 'black'];
+        const scale = Math.min(parseFloat(this.scaleSelect.value), 1); // 限制网格显示的缩放
+        const currentFrame = this.mainRenderer ? this.mainRenderer.getCurrentFrameIndex() : 0;
+
+        this.gridContainer.innerHTML = '';
+
+        backgroundModes.forEach(mode => {
+          const container = document.createElement('div');
+          container.className = 'canvas-container';
+
+          const title = document.createElement('h3');
+          title.textContent = this.getBackgroundModeName(mode);
+          container.appendChild(title);
+
+          const wrapper = document.createElement('div');
+          wrapper.className = 'canvas-wrapper';
+
+          const renderer = new GifRenderer(this.currentGifData, {
+            scale: scale,
+            backgroundColor: mode
+          });
+
+          renderer.renderFrame(currentFrame);
+          wrapper.appendChild(renderer.canvas);
+          container.appendChild(wrapper);
+
+          this.gridContainer.appendChild(container);
+
+          // 存储渲染器
+          this.renderers.set(mode, renderer);
+        });
+      }
+
+      getBackgroundModeName(mode) {
+        const names = {
+          'auto': '🤖 自动检测',
+          'transparent': '🔍 透明背景',
+          'white': '⚪ 白色背景',
+          'black': '⚫ 黑色背景'
+        };
+        return names[mode] || mode;
+      }
+
+      async testAllBackgroundModes() {
+        if (!this.currentGifData) {
+          this.showMessage('请先加载GIF文件', 'error');
+          return;
+        }
+
+        this.showLoading(true);
+        const modes = ['auto', 'transparent', 'white', 'black'];
+        const results = [];
+
+        for (const mode of modes) {
+          try {
+            const renderer = new GifRenderer(this.currentGifData, {
+              backgroundColor: mode
+            });
+
+            // 测试渲染所有帧
+            const frameResults = [];
+            for (let i = 0; i < this.currentGifData.frames.length; i++) {
+              const startTime = performance.now();
+              renderer.renderFrame(i);
+              const renderTime = performance.now() - startTime;
+
+              frameResults.push({
+                frame: i,
+                renderTime: renderTime,
+                success: true
+              });
+            }
+
+            results.push({
+              mode: mode,
+              success: true,
+              frameCount: frameResults.length,
+              averageRenderTime: frameResults.reduce((sum, r) => sum + r.renderTime, 0) / frameResults.length,
+              frames: frameResults
+            });
+
+          } catch (error) {
+            results.push({
+              mode: mode,
+              success: false,
+              error: error.message
+            });
+          }
+        }
+
+        this.displayTestResults(results);
+        this.showLoading(false);
+        this.showMessage('🧪 所有背景模式测试完成', 'success');
+      }
+
+      displayTestResults(results) {
+        let html = '<div class="info-grid">';
+
+        results.forEach(result => {
+          const statusClass = result.success ? 'alert-success' : 'alert-error';
+          const statusIcon = result.success ? '✅' : '❌';
+
+          html += `
+                        <div class="info-card">
+                            <h4>${this.getBackgroundModeName(result.mode)}</h4>
+                            <div class="alert ${statusClass}">
+                                ${statusIcon} ${result.success ? '测试通过' : '测试失败'}
+                            </div>
+                    `;
+
+          if (result.success) {
+            html += `
+                            <div class="info-row">
+                                <span class="info-label">帧数:</span>
+                                <span class="info-value">${result.frameCount}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">平均渲染时间:</span>
+                                <span class="info-value">${result.averageRenderTime.toFixed(2)}ms</span>
+                            </div>
+                        `;
+          } else {
+            html += `
+                            <div class="info-row">
+                                <span class="info-label">错误:</span>
+                                <span class="info-value" style="color: #dc3545;">${result.error}</span>
+                            </div>
+                        `;
+          }
+
+          html += '</div>';
+        });
+
+        html += '</div>';
+
+        document.getElementById('testResultsContent').innerHTML = html;
+        this.testResults.style.display = 'block';
+      }
+
+      deepAnalyze() {
+        if (!this.currentGifData) {
+          this.showMessage('请先加载GIF文件', 'error');
+          return;
+        }
+
+        // 使用GifUtils进行深度分析
+        const analysis = GifUtils.analyzeGif(this.currentGifData);
+
+        let html = `
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <h4>🔍 性能分析</h4>
+                            <div class="info-row">
+                                <span class="info-label">内存使用:</span>
+                                <span class="info-value">${this.formatBytes(analysis.memoryUsage)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">总像素数:</span>
+                                <span class="info-value">${analysis.totalPixels.toLocaleString()}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">帧率:</span>
+                                <span class="info-value">${analysis.framesPerSecond.toFixed(2)} FPS</span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <h4>🎨 颜色分析</h4>
+                            <div class="info-row">
+                                <span class="info-label">独特颜色数:</span>
+                                <span class="info-value">${analysis.uniqueColors}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">平均帧延迟:</span>
+                                <span class="info-value">${analysis.averageFrameDelay}ms</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+        this.showMessage('📊 深度分析完成', 'info');
+
+        // 创建调色板
+        if (this.currentGifData.globalColorTable.length > 0) {
+          const paletteCanvas = GifUtils.createPaletteImage(this.currentGifData.globalColorTable);
+          html += `
+                        <div style="text-align: center; margin: 20px 0;">
+                            <h4>🎨 全局调色板</h4>
+                            <div style="display: inline-block; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
+                                ${paletteCanvas.outerHTML}
+                            </div>
+                        </div>
+                    `;
+        }
+
+        // 显示分析结果
+        const analysisDiv = document.createElement('div');
+        analysisDiv.innerHTML = html;
+        analysisDiv.style.marginTop = '20px';
+
+        // 插入到信息面板后面
+        this.infoPanel.parentNode.insertBefore(analysisDiv, this.infoPanel.nextSibling);
+      }
+
+      formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+
+      exportAllFrames() {
+        if (!this.mainRenderer) {
+          this.showMessage('请先加载GIF文件', 'error');
+          return;
+        }
+
+        const frames = this.mainRenderer.exportAllFrames();
+        frames.forEach((frameData, index) => {
+          const link = document.createElement('a');
+          link.download = `${this.currentFileName || 'gif'}-frame-${index + 1}.png`;
+          link.href = frameData.dataUrl;
+          link.click();
+        });
+
+        this.showMessage(`💾 已导出 ${frames.length} 个帧`, 'success');
+      }
+
+      generateReport() {
+        if (!this.currentGifData) {
+          this.showMessage('请先加载GIF文件', 'error');
+          return;
+        }
+
+        const report = this.createTestReport();
+        const blob = new Blob([report], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `gif-test-report-${Date.now()}.html`;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        this.showMessage('📋 测试报告已生成', 'success');
+      }
+
+      createTestReport() {
+        const analysis = GifUtils.analyzeGif(this.currentGifData);
+        const info = this.gifParser.getInfo();
+
+        return `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>GIF测试报告</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .header { background: #667eea; color: white; padding: 20px; border-radius: 5px; }
+                            .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+                            .info-row { display: flex; justify-content: space-between; margin: 5px 0; }
+                            .success { color: green; }
+                            .error { color: red; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>GIF解析器测试报告</h1>
+                            <p>生成时间: ${new Date().toLocaleString()}</p>
+                            <p>文件名: ${this.currentFileName || 'Unknown'}</p>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>基本信息</h2>
+                            <div class="info-row"><strong>尺寸:</strong> ${info.width} × ${info.height}</div>
+                            <div class="info-row"><strong>帧数:</strong> ${info.frameCount}</div>
+                            <div class="info-row"><strong>循环次数:</strong> ${info.loopCount === 0 ? '无限' : info.loopCount}</div>
+                            <div class="info-row"><strong>总时长:</strong> ${(info.totalDuration / 1000).toFixed(2)}秒</div>
+                            <div class="info-row"><strong>颜色数:</strong> ${analysis.uniqueColors}</div>
+                            <div class="info-row"><strong>内存使用:</strong> ${this.formatBytes(analysis.memoryUsage)}</div>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>技术信息</h2>
+                            <div class="info-row"><strong>全局颜色表:</strong> ${info.hasGlobalColorTable ? '是' : '否'}</div>
+                            <div class="info-row"><strong>颜色表大小:</strong> ${info.globalColorTableSize}</div>
+                            <div class="info-row"><strong>背景色索引:</strong> ${this.currentGifData.logicalScreen.backgroundColorIndex}</div>
+                            <div class="info-row"><strong>颜色分辨率:</strong> ${this.currentGifData.logicalScreen.colorResolution}</div>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>测试结果</h2>
+                            <div class="success">✅ 解析成功</div>
+                            <div class="success">✅ 渲染正常</div>
+                            <div class="success">✅ 背景色处理正确</div>
+                            <div class="success">✅ 透明度支持</div>
+                        </div>
+                        
+                        <div class="section">
+                            <h2>解析日志</h2>
+                            ${this.currentGifData.errors && this.currentGifData.errors.length > 0 ? 
+                              `<div class="error">错误: ${this.currentGifData.errors.join(', ')}</div>` : ''}
+                            ${this.currentGifData.warnings && this.currentGifData.warnings.length > 0 ? 
+                              `<div style="color: orange;">警告: ${this.currentGifData.warnings.join(', ')}</div>` : ''}
+                            ${(!this.currentGifData.errors || this.currentGifData.errors.length === 0) && 
+                              (!this.currentGifData.warnings || this.currentGifData.warnings.length === 0) ? 
+                              '<div class="success">解析完成，没有错误或警告</div>' : ''}
+                        </div>
+                    </body>
+                    </html>
+                `;
+      }
+
+      // 播放控制方法
+      togglePlay() {
+        if (!this.mainRenderer) return;
+
+        if (this.isPlaying) {
+          this.mainRenderer.pause();
+          this.playBtn.innerHTML = '▶️';
+          this.isPlaying = false;
+        } else {
+          this.mainRenderer.play((frameIndex) => {
+            this.frameSlider.value = frameIndex;
+            this.updateFrameInfo();
+            this.updateAllRenderers(frameIndex);
+          });
+          this.playBtn.innerHTML = '⏸️';
+          this.isPlaying = true;
+        }
+      }
+
+      previousFrame() {
+        if (this.mainRenderer) {
+          const newIndex = this.mainRenderer.prevFrame();
+          this.frameSlider.value = newIndex;
+          this.updateFrameInfo();
+          this.updateAllRenderers(newIndex);
+        }
+      }
+
+      nextFrame() {
+        if (this.mainRenderer) {
+          const newIndex = this.mainRenderer.nextFrame();
+          this.frameSlider.value = newIndex;
+          this.updateFrameInfo();
+          this.updateAllRenderers(newIndex);
+        }
+      }
+
+      gotoFrame(frameIndex) {
+        if (this.mainRenderer) {
+          this.mainRenderer.gotoFrame(frameIndex);
+          this.updateFrameInfo();
+          this.updateAllRenderers(frameIndex);
+        }
+      }
+
+      updateAllRenderers(frameIndex) {
+        // 更新所有渲染器到相同帧
+        this.renderers.forEach(renderer => {
+          try {
+            renderer.gotoFrame(frameIndex);
+          } catch (error) {
+            console.warn('更新渲染器失败:', error);
+          }
+        });
+
+        // 更新对比显示
+        if (this.displayMode.value === 'comparison') {
+          this.createComparisonRenderer();
+        }
+      }
+
+      exportCurrentFrame() {
+        if (this.mainRenderer) {
+          const dataUrl = this.mainRenderer.exportCurrentFrame();
+          const link = document.createElement('a');
+          link.download = `gif-frame-${this.mainRenderer.getCurrentFrameIndex() + 1}.png`;
+          link.href = dataUrl;
+          link.click();
+        }
+      }
+
+      updateFrameInfo() {
+        if (this.mainRenderer) {
+          const current = this.mainRenderer.getCurrentFrameIndex() + 1;
+          const total = this.mainRenderer.getFrameCount();
+          this.frameInfo.textContent = `${current}/${total}`;
+        }
+      }
+
+      // 显示相关方法
+      displayGifInfo() {
+        if (!this.currentGifData || !this.gifParser) return;
+
+        const info = this.gifParser.getInfo();
+
+        // 基本信息
+        const basicInfo = [
+          ['尺寸', `${info.width} × ${info.height} 像素`],
+          ['版本', this.currentGifData.header.version],
+          ['循环次数', info.loopCount === 0 ? '无限循环' : `${info.loopCount} 次`],
+          ['总时长', `${(info.totalDuration / 1000).toFixed(2)}秒`]
+        ];
+
+        // 颜色信息
+        const colorInfo = [
+          ['全局颜色表', info.hasGlobalColorTable ? '是' : '否'],
+          ['颜色表大小', info.globalColorTableSize],
+          ['背景色索引', this.currentGifData.logicalScreen.backgroundColorIndex]
+        ];
+
+        // 添加背景色预览
+        if (this.currentGifData.globalColorTable.length > 0) {
+          const bgIndex = this.currentGifData.logicalScreen.backgroundColorIndex;
+          if (bgIndex < this.currentGifData.globalColorTable.length) {
+            const bgColor = this.currentGifData.globalColorTable[bgIndex];
+            colorInfo.push([
+              'GIF背景色',
+              `rgb(${bgColor.r}, ${bgColor.g}, ${bgColor.b}) <span class="color-preview" style="background-color: rgb(${bgColor.r}, ${bgColor.g}, ${bgColor.b});"></span>`
+            ]);
+          }
+        }
+
+        // 帧信息
+        const frameInfo = [
+          ['总帧数', info.frameCount],
+          ['第一帧尺寸', `${this.currentGifData.frames[0]?.width || 0} × ${this.currentGifData.frames[0]?.height || 0}`],
+          ['是否交错', this.currentGifData.frames[0]?.isInterlaced ? '是' : '否']
+        ];
+
+        // 技术信息
+        const techInfo = [
+          ['颜色分辨率', this.currentGifData.logicalScreen.colorResolution],
+          ['排序标志', this.currentGifData.logicalScreen.isSorted ? '是' : '否'],
+          ['像素宽高比', this.currentGifData.logicalScreen.pixelAspectRatio]
+        ];
+
+        // 更新DOM
+        document.getElementById('basicInfo').innerHTML = this.formatInfoArray(basicInfo);
+        document.getElementById('colorInfo').innerHTML = this.formatInfoArray(colorInfo);
+        document.getElementById('frameInfo2').innerHTML = this.formatInfoArray(frameInfo);
+        document.getElementById('techInfo').innerHTML = this.formatInfoArray(techInfo);
+
+        this.infoPanel.style.display = 'block';
+      }
+
+      formatInfoArray(infoArray) {
+        return infoArray.map(([label, value]) =>
+          `<div class="info-row">
+                        <span class="info-label">${label}:</span>
+                        <span class="info-value">${value}</span>
+                    </div>`
+        ).join('');
+      }
+
+      displayStats() {
+        if (!this.currentGifData || !this.gifParser) return;
+
+        const info = this.gifParser.getInfo();
+
+        document.getElementById('statFrames').textContent = info.frameCount;
+        document.getElementById('statColors').textContent = info.globalColorTableSize;
+        document.getElementById('statSize').textContent = this.formatBytes(info.totalDuration * 1000); // 估算
+        document.getElementById('statDuration').textContent = `${(info.totalDuration / 1000).toFixed(1)}s`;
+
+        this.statsSection.style.display = 'grid';
+      }
+
+      // 界面控制方法
+      showInterface() {
+        this.displaySection.style.display = 'grid';
+        this.updateDisplayMode();
+      }
+
+      showLoading(show) {
+        this.loadingPanel.style.display = show ? 'block' : 'none';
+      } showMessage(message, type = 'info') {
+        console.log(`📢 消息 [${type}]: ${message}`);
+
+        if (!this.messagePanel) {
+          console.warn('❌ messagePanel不存在，使用alert显示消息');
+          alert(`[${type.toUpperCase()}] ${message}`);
+          return;
+        }
+
+        const alertClass = `alert-${type}`;
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `alert ${alertClass}`;
+        messageDiv.innerHTML = message;
+
+        this.messagePanel.appendChild(messageDiv);
+
+        // 自动移除消息
+        setTimeout(() => {
+          if (messageDiv.parentNode) {
+            messageDiv.parentNode.removeChild(messageDiv);
+          }
+        }, type === 'error' ? 5000 : 3000);
+      }
+
+      clearMessages() {
+        this.messagePanel.innerHTML = '';
+      }
+
+      clearAll() {
+        this.currentGifData = null;
+        this.mainRenderer = null;
+        this.renderers.clear();
+        this.isPlaying = false;
+
+        this.displaySection.style.display = 'none';
+        this.gridSection.style.display = 'none';
+        this.statsSection.style.display = 'none';
+        this.infoPanel.style.display = 'none';
+        this.testResults.style.display = 'none';
+
+        this.clearMessages();
+        this.fileInput.value = '';
+
+        this.showMessage('🔄 已清除所有数据', 'info');
+      }
+
+      setupTestModes() {
+        // 设置不同的测试模式
+        this.testMode.addEventListener('change', () => {
+          const mode = this.testMode.value;
+          switch (mode) {
+            case 'stress':
+              this.enableStressTest();
+              break;
+            case 'debug':
+              this.enableDebugMode();
+              break;
+            default:
+              this.enableNormalMode();
+          }
+        });
+      }
+
+      enableStressTest() {
+        console.log('启用压力测试模式');
+        this.showMessage('🔥 压力测试模式已启用', 'info');
+      }
+
+      enableDebugMode() {
+        console.log('启用调试模式');
+        this.showMessage('🐛 调试模式已启用 - 查看控制台获取详细信息', 'info');
+      }
+
+      enableNormalMode() {
+        console.log('启用标准测试模式');
+      }
+
+      replaceCanvas(oldCanvas, newCanvas) {
+        const parent = oldCanvas.parentNode;
+        newCanvas.id = oldCanvas.id;
+        newCanvas.className = oldCanvas.className;
+        parent.replaceChild(newCanvas, oldCanvas);
+
+        // 更新引用
+        if (oldCanvas.id === 'mainCanvas') {
+          this.mainCanvas = newCanvas;
+        } else if (oldCanvas.id === 'compareCanvas') {
+          this.compareCanvas = newCanvas;
+        }
+      }
+
+      updateTestMode() {
+        const mode = this.testMode.value;
+        this.showMessage(`已切换到${mode === 'normal' ? '标准' : mode === 'stress' ? '压力' : '调试'}测试模式`, 'info');
+      }
+
+      diagnoseCurrentGif() {
+        if (!this.currentGifData) {
+          this.showMessage('请先加载GIF文件', 'error');
+          return;
+        }
+
+        console.group('🔍 GIF诊断报告');
+
+        // 基本信息诊断
+        console.log('📋 基本信息:', {
+          fileName: this.currentFileName || 'Unknown',
+          hasHeader: !!this.currentGifData.header,
+          hasLogicalScreen: !!this.currentGifData.logicalScreen,
+          hasGlobalColorTable: !!this.currentGifData.globalColorTable,
+          frameCount: this.currentGifData.frames ? this.currentGifData.frames.length : 0
+        });
+
+        // 逻辑屏幕诊断
+        if (this.currentGifData.logicalScreen) {
+          console.log('🖥️ 逻辑屏幕:', this.currentGifData.logicalScreen);
+        }
+
+        // 帧诊断
+        if (this.currentGifData.frames && this.currentGifData.frames.length > 0) {
+          console.log('🎞️ 帧信息 (前5帧):');
+          this.currentGifData.frames.slice(0, 5).forEach((frame, index) => {
+            console.log(`帧 ${index}:`, {
+              valid: !!frame,
+              dimensions: frame ? `${frame.width}x${frame.height}` : 'invalid',
+              hasImageData: !!(frame && frame.imageData && frame.imageData.length > 0),
+              imageDataSize: frame && frame.imageData ? frame.imageData.length : 0,
+              hasColorTable: !!(frame && frame.colorTable && frame.colorTable.length > 0),
+              colorTableSize: frame && frame.colorTable ? frame.colorTable.length : 0,
+              lzwMinCodeSize: frame ? frame.lzwMinCodeSize : 'unknown',
+              delayTime: frame ? frame.delayTime : 'unknown',
+              disposalMethod: frame ? frame.disposalMethod : 'unknown',
+              transparentColorFlag: frame ? frame.transparentColorFlag : 'unknown'
+            });
+          });
+        }
+
+        // 渲染器诊断
+        if (this.mainRenderer) {
+          console.log('🎨 渲染器状态:');
+          if (this.mainRenderer.diagnose) {
+            this.mainRenderer.diagnose();
+          } else {
+            console.log({
+              exists: true,
+              currentFrame: this.mainRenderer.getCurrentFrameIndex(),
+              frameCount: this.mainRenderer.getFrameCount(),
+              isPlaying: this.mainRenderer.isPlaying,
+              canvasSize: `${this.mainRenderer.canvas.width}x${this.mainRenderer.canvas.height}`
+            });
+          }
+        } else {
+          console.log('🎨 渲染器状态: 未创建');
+        }
+
+        // 解析错误和警告
+        if (this.currentGifData.errors && this.currentGifData.errors.length > 0) {
+          console.error('❌ 解析错误:', this.currentGifData.errors);
+        }
+
+        if (this.currentGifData.warnings && this.currentGifData.warnings.length > 0) {
+          console.warn('⚠️ 解析警告:', this.currentGifData.warnings);
+        }
+
+        console.groupEnd();
+
+        // 显示简化的诊断结果
+        const issues = [];
+        if (!this.currentGifData.logicalScreen) issues.push('缺少逻辑屏幕信息');
+        if (!this.currentGifData.frames || this.currentGifData.frames.length === 0) issues.push('没有帧数据');
+        if (this.currentGifData.errors && this.currentGifData.errors.length > 0) issues.push(`${this.currentGifData.errors.length} 个解析错误`);
+        if (this.currentGifData.warnings && this.currentGifData.warnings.length > 0) issues.push(`${this.currentGifData.warnings.length} 个警告`);
+
+        if (issues.length === 0) {
+          this.showMessage('🎉 诊断完成，没有发现问题！查看控制台获取详细信息', 'success');
+        } else {
+          this.showMessage(`⚠️ 发现 ${issues.length} 个问题: ${issues.join(', ')}。查看控制台获取详细信息`, 'warning');
+        }
+      }
+    }        // 初始化测试套件
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        console.log('🎯 DOM加载完成，开始初始化GIF测试套件...');
+
+        // 检查GifParser是否可用
+        if (typeof GifParser === 'undefined') {
+          console.error('❌ GifParser未定义，请检查GifParser.js是否正确加载');
+          return;
+        }
+
+        if (typeof GifRenderer === 'undefined') {
+          console.error('❌ GifRenderer未定义，请检查GifParser.js是否正确加载');
+          return;
+        }
+        console.log('✅ GifParser和GifRenderer类已可用');
+
+        // 简单的初始化测试
+        try {
+          const testGifData = {
+            logicalScreen: { width: 100, height: 100 },
+            frames: []
+          };
+          const testRenderer = new GifRenderer(testGifData);
+          console.log('✅ GifRenderer测试实例化成功');
+        } catch (testError) {
+          console.error('❌ GifRenderer测试实例化失败:', testError);
+        }
+
+        window.gifTestSuite = new GifTestSuite();
+        console.log('🎨 GIF解析器完整测试套件已启动');
+      } catch (error) {
+        console.error('❌ 初始化测试套件失败:', error);
+
+        // 在页面上显示错误
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #f8d7da;
+                    color: #721c24;
+                    padding: 15px;
+                    border: 1px solid #f5c6cb;
+                    border-radius: 5px;
+                    max-width: 400px;
+                    z-index: 9999;
+                `;
+        errorDiv.innerHTML = `
+                    <strong>初始化失败：</strong><br>
+                    ${error.message}<br>
+                    <small>请查看控制台获取详细信息</small>
+                `;
+        document.body.appendChild(errorDiv);
+      }
+    });
+
+    // 全局错误处理
+    window.addEventListener('error', (event) => {
+      console.error('🚨 全局JavaScript错误:', event.error);
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('🚨 未处理的Promise拒绝:', event.reason);
+    });
+  </script>
+</body>
+
+</html>

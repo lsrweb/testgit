@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手机拖拽模拟器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .phone-container {
+            position: relative;
+            background: #2c3e50;
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .phone-screen {
+            width: 300px;
+            height: 600px;
+            background: #000;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #333;
+        }
+
+        .phone-header {
+            height: 60px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .phone-header::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }        .phone-content {
+            height: calc(100% - 60px);
+            background: #f8f9fa;
+            position: relative;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .drop-zone {
+            width: 100%;
+            height: 120px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #007bff;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            background: rgba(0, 123, 255, 0.05);
+        }
+
+        .drop-zone.drag-over {
+            background: rgba(0, 123, 255, 0.1);
+            border-color: #0056b3;
+            transform: scale(1.02);
+        }
+
+        .drop-zone.has-item {
+            border-style: solid;
+            background: rgba(40, 167, 69, 0.1);
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+        .draggable-item {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+        }        .draggable-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+            z-index: 1000;
+        }
+
+        .draggable-item.free-drag {
+            position: absolute;
+            z-index: 999;
+            transition: none;
+            cursor: move;
+        }
+
+        .draggable-item.free-drag:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .item-1 { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        .item-2 { background: linear-gradient(135deg, #4ecdc4, #44bd87); }
+        .item-3 { background: linear-gradient(135deg, #45b7d1, #3742fa); }
+        .item-4 { background: linear-gradient(135deg, #f9ca24, #f0932b); }
+        .item-5 { background: linear-gradient(135deg, #eb4d4b, #c0392b); }
+        .item-6 { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 200px;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .btn.danger {
+            background: #dc3545;
+        }
+
+        .btn.danger:hover {
+            background: #c82333;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+
+        .status h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .status-item {
+            margin-bottom: 5px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .phone-time {
+            position: absolute;
+            top: 8px;
+            right: 15px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+        }
+
+        .phone-battery {
+            position: absolute;
+            top: 8px;
+            left: 15px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0,0,0);
+            }
+            40%, 43% {
+                transform: translate3d(0, -5px, 0);
+            }
+            70% {
+                transform: translate3d(0, -3px, 0);
+            }
+            90% {
+                transform: translate3d(0, -1px, 0);
+            }
+        }
+
+        .draggable-item:hover {
+            animation: bounce 1s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧控制面板 -->
+        <div class="sidebar">
+            <h3>拖拽元素</h3>
+            <div class="items-grid">
+                <div class="draggable-item item-1" draggable="true" data-id="1">
+                    图片
+                </div>
+                <div class="draggable-item item-2" draggable="true" data-id="2">
+                    文字
+                </div>
+                <div class="draggable-item item-3" draggable="true" data-id="3">
+                    视频
+                </div>
+                <div class="draggable-item item-4" draggable="true" data-id="4">
+                    音频
+                </div>
+                <div class="draggable-item item-5" draggable="true" data-id="5">
+                    按钮
+                </div>
+                <div class="draggable-item item-6" draggable="true" data-id="6">
+                    图标
+                </div>
+            </div>            <div class="controls">
+                <button class="btn" onclick="clearAllZones()">清空所有</button>
+                <button class="btn" onclick="resetItems()">重置元素</button>
+                <button class="btn" onclick="toggleFreeDrag()">切换自由拖拽</button>
+                <button class="btn danger" onclick="showLog()">查看日志</button>
+            </div>
+
+            <div class="status">
+                <h4>状态信息</h4>
+                <div class="status-item">拖拽次数: <span id="dragCount">0</span></div>
+                <div class="status-item">放置次数: <span id="dropCount">0</span></div>
+                <div class="status-item">自由拖拽: <span id="freeDragStatus">关闭</span></div>
+                <div class="status-item">当前时间: <span id="currentTime"></span></div>
+            </div>
+        </div>
+
+        <!-- 手机模拟器 -->
+        <div class="phone-container">
+            <div class="phone-screen">
+                <div class="phone-header">
+                    <div class="phone-battery">100%</div>
+                    <span>手机模拟器</span>
+                    <div class="phone-time" id="phoneTime"></div>
+                </div>
+                <div class="phone-content">
+                    <div class="drop-zone" data-zone="1">
+                        <span class="zone-text">拖拽区域 1</span>
+                    </div>
+                    <div class="drop-zone" data-zone="2">
+                        <span class="zone-text">拖拽区域 2</span>
+                    </div>
+                    <div class="drop-zone" data-zone="3">
+                        <span class="zone-text">拖拽区域 3</span>
+                    </div>
+                    <div class="drop-zone" data-zone="4">
+                        <span class="zone-text">拖拽区域 4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>        let dragCount = 0;
+        let dropCount = 0;
+        let operationLog = [];
+        let currentDragElement = null;
+        let freeDragMode = false;
+        let dragOffset = { x: 0, y: 0 };
+        let isDragging = false;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            initializeDragAndDrop();
+        });
+
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('currentTime').textContent = timeString;
+            document.getElementById('phoneTime').textContent = now.toLocaleTimeString('zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }        // 初始化拖拽功能
+        function initializeDragAndDrop() {
+            const draggableItems = document.querySelectorAll('.draggable-item');
+            const dropZones = document.querySelectorAll('.drop-zone');
+
+            // 为拖拽元素添加事件
+            draggableItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                
+                // 添加鼠标事件用于自由拖拽
+                item.addEventListener('mousedown', handleMouseDown);
+            });
+
+            // 为放置区域添加事件
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDrop);
+            });
+
+            // 添加全局鼠标事件
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        }
+
+        // 拖拽开始
+        function handleDragStart(e) {
+            currentDragElement = e.target;
+            e.target.classList.add('dragging');
+            dragCount++;
+            document.getElementById('dragCount').textContent = dragCount;
+            
+            // 记录日志
+            const itemType = e.target.textContent.trim();
+            operationLog.push({
+                time: new Date().toLocaleTimeString(),
+                action: '开始拖拽',
+                item: itemType,
+                from: '侧边栏'
+            });
+
+            e.dataTransfer.effectAllowed = 'copy';
+            e.dataTransfer.setData('text/html', e.target.outerHTML);
+        }
+
+        // 拖拽结束
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            currentDragElement = null;
+        }
+
+        // 拖拽经过
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        }
+
+        // 拖拽进入
+        function handleDragEnter(e) {
+            e.preventDefault();
+            e.target.closest('.drop-zone').classList.add('drag-over');
+        }
+
+        // 拖拽离开
+        function handleDragLeave(e) {
+            const dropZone = e.target.closest('.drop-zone');
+            if (dropZone && !dropZone.contains(e.relatedTarget)) {
+                dropZone.classList.remove('drag-over');
+            }
+        }
+
+        // 放置
+        function handleDrop(e) {
+            e.preventDefault();
+            const dropZone = e.target.closest('.drop-zone');
+            dropZone.classList.remove('drag-over');
+
+            if (currentDragElement) {
+                // 创建新的元素副本
+                const newElement = currentDragElement.cloneNode(true);
+                newElement.style.width = '60px';
+                newElement.style.height = '60px';
+                newElement.style.fontSize = '12px';
+                newElement.draggable = false;
+
+                // 清空原有内容并添加新元素
+                const zoneText = dropZone.querySelector('.zone-text');
+                if (zoneText) {
+                    zoneText.style.display = 'none';
+                }
+
+                // 移除之前的元素（如果有）
+                const existingItem = dropZone.querySelector('.draggable-item');
+                if (existingItem) {
+                    existingItem.remove();
+                }
+
+                dropZone.appendChild(newElement);
+                dropZone.classList.add('has-item');
+
+                // 更新计数器
+                dropCount++;
+                document.getElementById('dropCount').textContent = dropCount;
+
+                // 记录日志
+                const itemType = currentDragElement.textContent.trim();
+                const zoneId = dropZone.getAttribute('data-zone');
+                operationLog.push({
+                    time: new Date().toLocaleTimeString(),
+                    action: '成功放置',
+                    item: itemType,
+                    to: `区域 ${zoneId}`
+                });                // 添加成功动画
+                newElement.style.animation = 'bounce 0.6s ease';
+                setTimeout(() => {
+                    newElement.style.animation = '';
+                }, 600);
+
+                // 为新元素添加自由拖拽功能
+                addFreeDragToElement(newElement);
+            }
+        }
+
+        // 鼠标按下事件（自由拖拽）
+        function handleMouseDown(e) {
+            if (!freeDragMode) return;
+            
+            const element = e.target.closest('.draggable-item');
+            if (!element || !element.classList.contains('free-drag')) return;
+
+            e.preventDefault();
+            isDragging = true;
+            currentDragElement = element;
+
+            const rect = element.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+
+            element.style.cursor = 'grabbing';
+            element.style.zIndex = '1001';
+
+            dragCount++;
+            document.getElementById('dragCount').textContent = dragCount;
+
+            operationLog.push({
+                time: new Date().toLocaleTimeString(),
+                action: '开始自由拖拽',
+                item: element.textContent.trim(),
+                from: '自由位置'
+            });
+        }
+
+        // 鼠标移动事件（自由拖拽）
+        function handleMouseMove(e) {
+            if (!isDragging || !currentDragElement || !freeDragMode) return;
+
+            e.preventDefault();
+
+            const phoneContent = document.querySelector('.phone-content');
+            const phoneRect = phoneContent.getBoundingClientRect();
+
+            let newX = e.clientX - phoneRect.left - dragOffset.x;
+            let newY = e.clientY - phoneRect.top - dragOffset.y;
+
+            // 限制在手机屏幕范围内
+            const elementWidth = currentDragElement.offsetWidth;
+            const elementHeight = currentDragElement.offsetHeight;
+            const maxX = phoneContent.offsetWidth - elementWidth;
+            const maxY = phoneContent.offsetHeight - elementHeight;
+
+            newX = Math.max(0, Math.min(newX, maxX));
+            newY = Math.max(0, Math.min(newY, maxY));
+
+            currentDragElement.style.left = newX + 'px';
+            currentDragElement.style.top = newY + 'px';
+        }
+
+        // 鼠标释放事件（自由拖拽）
+        function handleMouseUp(e) {
+            if (!isDragging || !currentDragElement) return;
+
+            isDragging = false;
+            currentDragElement.style.cursor = 'move';
+            currentDragElement.style.zIndex = '999';
+
+            operationLog.push({
+                time: new Date().toLocaleTimeString(),
+                action: '完成自由拖拽',
+                item: currentDragElement.textContent.trim(),
+                to: `位置 (${currentDragElement.style.left}, ${currentDragElement.style.top})`
+            });
+
+            currentDragElement = null;
+        }
+
+        // 为元素添加自由拖拽功能
+        function addFreeDragToElement(element) {
+            if (freeDragMode) {
+                element.classList.add('free-drag');
+                element.draggable = false;
+                element.addEventListener('mousedown', handleMouseDown);
+            }
+        }
+
+        // 切换自由拖拽模式
+        function toggleFreeDrag() {
+            freeDragMode = !freeDragMode;
+            const status = document.getElementById('freeDragStatus');
+            status.textContent = freeDragMode ? '开启' : '关闭';
+            
+            const phoneContent = document.querySelector('.phone-content');
+            const existingItems = phoneContent.querySelectorAll('.draggable-item');
+            
+            existingItems.forEach(item => {
+                if (freeDragMode) {
+                    item.classList.add('free-drag');
+                    item.draggable = false;
+                    
+                    // 设置初始位置（如果还没有位置）
+                    if (!item.style.left && !item.style.top) {
+                        const rect = item.getBoundingClientRect();
+                        const phoneRect = phoneContent.getBoundingClientRect();
+                        item.style.left = (rect.left - phoneRect.left) + 'px';
+                        item.style.top = (rect.top - phoneRect.top) + 'px';
+                    }
+                } else {
+                    item.classList.remove('free-drag');
+                    item.draggable = true;
+                    item.style.position = '';
+                    item.style.left = '';
+                    item.style.top = '';
+                    item.style.zIndex = '';
+                }
+            });
+
+            // 更新拖拽区域的显示状态
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                if (freeDragMode) {
+                    zone.style.borderStyle = 'dotted';
+                    zone.style.opacity = '0.3';
+                } else {
+                    zone.style.borderStyle = 'dashed';
+                    zone.style.opacity = '1';
+                }
+            });
+
+            operationLog.push({
+                time: new Date().toLocaleTimeString(),
+                action: freeDragMode ? '开启自由拖拽模式' : '关闭自由拖拽模式',
+                item: '系统',
+                to: freeDragMode ? '自由模式' : '区域模式'
+            });
+
+            alert(`自由拖拽模式已${freeDragMode ? '开启' : '关闭'}！\n${freeDragMode ? '现在可以将元素拖拽到任意位置' : '现在元素只能拖拽到指定区域'}`);
+        }        // 清空所有区域
+        function clearAllZones() {
+            const phoneContent = document.querySelector('.phone-content');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            const freeItems = phoneContent.querySelectorAll('.draggable-item.free-drag');
+            
+            // 清空固定区域
+            dropZones.forEach(zone => {
+                const item = zone.querySelector('.draggable-item:not(.free-drag)');
+                if (item) {
+                    item.remove();
+                }
+                const zoneText = zone.querySelector('.zone-text');
+                if (zoneText) {
+                    zoneText.style.display = 'block';
+                }
+                zone.classList.remove('has-item');
+            });
+
+            // 清空自由拖拽元素
+            freeItems.forEach(item => {
+                item.remove();
+            });
+
+            operationLog.push({
+                time: new Date().toLocaleTimeString(),
+                action: '清空所有区域',
+                item: '全部',
+                to: '无'
+            });
+
+            alert('所有区域已清空！');
+        }        // 重置元素
+        function resetItems() {
+            dragCount = 0;
+            dropCount = 0;
+            operationLog = [];
+            freeDragMode = false;
+            isDragging = false;
+            currentDragElement = null;
+            
+            document.getElementById('dragCount').textContent = '0';
+            document.getElementById('dropCount').textContent = '0';
+            document.getElementById('freeDragStatus').textContent = '关闭';
+            
+            clearAllZones();
+            
+            // 重置拖拽区域样式
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.style.borderStyle = 'dashed';
+                zone.style.opacity = '1';
+            });
+            
+            operationLog.push({
+                time: new Date().toLocaleTimeString(),
+                action: '重置所有数据',
+                item: '系统',
+                to: '初始状态'
+            });
+
+            alert('数据已重置！');
+        }
+
+        // 显示操作日志
+        function showLog() {
+            if (operationLog.length === 0) {
+                alert('暂无操作记录');
+                return;
+            }
+
+            let logText = '操作日志：\n\n';
+            operationLog.forEach((log, index) => {
+                logText += `${index + 1}. [${log.time}] ${log.action} - ${log.item}`;
+                if (log.from) logText += ` (从: ${log.from})`;
+                if (log.to) logText += ` (到: ${log.to})`;
+                logText += '\n';
+            });
+
+            alert(logText);
+        }        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey) {
+                switch(e.key) {
+                    case 'c':
+                        e.preventDefault();
+                        clearAllZones();
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        resetItems();
+                        break;
+                    case 'l':
+                        e.preventDefault();
+                        showLog();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        toggleFreeDrag();
+                        break;
+                }
+            }
+            
+            // ESC键退出拖拽
+            if (e.key === 'Escape' && isDragging) {
+                isDragging = false;
+                if (currentDragElement) {
+                    currentDragElement.style.cursor = 'move';
+                    currentDragElement.style.zIndex = '999';
+                    currentDragElement = null;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

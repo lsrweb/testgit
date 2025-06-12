@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GIF解析器示例 - 完善版</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .upload-area {
+      border: 2px dashed #ddd;
+      border-radius: 10px;
+      padding: 40px;
+      text-align: center;
+      background-color: #fafafa;
+      transition: all 0.3s ease;
+    }
+
+    .upload-area:hover {
+      border-color: #007bff;
+      background-color: #f0f8ff;
+    }
+
+    .upload-area.dragover {
+      border-color: #007bff;
+      background-color: #e3f2fd;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .upload-btn {
+      background: #007bff;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px;
+    }
+
+    .upload-btn:hover {
+      background: #0056b3;
+    }
+
+    .url-input {
+      width: 300px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin: 10px;
+    }
+
+    .controls {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .control-btn {
+      background: #28a745;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0 5px;
+      font-size: 14px;
+    }
+
+    .control-btn:hover {
+      background: #218838;
+    }
+
+    .control-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .info-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .info-section {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      border-left: 4px solid #007bff;
+    }
+
+    .info-section h3 {
+      margin: 0 0 10px 0;
+      color: #007bff;
+    }
+
+    .canvas-container {
+      text-align: center;
+      margin: 20px 0;
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .canvas-container canvas {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .frame-info {
+      margin: 10px 0;
+      padding: 10px;
+      background: #e9ecef;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    .error {
+      color: #dc3545;
+      background: #f8d7da;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    .warning {
+      color: #856404;
+      background: #fff3cd;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    .success {
+      color: #155724;
+      background: #d4edda;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    .progress {
+      width: 100%;
+      height: 20px;
+      background: #e9ecef;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #007bff, #0056b3);
+      transition: width 0.3s ease;
+    }
+
+    .export-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 5px;
+    }
+
+    .export-btn {
+      background: #6f42c1;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .export-btn:hover {
+      background: #5a32a3;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab.active {
+      border-bottom-color: #007bff;
+      color: #007bff;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🎨 GIF解析器示例 - 完善版</h1>
+
+    <div class="upload-area" id="uploadArea">
+      <p>拖拽GIF文件到这里，或者点击选择文件</p>
+      <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+        选择文件
+      </button>
+      <input type="file" id="fileInput" class="file-input" accept=".gif">
+
+      <p>或者从URL加载：</p>
+      <input type="url" id="urlInput" class="url-input" placeholder="输入GIF文件URL">
+      <button class="upload-btn" onclick="loadFromUrl()">从URL加载</button>
+    </div>
+
+    <div id="loadingIndicator" style="display: none;">
+      <div class="progress">
+        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+      </div>
+      <p style="text-align: center;">正在解析GIF文件...</p>
+    </div>
+
+    <div id="content" style="display: none;">        <div class="tabs">
+          <button class="tab active" onclick="showTab('viewer')">查看器</button>
+          <button class="tab" onclick="showTab('info')">详细信息</button>
+          <button class="tab" onclick="showTab('frames')">帧管理</button>
+          <button class="tab" onclick="showTab('tools')">工具</button>
+          <button class="tab" onclick="showTab('compress')">压缩</button>
+        </div>
+
+      <!-- 查看器标签页 -->
+      <div id="viewer" class="tab-content active">
+        <div class="canvas-container">
+          <canvas id="gifCanvas"></canvas>
+          <div class="frame-info" id="frameInfo"></div>
+        </div>
+
+        <div class="controls">
+          <button class="control-btn" onclick="renderer.reset()">重置</button>
+          <button class="control-btn" onclick="renderer.prevFrame()">上一帧</button>
+          <button class="control-btn" id="playBtn" onclick="togglePlay()">播放</button>
+          <button class="control-btn" onclick="renderer.nextFrame()">下一帧</button>
+          <button class="control-btn" onclick="exportCurrentFrame()">导出当前帧</button>
+        </div>
+      </div>
+
+      <!-- 详细信息标签页 -->
+      <div id="info" class="tab-content">
+        <div class="info-panel">
+          <div class="info-section">
+            <h3>基本信息</h3>
+            <div id="basicInfo"></div>
+          </div>
+          <div class="info-section">
+            <h3>技术参数</h3>
+            <div id="technicalInfo"></div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>解析日志</h3>
+          <div id="parseLog"></div>
+        </div>
+      </div>
+
+      <!-- 帧管理标签页 -->
+      <div id="frames" class="tab-content">
+        <div id="framesList"></div>
+      </div>      <!-- 工具标签页 -->
+      <div id="tools" class="tab-content">
+        <div class="export-section">
+          <h3>导出工具</h3>
+          <button class="export-btn" onclick="exportAllFrames()">导出所有帧</button>
+          <button class="export-btn" onclick="createSpriteSheet()">创建精灵图</button>
+          <button class="export-btn" onclick="exportPalette()">导出调色板</button>
+          <button class="export-btn" onclick="downloadAnalysis()">下载分析报告</button>
+        </div>
+
+        <div class="export-section">
+          <h3>分析工具</h3>
+          <div id="analysisResult"></div>
+        </div>
+      </div>
+
+      <!-- 压缩标签页 -->
+      <div id="compress" class="tab-content">
+        <div class="export-section">
+          <h3>GIF压缩设置</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div>
+              <label style="display: block; margin-bottom: 5px;"><strong>目标尺寸:</strong></label>
+              <input type="number" id="compressWidth" placeholder="宽度 (留空保持原始)" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              <input type="number" id="compressHeight" placeholder="高度 (留空保持原始)" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px;">
+            </div>            <div>
+              <label style="display: block; margin-bottom: 5px;"><strong>压缩质量:</strong> <span id="qualityValue">15</span></label>
+              <input type="range" id="compressQuality" min="1" max="30" value="15" style="width: 100%;" oninput="updateQualityValue(this.value)">
+              <small style="color: #666;">数字越小质量越高，建议15-20获得最佳压缩比</small>
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 5px;"><strong>最大帧数:</strong></label>
+              <input type="number" id="maxFrames" placeholder="留空保持所有帧" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              <small style="color: #666;">减少帧数可显著减小文件大小</small>
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 15px;"><strong>高级选项:</strong></label>
+              <label style="display: block; margin-bottom: 8px;">
+                <input type="checkbox" id="enableDither" style="margin-right: 8px;">
+                启用抖动 (提高渐变质量)
+              </label>
+              <label style="display: block; margin-bottom: 8px;">
+                <input type="checkbox" id="debugMode" style="margin-right: 8px;">
+                调试模式
+              </label>
+            </div>
+          </div>
+          
+          <div id="compressionPreview" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px; display: none;">
+            <h4 style="margin: 0 0 10px 0;">压缩预览</h4>
+            <div id="previewContent"></div>
+          </div>
+          
+          <div style="text-align: center;">
+            <button class="export-btn" onclick="previewCompression()" style="background: #17a2b8;">预览压缩效果</button>
+            <button class="export-btn" onclick="startCompression()" style="background: #dc3545;">开始压缩</button>
+          </div>
+        </div>
+
+        <div id="compressionProgress" style="display: none; margin-top: 20px;">
+          <h4>压缩进度</h4>
+          <div class="progress">
+            <div class="progress-bar" id="compressionProgressBar" style="width: 0%"></div>
+          </div>
+          <div id="compressionStatus" style="text-align: center; margin-top: 10px;">准备中...</div>
+        </div>
+
+        <div id="compressionResult" style="display: none; margin-top: 20px;">
+          <h4>压缩结果</h4>
+          <div id="compressionResultContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="GifParser.js"></script>
+  <script src="imageUtils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
+  <script>    let gifParser = null;
+    let renderer = null;
+    let gifData = null;
+    let imageUtils = null;
+    let originalFileSize = 0; // 保存原始文件大小// 初始化
+    document.addEventListener('DOMContentLoaded', function () {
+      setupFileUpload();
+      setupDragAndDrop();
+      
+      // 初始化图像工具
+      if (typeof ImageUtils !== 'undefined') {
+        imageUtils = new ImageUtils();
+        console.log('图像压缩工具初始化成功');
+      } else {
+        console.warn('ImageUtils未加载，压缩功能不可用');
+      }
+    });
+
+    // 设置文件上传
+    function setupFileUpload() {
+      const fileInput = document.getElementById('fileInput');
+      fileInput.addEventListener('change', handleFileSelect);
+    }
+
+    // 设置拖拽上传
+    function setupDragAndDrop() {
+      const uploadArea = document.getElementById('uploadArea');
+
+      uploadArea.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+
+      uploadArea.addEventListener('dragleave', function (e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+      });
+
+      uploadArea.addEventListener('drop', function (e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type === 'image/gif') {
+          handleFile(files[0]);
+        } else {
+          showMessage('请选择GIF文件', 'error');
+        }
+      });
+    }
+
+    // 处理文件选择
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file && file.type === 'image/gif') {
+        handleFile(file);
+      } else {
+        showMessage('请选择GIF文件', 'error');
+      }
+    }    // 处理文件
+    async function handleFile(file) {
+      showLoading(true);
+      
+      // 保存原始文件大小
+      originalFileSize = file.size;
+
+      try {
+        gifParser = await GifParser.fromFile(file, {
+          strict: false,
+          validateFrames: true,
+          maxFrames: 500
+        });
+
+        gifData = gifParser.parse();
+        await initializeViewer();
+        showMessage(`成功加载GIF文件: ${file.name} (${(originalFileSize/1024).toFixed(1)}KB)`, 'success');
+
+      } catch (error) {
+        showMessage(`加载失败: ${error.message}`, 'error');
+        console.error(error);
+      }
+
+      showLoading(false);
+    }    // 从URL加载
+    async function loadFromUrl() {
+      const url = document.getElementById('urlInput').value.trim();
+      if (!url) {
+        showMessage('请输入URL', 'error');
+        return;
+      }
+
+      showLoading(true);
+
+      try {
+        // 先获取文件大小
+        const response = await fetch(url, { method: 'HEAD' });
+        originalFileSize = parseInt(response.headers.get('content-length')) || 0;
+        
+        gifParser = await GifParser.fromUrl(url, {
+          strict: false,
+          validateFrames: true,
+          maxFrames: 500
+        });
+
+        gifData = gifParser.parse();
+        await initializeViewer();
+        showMessage(`成功从URL加载GIF文件 (${(originalFileSize/1024).toFixed(1)}KB)`, 'success');
+
+      } catch (error) {
+        showMessage(`加载失败: ${error.message}`, 'error');
+        console.error(error);
+      }
+
+      showLoading(false);
+    }
+
+    // 初始化查看器
+    async function initializeViewer() {
+      const canvas = document.getElementById('gifCanvas');
+
+      // 创建渲染器
+      renderer = new GifRenderer(gifData, {
+        autoPlay: false,
+        loop: true,
+        scale: 1,
+        backgroundColor: 'transparent'
+      });
+
+      // 替换画布
+      canvas.parentNode.replaceChild(renderer.canvas, canvas);
+      renderer.canvas.id = 'gifCanvas';
+
+      // 渲染第一帧
+      if (gifData.frames.length > 0) {
+        renderer.renderFrame(0);
+        updateFrameInfo();
+      }
+
+      // 显示内容
+      document.getElementById('content').style.display = 'block';
+
+      // 更新信息面板
+      updateInfoPanels();
+      updateFramesList();
+      updateAnalysis();
+    }
+
+    // 切换播放状态
+    function togglePlay() {
+      const playBtn = document.getElementById('playBtn');
+
+      if (renderer.isPlaying) {
+        renderer.pause();
+        playBtn.textContent = '播放';
+      } else {
+        renderer.play((frameIndex, frame) => {
+          updateFrameInfo();
+        });
+        playBtn.textContent = '暂停';
+      }
+    }
+
+    // 更新帧信息
+    function updateFrameInfo() {
+      const frameInfo = document.getElementById('frameInfo');
+      const state = renderer.getPlaybackState();
+      const frame = renderer.getFrameInfo(state.currentFrame);
+
+      if (frame) {
+        frameInfo.innerHTML = `
+                    帧 ${frame.index + 1} / ${state.totalFrames} | 
+                    尺寸: ${frame.width}x${frame.height} | 
+                    位置: (${frame.left}, ${frame.top}) | 
+                    延迟: ${frame.delayTime * 10}ms |
+                    处理方式: ${getDisposalMethodName(frame.disposalMethod)} |
+                    ${frame.transparentColorFlag ? '有透明' : '无透明'} |
+                    ${frame.isInterlaced ? '交错' : '非交错'}
+                `;
+      }
+    }
+
+    // 获取处理方式名称
+    function getDisposalMethodName(method) {
+      const names = ['不指定', '不处理', '恢复背景', '恢复上一帧'];
+      return names[method] || '未知';
+    }
+
+    // 更新信息面板
+    function updateInfoPanels() {
+      const basicInfo = document.getElementById('basicInfo');
+      const technicalInfo = document.getElementById('technicalInfo');
+      const parseLog = document.getElementById('parseLog');
+
+      const info = gifParser.getInfo();
+
+      basicInfo.innerHTML = `
+                <p><strong>版本:</strong> ${gifData.header.version}</p>
+                <p><strong>尺寸:</strong> ${info.width} x ${info.height}</p>
+                <p><strong>帧数:</strong> ${info.frameCount}</p>
+                <p><strong>循环次数:</strong> ${info.loopCount === 0 ? '无限循环' : info.loopCount}</p>
+                <p><strong>总时长:</strong> ${(info.totalDuration / 1000).toFixed(2)}秒</p>
+            `;
+
+      technicalInfo.innerHTML = `
+                <p><strong>全局颜色表:</strong> ${info.hasGlobalColorTable ? '是' : '否'}</p>
+                <p><strong>颜色表大小:</strong> ${info.globalColorTableSize}</p>
+                <p><strong>背景色索引:</strong> ${gifData.logicalScreen.backgroundColorIndex}</p>
+                <p><strong>颜色分辨率:</strong> ${gifData.logicalScreen.colorResolution}</p>
+                <p><strong>像素宽高比:</strong> ${gifData.logicalScreen.pixelAspectRatio}</p>
+            `;
+
+      // 显示解析日志
+      let logHtml = '';
+      if (gifData.errors.length > 0) {
+        logHtml += '<h4 style="color: #dc3545;">错误:</h4>';
+        gifData.errors.forEach(error => {
+          logHtml += `<div class="error">${error}</div>`;
+        });
+      }
+
+      if (gifData.warnings.length > 0) {
+        logHtml += '<h4 style="color: #856404;">警告:</h4>';
+        gifData.warnings.forEach(warning => {
+          logHtml += `<div class="warning">${warning}</div>`;
+        });
+      }
+
+      if (gifData.errors.length === 0 && gifData.warnings.length === 0) {
+        logHtml = '<div class="success">解析完成，没有错误或警告</div>';
+      }
+
+      parseLog.innerHTML = logHtml;
+    }
+
+    // 更新帧列表
+    function updateFramesList() {
+      const framesList = document.getElementById('framesList');
+      let html = '<h3>帧列表</h3>';
+
+      gifData.frames.forEach((frame, index) => {
+        html += `
+                    <div style="border: 1px solid #ddd; margin: 10px 0; padding: 10px; border-radius: 5px;">
+                        <strong>帧 ${index + 1}</strong>
+                        <button class="control-btn" onclick="renderer.gotoFrame(${index}); updateFrameInfo();" style="float: right;">查看</button>
+                        <br>
+                        尺寸: ${frame.width}x${frame.height} | 
+                        位置: (${frame.left}, ${frame.top}) | 
+                        延迟: ${frame.delayTime * 10}ms<br>
+                        颜色表大小: ${frame.colorTable.length} | 
+                        数据大小: ${frame.imageData.length} bytes
+                    </div>
+                `;
+      });
+
+      framesList.innerHTML = html;
+    }
+
+    // 更新分析结果
+    function updateAnalysis() {
+      const analysisResult = document.getElementById('analysisResult');
+      const analysis = GifUtils.analyzeGif(gifData);
+
+      analysisResult.innerHTML = `
+                <h4>性能分析</h4>
+                <p><strong>总像素数:</strong> ${analysis.totalPixels.toLocaleString()}</p>
+                <p><strong>唯一颜色数:</strong> ${analysis.uniqueColors}</p>
+                <p><strong>平均帧延迟:</strong> ${analysis.averageFrameDelay.toFixed(1)}ms</p>
+                <p><strong>估算FPS:</strong> ${analysis.framesPerSecond.toFixed(1)}</p>
+                <p><strong>估算内存使用:</strong> ${(analysis.memoryUsage / 1024 / 1024).toFixed(2)} MB</p>
+            `;
+    }
+
+    // 导出当前帧
+    function exportCurrentFrame() {
+      try {
+        const dataUrl = renderer.exportFrame(undefined, 'image/png', 0.92);
+        downloadDataUrl(dataUrl, `frame_${renderer.getCurrentFrameIndex() + 1}.png`);
+        showMessage('当前帧导出成功', 'success');
+      } catch (error) {
+        showMessage(`导出失败: ${error.message}`, 'error');
+      }
+    }
+
+    // 导出所有帧
+    function exportAllFrames() {
+      try {
+        const frames = renderer.exportAllFrames('image/png', 0.92);
+        frames.forEach((frame, index) => {
+          setTimeout(() => {
+            downloadDataUrl(frame.dataUrl, `frame_${frame.index + 1}.png`);
+          }, index * 100); // 延迟下载，避免浏览器阻止
+        });
+        showMessage(`成功导出 ${frames.length} 帧`, 'success');
+      } catch (error) {
+        showMessage(`导出失败: ${error.message}`, 'error');
+      }
+    }
+
+    // 创建精灵图
+    function createSpriteSheet() {
+      try {
+        const spriteCanvas = renderer.createSpriteSheet();
+        if (spriteCanvas) {
+          const dataUrl = spriteCanvas.toDataURL('image/png', 0.92);
+          downloadDataUrl(dataUrl, 'sprite_sheet.png');
+          showMessage('精灵图创建成功', 'success');
+        } else {
+          showMessage('无法创建精灵图', 'error');
+        }
+      } catch (error) {
+        showMessage(`创建精灵图失败: ${error.message}`, 'error');
+      }
+    }
+
+    // 导出调色板
+    function exportPalette() {
+      try {
+        if (gifData.globalColorTable.length > 0) {
+          const paletteCanvas = GifUtils.createPaletteImage(gifData.globalColorTable);
+          const dataUrl = paletteCanvas.toDataURL('image/png', 1.0);
+          downloadDataUrl(dataUrl, 'palette.png');
+          showMessage('调色板导出成功', 'success');
+        } else {
+          showMessage('没有全局调色板可导出', 'warning');
+        }
+      } catch (error) {
+        showMessage(`导出调色板失败: ${error.message}`, 'error');
+      }
+    }
+
+    // 下载分析报告
+    function downloadAnalysis() {
+      try {
+        const info = gifParser.getInfo();
+        const analysis = GifUtils.analyzeGif(gifData);
+
+        const report = {
+          basicInfo: {
+            version: gifData.header.version,
+            dimensions: `${info.width}x${info.height}`,
+            frameCount: info.frameCount,
+            loopCount: info.loopCount,
+            totalDuration: info.totalDuration
+          },
+          technicalInfo: {
+            hasGlobalColorTable: info.hasGlobalColorTable,
+            globalColorTableSize: info.globalColorTableSize,
+            backgroundColorIndex: gifData.logicalScreen.backgroundColorIndex,
+            colorResolution: gifData.logicalScreen.colorResolution
+          },
+          analysis: analysis,
+          frames: gifData.frames.map((frame, index) => ({
+            index: index + 1,
+            width: frame.width,
+            height: frame.height,
+            left: frame.left,
+            top: frame.top,
+            delayTime: frame.delayTime,
+            disposalMethod: frame.disposalMethod,
+            transparentColorFlag: frame.transparentColorFlag,
+            isInterlaced: frame.isInterlaced,
+            colorTableSize: frame.colorTable.length,
+            dataSize: frame.imageData.length
+          })),
+          parseLog: {
+            errors: gifData.errors,
+            warnings: gifData.warnings
+          }
+        };
+
+        const json = JSON.stringify(report, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'gif_analysis_report.json';
+        a.click();
+
+        URL.revokeObjectURL(url);
+        showMessage('分析报告下载成功', 'success');
+      } catch (error) {
+        showMessage(`生成报告失败: ${error.message}`, 'error');
+      }
+    }
+
+    // 切换标签页
+    function showTab(tabName) {
+      // 隐藏所有标签页内容
+      const tabContents = document.querySelectorAll('.tab-content');
+      tabContents.forEach(content => content.classList.remove('active'));
+
+      // 移除所有标签的激活状态
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => tab.classList.remove('active'));
+
+      // 显示选中的标签页
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // 显示/隐藏加载指示器
+    function showLoading(show) {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const content = document.getElementById('content');
+
+      if (show) {
+        loadingIndicator.style.display = 'block';
+        content.style.display = 'none';
+        // 模拟进度条
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 30;
+          if (progress > 90) progress = 90;
+          document.getElementById('progressBar').style.width = progress + '%';
+        }, 100);
+        loadingIndicator.dataset.interval = interval;
+      } else {
+        clearInterval(loadingIndicator.dataset.interval);
+        document.getElementById('progressBar').style.width = '100%';
+        setTimeout(() => {
+          loadingIndicator.style.display = 'none';
+        }, 300);
+      }
+    }
+
+    // 显示消息
+    function showMessage(message, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = type;
+      messageDiv.textContent = message;
+      messageDiv.style.position = 'fixed';
+      messageDiv.style.top = '20px';
+      messageDiv.style.right = '20px';
+      messageDiv.style.zIndex = '1000';
+      messageDiv.style.padding = '10px 20px';
+      messageDiv.style.borderRadius = '5px';
+      messageDiv.style.maxWidth = '300px';
+
+      document.body.appendChild(messageDiv);
+
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 3000);
+    }    // 下载数据URL
+    function downloadDataUrl(dataUrl, filename) {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = filename;
+      a.click();
+    }
+
+    // ============ GIF压缩功能 ============
+
+    // 更新质量显示值
+    function updateQualityValue(value) {
+      document.getElementById('qualityValue').textContent = value;
+    }    // 预览压缩效果
+    function previewCompression() {
+      if (!gifData || !imageUtils) {
+        showMessage('请先加载GIF文件和压缩工具', 'error');
+        return;
+      }
+
+      const options = getCompressionOptions();
+      const preview = imageUtils.createCompressionPreview(gifData, options, originalFileSize);
+      
+      const previewDiv = document.getElementById('compressionPreview');
+      const contentDiv = document.getElementById('previewContent');
+      
+      // 显示实际文件大小和估算大小
+      const actualSizeText = originalFileSize > 0 ? 
+        `${formatFileSize(originalFileSize)} (实际)` : 
+        `${formatFileSize(preview.original.estimatedSize)} (估算)`;
+      
+      contentDiv.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+          <div>
+            <h5 style="margin: 0 0 8px 0; color: #333;">原始</h5>
+            <p style="margin: 2px 0;">${preview.original.width}×${preview.original.height}</p>
+            <p style="margin: 2px 0;">${preview.original.frameCount} 帧</p>
+            <p style="margin: 2px 0;">${actualSizeText}</p>
+          </div>
+          <div style="color: #007bff;">
+            <h5 style="margin: 0 0 8px 0;">压缩后</h5>
+            <p style="margin: 2px 0;">${preview.compressed.width}×${preview.compressed.height}</p>
+            <p style="margin: 2px 0;">${preview.compressed.frameCount} 帧</p>
+            <p style="margin: 2px 0;">${formatFileSize(preview.compressed.estimatedSize)} (预估)</p>
+          </div>
+          <div style="color: #28a745;">
+            <h5 style="margin: 0 0 8px 0;">减少</h5>
+            <p style="margin: 2px 0;">尺寸: ${preview.reduction.pixelReduction}</p>
+            <p style="margin: 2px 0;">帧数: ${preview.reduction.frameReduction}</p>
+            <p style="margin: 2px 0;">大小: ${preview.reduction.sizeReduction}</p>
+          </div>
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background: #e9ecef; border-radius: 4px;">
+          <strong>压缩设置:</strong> 质量=${preview.settings.quality}, 方法=${preview.settings.method}, 帧步长=${preview.settings.frameStep}
+        </div>
+      `;
+      
+      previewDiv.style.display = 'block';
+      showMessage('压缩预览生成完成', 'success');
+    }// 获取压缩选项
+    function getCompressionOptions() {
+      const width = parseInt(document.getElementById('compressWidth').value) || null;
+      const height = parseInt(document.getElementById('compressHeight').value) || null;
+      const quality = parseInt(document.getElementById('compressQuality').value) || 15;
+      const maxFrames = parseInt(document.getElementById('maxFrames').value) || null;
+      const dither = document.getElementById('enableDither').checked;
+      const debug = document.getElementById('debugMode').checked;
+
+      return {
+        width,
+        height,
+        quality,
+        maxFrames,
+        dither,
+        debug,
+        workers: 2,
+        repeat: gifData.loopCount || 0,
+        onProgress: updateCompressionProgress,
+        onFrameAdded: updateFrameProgress
+      };
+    }// 开始压缩
+    async function startCompression() {
+      if (!gifData || !imageUtils) {
+        showMessage('请先加载GIF文件和压缩工具', 'error');
+        return;
+      }
+
+      const options = getCompressionOptions();
+      
+      // 显示进度
+      showCompressionProgress(true);
+      updateCompressionStatus('正在分析原始文件...');
+        // 获取原始文件大小信息
+      const originalInfo = gifParser.getInfo();
+      const actualOriginalSize = originalFileSize > 0 ? originalFileSize : (originalInfo.width * originalInfo.height * originalInfo.frameCount * 0.5);
+      
+      console.log('原始GIF信息:', {
+        dimensions: `${originalInfo.width}x${originalInfo.height}`,
+        frameCount: originalInfo.frameCount,
+        actualSize: originalFileSize > 0 ? `${(originalFileSize / 1024).toFixed(1)} KB` : '未知',
+        estimatedSize: `${(actualOriginalSize / 1024).toFixed(1)} KB`
+      });
+      
+      try {
+        const startTime = Date.now();
+        updateCompressionStatus('初始化压缩器...');
+        
+        // 执行压缩
+        const compressedData = await imageUtils.compressGif(gifData, options);
+        
+        const endTime = Date.now();
+        const duration = ((endTime - startTime) / 1000).toFixed(1);
+        
+        // 计算实际压缩比
+        let actualSize = 0;
+        let compressionRatio = 0;
+          if (compressedData instanceof Blob) {
+          actualSize = compressedData.size;
+          compressionRatio = ((actualOriginalSize - actualSize) / actualOriginalSize * 100).toFixed(1);
+        } else {
+          actualSize = new Blob([compressedData]).size;
+          compressionRatio = 'N/A (兜底方案)';
+        }
+        
+        console.log('压缩结果:', {
+          method: imageUtils.gifJsAvailable ? 'gif.js' : '兜底方案',
+          originalActual: `${(actualOriginalSize / 1024).toFixed(1)} KB`,
+          compressed: `${(actualSize / 1024).toFixed(1)} KB`,
+          reduction: `${compressionRatio}%`,
+          duration: `${duration}s`
+        });
+        
+        // 显示结果
+        showCompressionResult(compressedData, duration, options, {
+          originalSize: actualOriginalSize,
+          compressedSize: actualSize,
+          compressionRatio: compressionRatio
+        });
+        
+        if (compressionRatio !== 'N/A (兜底方案)' && parseFloat(compressionRatio) > 0) {
+          showMessage(`GIF压缩完成，减少了 ${compressionRatio}%，耗时 ${duration} 秒`, 'success');
+        } else if (compressionRatio !== 'N/A (兜底方案)') {
+          showMessage(`压缩完成但文件可能变大，请调整压缩参数`, 'warning');
+        } else {
+          showMessage(`使用兜底方案完成处理，耗时 ${duration} 秒`, 'info');
+        }
+        
+      } catch (error) {
+        console.error('压缩失败:', error);
+        showMessage(`压缩失败: ${error.message}`, 'error');
+        updateCompressionStatus(`压缩失败: ${error.message}`);
+      }
+      
+      showCompressionProgress(false);
+    }
+
+    // 更新压缩进度
+    function updateCompressionProgress(progress) {
+      const progressBar = document.getElementById('compressionProgressBar');
+      const percentage = Math.round(progress * 100);
+      progressBar.style.width = percentage + '%';
+      updateCompressionStatus(`压缩进度: ${percentage}%`);
+    }
+
+    // 更新帧添加进度
+    function updateFrameProgress(current, total) {
+      updateCompressionStatus(`添加帧: ${current}/${total}`);
+    }
+
+    // 更新压缩状态
+    function updateCompressionStatus(status) {
+      const statusDiv = document.getElementById('compressionStatus');
+      statusDiv.textContent = status;
+    }
+
+    // 显示/隐藏压缩进度
+    function showCompressionProgress(show) {
+      const progressDiv = document.getElementById('compressionProgress');
+      progressDiv.style.display = show ? 'block' : 'none';
+      
+      if (show) {
+        document.getElementById('compressionProgressBar').style.width = '0%';
+        updateCompressionStatus('准备中...');
+      }
+    }    // 显示压缩结果
+    function showCompressionResult(compressedData, duration, options, sizeInfo = null) {
+      const resultDiv = document.getElementById('compressionResult');
+      const contentDiv = document.getElementById('compressionResultContent');
+      
+      let resultHtml = `
+        <div style="background: #d4edda; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          <h5 style="margin: 0 0 10px 0; color: #155724;">✅ 压缩成功</h5>
+          <p style="margin: 5px 0;">压缩时间: ${duration} 秒</p>
+          <p style="margin: 5px 0;">压缩方法: ${imageUtils.gifJsAvailable ? 'gif.js (高质量)' : '兜底方案'}</p>
+      `;
+        if (compressedData instanceof Blob) {
+        const sizeKB = (compressedData.size / 1024).toFixed(1);
+        resultHtml += `<p style="margin: 5px 0;">压缩后大小: ${sizeKB} KB</p>`;
+        
+        // 显示压缩比信息
+        if (sizeInfo) {
+          const originalKB = (sizeInfo.originalSize / 1024).toFixed(1);
+          resultHtml += `<p style="margin: 5px 0;">原始文件大小: ${originalKB} KB</p>`;
+          if (sizeInfo.compressionRatio !== 'N/A (兜底方案)') {
+            const ratio = parseFloat(sizeInfo.compressionRatio);
+            const color = ratio > 0 ? '#28a745' : '#dc3545';
+            resultHtml += `<p style="margin: 5px 0; color: ${color};">压缩比: ${sizeInfo.compressionRatio}%</p>`;
+            
+            if (ratio <= 0) {
+              resultHtml += `<div style="background: #fff3cd; color: #856404; padding: 8px; border-radius: 4px; margin: 8px 0;">
+                ⚠️ 文件可能变大了，建议调整以下参数：<br>
+                • 提高压缩质量值 (15-25)<br>
+                • 减少目标尺寸<br>
+                • 限制最大帧数<br>
+                • 启用抖动
+              </div>`;
+            }
+          }
+        }
+      } else {
+        const sizeKB = (new Blob([compressedData]).size / 1024).toFixed(1);
+        resultHtml += `<p style="margin: 5px 0;">数据大小: ${sizeKB} KB (JSON格式)</p>`;
+      }
+      
+      resultHtml += `</div>`;
+      
+      // 添加压缩参数信息
+      resultHtml += `
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          <h5 style="margin: 0 0 10px 0; color: #495057;">🔧 压缩参数</h5>
+          <p style="margin: 2px 0;">质量等级: ${options.quality} (1-30，越小质量越高)</p>
+          <p style="margin: 2px 0;">目标尺寸: ${options.width || '原始'}×${options.height || '原始'}</p>
+          <p style="margin: 2px 0;">最大帧数: ${options.maxFrames || '不限制'}</p>
+          <p style="margin: 2px 0;">抖动: ${options.dither ? '启用' : '禁用'}</p>
+          <p style="margin: 2px 0;">工作线程: ${options.workers}</p>
+        </div>
+      `;
+      
+      // 添加下载按钮
+      resultHtml += `
+        <div style="text-align: center;">
+          <button class="export-btn" onclick="downloadCompressedGif()" style="background: #28a745; margin-right: 10px;">
+            💾 下载压缩文件
+          </button>
+          <button class="export-btn" onclick="resetCompression()" style="background: #6c757d;">
+            🔄 重新压缩
+          </button>
+        </div>
+      `;
+      
+      contentDiv.innerHTML = resultHtml;
+      resultDiv.style.display = 'block';
+      
+      // 保存压缩结果供下载使用
+      window.currentCompressedData = compressedData;
+    }
+
+    // 下载压缩后的GIF
+    function downloadCompressedGif() {
+      if (!window.currentCompressedData) {
+        showMessage('没有可下载的压缩文件', 'error');
+        return;
+      }
+      
+      try {
+        imageUtils.downloadCompressedGif(window.currentCompressedData, 'compressed.gif');
+      } catch (error) {
+        showMessage(`下载失败: ${error.message}`, 'error');
+      }
+    }
+
+    // 重置压缩界面
+    function resetCompression() {
+      document.getElementById('compressionResult').style.display = 'none';
+      document.getElementById('compressionPreview').style.display = 'none';
+      window.currentCompressedData = null;
+      showMessage('压缩界面已重置', 'success');
+    }
+
+    // 格式化文件大小
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+  </script>
+</body>
+
+</html>

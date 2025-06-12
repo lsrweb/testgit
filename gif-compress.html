@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gif.js Demo - GIF Creation</title>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+       .container { margin-bottom: 20px; }
+        label { margin-right: 10px; }
+        img { border: 1px solid #ccc; max-width: 300px; margin-top: 10px; }
+        #status { margin-top: 10px; font-style: italic; }
+       .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <h1>GIF Creation with gif.js</h1>
+
+    <div class="container">
+        <p>This page demonstrates creating a GIF from two sample images. You can adjust the 'quality' setting to influence the output file size. A higher quality value (e.g., 30) results in a smaller file but lower visual quality, while a lower value (e.g., 1) results in a larger file but better visual quality. The default is 10.</p>
+        <label for="quality">Quality (1-30, lower is better quality, higher is smaller file):</label>
+        <input type="number" id="quality" value="10" min="1" max="30">
+    </div>
+
+    <div class="container">
+        <button id="createGifButton">Create GIF</button>
+    </div>
+
+    <div id="status">Ready.</div>
+
+    <div class="container">
+        <h2>Source Images (Hidden):</h2>
+        <img id="image1" src="./iQP1jI9B_639c15c336bd7.gif" alt="Frame 1" class="hidden">
+        <img id="image2" src="./iQP1jI9B_639c15c336bd7.gif" alt="Frame 2" class="hidden">
+    </div>
+
+    <div class="container">
+        <h2>Generated GIF:</h2>
+        <img id="generatedGif" alt="Generated GIF will appear here">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const createGifButton = document.getElementById('createGifButton');
+            const qualityInput = document.getElementById('quality');
+            const statusDiv = document.getElementById('status');
+            const generatedGifImg = document.getElementById('generatedGif');
+            const image1 = document.getElementById('image1');
+            const image2 = document.getElementById('image2');
+
+            let gifInstance = null;
+            let workerBlobUrl = null;
+
+            // Fetch the worker script and create a Blob URL for it [1]
+            fetch('https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js')
+               .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response for gif.worker.js was not OK");
+                    }
+                    return response.blob();
+                })
+               .then(workerBlob => {
+                    workerBlobUrl = URL.createObjectURL(workerBlob);
+                    statusDiv.textContent = 'Worker script loaded. Ready to create GIF.';
+                    createGifButton.disabled = false;
+                })
+               .catch(error => {
+                    console.error('Failed to load gif.worker.js:', error);
+                    statusDiv.textContent = 'Error: Could not load worker script. GIF creation disabled.';
+                    createGifButton.disabled = true;
+                });
+
+            createGifButton.disabled = true; // Disable button until worker is loaded
+
+            createGifButton.addEventListener('click', () => {
+                if (!workerBlobUrl) {
+                    statusDiv.textContent = 'Worker script not loaded yet. Please wait.';
+                    return;
+                }
+
+                // Ensure images are loaded before adding them as frames
+                // For simplicity, this example assumes images are loaded or will load quickly.
+                // In a robust application, you'd wait for image onload events.
+                if (!image1.complete ||!image2.complete) {
+                     // A simple check, for real-world use, attach onload listeners to images
+                    alert("Source images are not fully loaded yet. Please wait or ensure they are accessible.");
+                    return;
+                }
+
+
+                const quality = parseInt(qualityInput.value, 10);
+
+                statusDiv.textContent = 'Initializing GIF encoder...';
+
+                // Instantiate GIF object [2, 3]
+                gifInstance = new GIF({
+                    workers: 2, // Number of web workers to use [3]
+                    quality: quality, // Pixel sample interval, lower is better quality, higher is smaller file [3]
+                    workerScript: workerBlobUrl, // Path to the worker script [1]
+                    repeat: 0, // 0 for infinite loop, -1 for no repeat [3]
+                    background: '#ffffff', // Background color for transparent parts of frames [3]
+                    // width: image1.naturalWidth, // Optional: set explicit width [3]
+                    // height: image1.naturalHeight, // Optional: set explicit height [3]
+                });
+
+                // Add frames [2]
+                // Ensure imageElement1 and imageElement2 are loaded `<img>` elements
+                gifInstance.addFrame(image1, { delay: 500 }); // delay in ms
+                gifInstance.addFrame(image2, { delay: 500 });
+
+                gifInstance.on('progress', (p) => {
+                    statusDiv.textContent = `Rendering GIF: ${Math.round(p * 100)}%`;
+                });
+
+                gifInstance.on('finished', (blob) => {
+                    const gifUrl = URL.createObjectURL(blob);
+                    generatedGifImg.src = gifUrl;
+                    statusDiv.textContent = `GIF generated! Size: ${(blob.size / 1024).toFixed(2)} KB. Quality setting: ${quality}.`;
+                    // To download the gif, you could create an <a> element and click it:
+                    // const link = document.createElement('a');
+                    // link.href = gifUrl;
+                    // link.download = 'generated.gif';
+                    // document.body.appendChild(link);
+                    // link.click();
+                    // document.body.removeChild(link);
+                });
+
+                statusDiv.textContent = 'Starting GIF rendering...';
+                gifInstance.render();
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Vue 2.6.11 示例页面</title>
+	<link rel="stylesheet" href="element-ui.css">
+	<style>
+		/* 滚动条样式 */
+		::-webkit-scrollbar {
+			width: 6px;
+			height: 6px;
+		}
+		.preview-device::after{
+			content: '';
+			display: block;
+			position: absolute;
+			top: 0;
+			left: -8px;
+			width: 2px;
+			height: 100%;
+			background-color: #EBEEF5;
+		}
+		.el-row-bottom-line {
+			border-bottom: 1px solid #EBEEF5;
+			padding-bottom: 10px;
+		}
+		::-webkit-scrollbar-track {
+			background: #f1f1f1;
+			border-radius: 3px;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background: #c1c1c1;
+			border-radius: 3px;
+		}
+
+		::-webkit-scrollbar-thumb:hover {
+			background: #909090;
+		}
+
+		/* 平滑滚动 */
+		.message-list,
+		.preview-content {
+			scroll-behavior: smooth;
+		}
+
+		.message-list-content__wrapper {
+			flex: 1;
+			background-color: #f2f3f5;
+			padding: 12px;
+			border-radius: 6px;
+			padding-bottom: 4px;
+			padding-top: 4px;
+		}
+
+		.preview-wrapper {
+			height: 100%;
+			min-height: 500px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.preview-device {
+			width: 90%;
+			height: 0;
+			padding-bottom: 180%;
+			/* 调整宽高比，适配手机图片的比例 */
+			position: relative;
+			background: url('mock-phone.png') no-repeat center center;
+			background-size: contain;
+			margin: 0 auto;
+		}
+
+		.preview-header {
+			position: absolute;
+			top: 8%;
+			left: 0;
+			width: 100%;
+			text-align: center;
+			color: #909399;
+		}
+
+		.preview-content {
+			position: absolute;
+			top: 17px;
+			bottom: 17px;
+			left: 7%;
+			right: 7%;
+			overflow-y: auto;
+			display: flex;
+			flex-direction: column;
+			background-color: #f6f6f6;
+			padding: 16px;
+			border-radius: 40px;
+		}
+
+		.message-list {
+			max-height: 400px;
+			overflow-y: auto;
+			border: 1px solid #EBEEF5;
+			padding: 0;
+			border-radius: 6px;
+		}
+
+		.message-item {
+			border-radius: 4px;
+			display: flex;
+			padding: 8px;
+			/* user-select: none; */
+		}
+
+		.message-item:nth-child(n + 2) {
+			padding-top: 0;
+		}
+
+		.message-item:hover {
+			border-color: #505458;
+		}
+
+		.message-actions {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.empty-message {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			color: #909399;
+		}
+
+		.empty-message i {
+			font-size: 48px;
+			margin-bottom: 16px;
+			color: #DCDFE6;
+		}
+
+		/* 聊天框样式 */
+		.chat-message {
+			display: flex;
+			margin-bottom: 16px;
+			align-items: flex-start;
+		}
+
+		.chat-avatar {
+			width: 40px;
+			height: 40px;
+			border-radius: 4px;
+			background-color: #67C23A;
+			color: white;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+			margin-right: 8px;
+			flex-shrink: 0;
+		}
+
+		.chat-bubble {
+			background: white;
+			padding: 12px;
+			border-radius: 8px;
+			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+			position: relative;
+			flex: 1;
+			min-width: 0;
+		}
+
+		.chat-bubble:before {
+			content: '';
+			position: absolute;
+			left: -8px;
+			top: 14px;
+			width: 0;
+			height: 0;
+			border-top: 8px solid transparent;
+			border-right: 8px solid white;
+			border-bottom: 8px solid transparent;
+		}
+
+		.chat-bubble-content {
+			word-break: break-word;
+			white-space: pre-wrap;
+		}
+
+		.chat-bubble-image img {
+			max-width: 100%;
+			border-radius: 4px;
+		}
+
+		.chat-time {
+			font-size: 12px;
+			color: #909399;
+			margin-top: 4px;
+			text-align: right;
+		}
+
+		.ghost {
+			opacity: 0.5;
+			background: #f0f9eb;
+			/* Element UI success light color */
+			border: 1px dashed #67c23a;
+		}
+
+		.message-item-drag-handle {
+			cursor: grab !important;
+			font-size: 18px;
+			color: #909399;
+			margin-right: 6px;
+		}
+
+		.message-item-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 6px;
+			justify-content: space-between;
+			font-size: 12px;
+		}
+
+		.message-item-header>span:nth-of-type(1) {
+			/* Drag handle */
+		}
+
+		.message-item-header>span:nth-of-type(2) {
+			/* "消息 X" text */
+			margin-left: 8px;
+		}
+
+		/* Transition group for preview list */
+		.list-preview-move {
+			transition: transform 0.5s ease;
+		}
+
+		.list-preview-enter-active,
+		.list-preview-leave-active {
+			transition: all 0.4s ease;
+		}
+
+		.list-preview-enter,
+		.list-preview-leave-to {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+
+		.list-preview-leave-active {
+			position: absolute;
+			/* Important for smooth leave animations */
+			width: calc(100% - 30px);
+			/* Adjust width considering padding of preview-content */
+		}
+
+		/* Collapse transition for message editor content */
+		.collapse-enter-active {
+			transition: max-height 0.3s ease-out, opacity 0.3s ease-out 0.05s;
+			overflow: hidden;
+		}
+
+		.collapse-leave-active {
+			transition: max-height 0.3s ease-in, opacity 0.2s ease-in;
+			overflow: hidden;
+		}
+
+		.collapse-enter,
+		.collapse-leave-to {
+			max-height: 0;
+			opacity: 0;
+		}
+
+		.collapse-enter-to,
+		.collapse-leave {
+			max-height: 1000px;
+			opacity: 1;
+		}
+
+		.message-editor-content {
+			overflow: hidden;
+		}
+
+		.message-list {
+			scrollbar-gutter: stable;
+		}
+
+		.preview-content {
+			scrollbar-gutter: stable;
+		}
+
+		.footer-right{
+			text-align: right;
+			margin-top: 16px;
+		}
+		.npadding-col {
+			padding: 0 !important;
+		}
+
+	</style>
+</head>
+
+<body>
+	
+
+	<div id="app">
+		<el-select v-model="form.execType" placeholder="请选择执行方式" style="width: 200px; margin-bottom: 16px;">
+			<el-option v-for="option in undefined.filter(item => item.data == 1)" :key="option" :label="option" :value="option"></el-option>
+		</el-select>
+	</div>
+
+	<script src="vue-prod.js"></script>
+	<script src="Sortable.js"></script>
+	<script src="draggable.js"></script>
+	<script src="element-ui.js"></script>
+	<script>
+		
+
+		new Vue({
+			el: '#app',
+			data: {
+				form:{}
+			},
+			computed: {
+				
+			},
+			mounted() {
+				
+			},
+			methods: {
+			
+			}
+		});
+	</script>
+</body>
+
+</html>

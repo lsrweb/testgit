@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Element UI 多选表格示例</title>
+  <link rel="stylesheet" href="element-ui.css">
+  <style>
+    body {
+      padding: 20px;
+    }
+
+    .table-container {
+      margin-top: 20px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <el-card class="table-container">
+      <div slot="header">
+        <span>多选表格示例</span>
+      </div>
+      <el-table ref="multipleTable" :data="currentPageData" tooltip-effect="dark" style="width: 100%" @selection-change="handleSelectionChange" row-key="id">
+        <el-table-column type="selection" width="55" reserve-selection>
+        </el-table-column>
+        <el-table-column prop="date" label="日期" width="180">
+        </el-table-column>
+        <el-table-column prop="name" label="姓名" width="180">
+        </el-table-column>
+        <el-table-column prop="address" label="地址" show-overflow-tooltip>
+        </el-table-column>
+      </el-table>
+      <div style="margin-top: 20px; text-align: right;">
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 50]" :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper" :total="totalItems">
+        </el-pagination>
+      </div>
+      <div style="margin-top: 20px">
+        <el-button @click="toggleSelection()">取消选择</el-button>
+        <el-button @click="logSelection">打印选中项</el-button>
+      </div>
+    </el-card>
+  </div>
+
+  <script src="vue.js"></script>
+  <script src="element-ui.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          allTableData: [],
+          multipleSelection: [],
+          currentPage: 1,
+          pageSize: 10,
+          pendingSelectionId: null,
+          totalItems: 50 // 死数据 total
+        }
+      },
+      computed: {
+        // currentPageData 不再直接切片，而是每次分页动态生成
+        currentPageData() {
+          // 这里不再用 allTableData 切片，而是直接返回 allTableData
+          return this.allTableData;
+        }
+      },
+      mounted() {
+        // 模拟接口返回选中id为14的数据，但当前页没有该数据
+        this.multipleSelection = [{ id: 14 }];
+        this.generateMockData(this.currentPage, this.pageSize);
+
+      },
+      methods: {
+        generateMockData(page, pageSize) {
+          const mockData = [];
+          const names = ['张三', '李四', '王五', '赵六', '孙七', '周八', '吴九', '郑十'];
+          const addresses = [
+            '上海市普陀区金沙江路 1518 弄',
+            '北京市朝阳区霄云路 8 号',
+            '深圳市南山区深南大道 1001 号',
+            '广州市天河区珠江新城华夏路 1 号',
+            '杭州市西湖区文三路 391 号',
+            '成都市武侯区人民南路四段1号',
+            '武汉市洪山区珞喻路1037号',
+            '西安市雁塔区长安中路229号'
+          ];
+          const start = (page - 1) * pageSize + 1;
+          const end = Math.min(start + pageSize - 1, this.totalItems);
+          for (let i = start; i <= end; i++) {
+            mockData.push({
+              id: i,
+              date: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toLocaleDateString(),
+              name: names[Math.floor(Math.random() * names.length)],
+              address: addresses[Math.floor(Math.random() * addresses.length)] + ` ${Math.floor(Math.random() * 1000)} 号`
+            });
+          }
+          this.allTableData = mockData;
+
+          // 默认选中数据的id是14
+          this.$nextTick(() => {
+            this.checkAndApplyPendingSelection();
+          });
+          this.allTableData.forEach(item => {
+            if (item.id === 14) {
+              this.$refs.multipleTable.toggleRowSelection(item, true);
+            }
+          });
+        },
+        handleSelectionChange(val) {
+          this.multipleSelection = val;
+        },
+        toggleSelection(rows) {
+          if (rows) {
+            rows.forEach(row => {
+              this.$refs.multipleTable.toggleRowSelection(row);
+            });
+          } else {
+            this.$refs.multipleTable.clearSelection();
+          }
+        },
+        logSelection() {
+          if (this.multipleSelection.length > 0) {
+            console.log("当前选中的行:", JSON.parse(JSON.stringify(this.multipleSelection)));
+            this.$message({
+              message: '选中的数据已打印到控制台。',
+              type: 'success'
+            });
+          } else {
+            this.$message({
+              message: '请先选择数据行。',
+              type: 'warning'
+            });
+          }
+        },
+        handleSizeChange(val) {
+          this.pageSize = val;
+          this.currentPage = 1;
+          this.generateMockData(this.currentPage, this.pageSize);
+        },
+        handleCurrentChange(val) {
+          this.currentPage = val;
+          this.generateMockData(this.currentPage, this.pageSize);
+        },
+        checkAndApplyPendingSelection() { // 此方法可以保留，以防将来有类似需求，但当前场景下不会被有效触发
+          if (this.pendingSelectionId !== null) {
+            this.$nextTick(() => { // 确保DOM更新完毕，currentPageData已经是最新的
+              const itemToSelect = this.allTableData.find(item => item.id === this.pendingSelectionId);
+              if (itemToSelect) {
+                // 检查这条数据是否在当前渲染的页面数据中
+                const isOnCurrentPage = this.currentPageData.some(data => data.id === this.pendingSelectionId);
+                if (isOnCurrentPage && this.$refs.multipleTable) {
+                  this.$refs.multipleTable.toggleRowSelection(itemToSelect, true);
+                  this.pendingSelectionId = null; // 清除待选标记
+                }
+              }
+            });
+          }
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

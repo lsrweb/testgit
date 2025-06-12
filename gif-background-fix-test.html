@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF背景色修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        
+        .fix-info {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .fix-info h3 {
+            margin: 0 0 10px 0;
+            color: #2e7d32;
+        }
+        
+        .test-section {
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        
+        .background-options {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .bg-option {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .bg-option:hover {
+            background: #f0f0f0;
+        }
+        
+        .bg-option.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .canvas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .canvas-item {
+            text-align: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+        }
+        
+        .canvas-item h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .canvas-wrapper {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            display: inline-block;
+            position: relative;
+        }
+        
+        .canvas-wrapper.checkered {
+            background-image: 
+                linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        
+        .canvas-wrapper canvas {
+            border: 1px solid #999;
+            display: block;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        input[type="file"] {
+            margin: 10px 0;
+            width: 100%;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .before-after {
+            text-align: center;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .before-after.before {
+            border-color: #ff9800;
+            background: #fff3e0;
+        }
+        
+        .before-after.after {
+            border-color: #4caf50;
+            background: #e8f5e8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 GIF背景色修复测试</h1>
+        
+        <div class="fix-info">
+            <h3>✅ 修复内容</h3>
+            <ul>
+                <li><strong>自动背景检测</strong> - 优先使用GIF文件中定义的背景色</li>
+                <li><strong>智能颜色处理</strong> - 避免无效颜色索引导致的黑色背景</li>
+                <li><strong>背景色选项</strong> - 支持透明、白色、黑色或自定义背景</li>
+                <li><strong>正确的透明度处理</strong> - 透明像素不再显示为黑色</li>
+                <li><strong>Disposal Method修复</strong> - 正确处理帧间背景恢复</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h3>选择GIF文件测试</h3>
+            <input type="file" id="fileInput" accept=".gif">
+            
+            <div class="info">
+                <strong>提示：</strong>请选择一个有背景色问题的GIF文件进行测试。修复后，背景应该显示正确的颜色而不是黑色。
+            </div>
+            
+            <div id="backgroundOptions" class="background-options" style="display: none;">
+                <div class="bg-option active" data-bg="auto">自动检测</div>
+                <div class="bg-option" data-bg="transparent">透明背景</div>
+                <div class="bg-option" data-bg="white">白色背景</div>
+                <div class="bg-option" data-bg="black">黑色背景</div>
+                <div class="bg-option" data-bg="#f0f0f0">灰色背景</div>
+            </div>
+            
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script src="GifParser.js"></script>
+    <script>
+        let currentGifData = null;
+        let renderers = [];
+        
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        
+        // 背景选项切换
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('bg-option')) {
+                // 更新选中状态
+                document.querySelectorAll('.bg-option').forEach(opt => opt.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // 重新渲染
+                const selectedBg = e.target.dataset.bg;
+                updateRenderers(selectedBg);
+            }
+        });
+        
+        async function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file || file.type !== 'image/gif') {
+                showMessage('请选择GIF文件', 'error');
+                return;
+            }
+            
+            await testGifFile(file);
+        }
+        
+        async function testGifFile(file) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>正在解析GIF文件...</p>';
+            
+            try {
+                // 解析GIF
+                const parser = await GifParser.fromFile(file, {
+                    strict: false,
+                    validateFrames: true,
+                    maxFrames: 50
+                });
+                
+                currentGifData = parser.parse();
+                
+                // 显示背景选项
+                document.getElementById('backgroundOptions').style.display = 'flex';
+                
+                // 创建测试界面
+                createTestInterface();
+                
+                showMessage(`成功加载GIF: ${file.name}`, 'success');
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ 解析失败</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                console.error('GIF解析错误:', error);
+            }
+        }
+        
+        function createTestInterface() {
+            const resultsDiv = document.getElementById('results');
+            
+            let html = `
+                <div class="info">
+                    <h4>GIF信息</h4>
+                    <p><strong>尺寸:</strong> ${currentGifData.logicalScreen.width} x ${currentGifData.logicalScreen.height}</p>
+                    <p><strong>帧数:</strong> ${currentGifData.frames.length}</p>
+                    <p><strong>背景色索引:</strong> ${currentGifData.logicalScreen.backgroundColorIndex}</p>
+                    <p><strong>全局颜色表:</strong> ${currentGifData.logicalScreen.hasGlobalColorTable ? '有' : '无'} 
+                       ${currentGifData.globalColorTable.length > 0 ? `(${currentGifData.globalColorTable.length}色)` : ''}</p>
+                </div>
+                
+                <div class="comparison">
+                    <div class="before-after before">
+                        <h4>🔴 修复前效果</h4>
+                        <p>可能出现黑色背景</p>
+                        <div class="canvas-wrapper checkered" id="beforeWrapper">
+                            <!-- 这里会放置修复前的canvas -->
+                        </div>
+                    </div>
+                    
+                    <div class="before-after after">
+                        <h4>✅ 修复后效果</h4>
+                        <p>正确的背景色处理</p>
+                        <div class="canvas-wrapper checkered" id="afterWrapper">
+                            <!-- 这里会放置修复后的canvas -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button onclick="renderFirstFrame()">显示第1帧</button>
+                    <button onclick="renderRandomFrame()">随机帧测试</button>
+                    <button onclick="playAnimation()">播放动画</button>
+                    <button onclick="stopAnimation()">停止播放</button>
+                    <button onclick="exportFrames()">导出帧测试</button>
+                </div>
+                
+                <div id="frameInfo"></div>
+            `;
+            
+            resultsDiv.innerHTML = html;
+            
+            // 创建渲染器
+            createRenderers();
+        }
+        
+        function createRenderers() {
+            // 清理旧的渲染器
+            renderers.forEach(renderer => renderer.destroy && renderer.destroy());
+            renderers = [];
+            
+            const selectedBg = document.querySelector('.bg-option.active').dataset.bg;
+            
+            // 创建"修复前"的渲染器（使用可能有问题的设置）
+            const beforeRenderer = new GifRenderer(currentGifData, {
+                backgroundColor: 'black', // 模拟可能出现的黑色背景问题
+                scale: 1
+            });
+            
+            // 创建"修复后"的渲染器
+            const afterRenderer = new GifRenderer(currentGifData, {
+                backgroundColor: selectedBg,
+                scale: 1
+            });
+            
+            // 添加到页面
+            const beforeWrapper = document.getElementById('beforeWrapper');
+            const afterWrapper = document.getElementById('afterWrapper');
+            
+            beforeWrapper.innerHTML = '';
+            afterWrapper.innerHTML = '';
+            
+            beforeWrapper.appendChild(beforeRenderer.canvas);
+            afterWrapper.appendChild(afterRenderer.canvas);
+            
+            renderers = [beforeRenderer, afterRenderer];
+            
+            // 渲染第一帧
+            if (currentGifData.frames.length > 0) {
+                renderFirstFrame();
+            }
+        }
+        
+        function updateRenderers(backgroundColor) {
+            if (renderers.length > 1) {
+                // 重新创建修复后的渲染器
+                const afterRenderer = new GifRenderer(currentGifData, {
+                    backgroundColor: backgroundColor,
+                    scale: 1
+                });
+                
+                const afterWrapper = document.getElementById('afterWrapper');
+                afterWrapper.innerHTML = '';
+                afterWrapper.appendChild(afterRenderer.canvas);
+                
+                renderers[1] = afterRenderer;
+                
+                // 重新渲染当前帧
+                const currentFrame = renderers[0].getCurrentFrameIndex();
+                renderers.forEach(renderer => {
+                    renderer.renderFrame(currentFrame);
+                });
+                
+                updateFrameInfo(currentFrame);
+            }
+        }
+        
+        function renderFirstFrame() {
+            if (renderers.length === 0) return;
+            
+            renderers.forEach(renderer => {
+                renderer.renderFrame(0);
+            });
+            
+            updateFrameInfo(0);
+        }
+        
+        function renderRandomFrame() {
+            if (renderers.length === 0 || currentGifData.frames.length === 0) return;
+            
+            const randomIndex = Math.floor(Math.random() * currentGifData.frames.length);
+            
+            renderers.forEach(renderer => {
+                renderer.renderFrame(randomIndex);
+            });
+            
+            updateFrameInfo(randomIndex);
+        }
+        
+        function playAnimation() {
+            if (renderers.length === 0) return;
+            
+            renderers.forEach(renderer => {
+                renderer.play((frameIndex, frame) => {
+                    updateFrameInfo(frameIndex);
+                });
+            });
+        }
+        
+        function stopAnimation() {
+            if (renderers.length === 0) return;
+            
+            renderers.forEach(renderer => {
+                renderer.stop();
+            });
+        }
+        
+        function exportFrames() {
+            if (renderers.length === 0) return;
+            
+            try {
+                // 导出修复后渲染器的前几帧
+                const afterRenderer = renderers[1];
+                const maxFrames = Math.min(3, currentGifData.frames.length);
+                
+                for (let i = 0; i < maxFrames; i++) {
+                    afterRenderer.renderFrame(i);
+                    const dataUrl = afterRenderer.exportFrame(i, 'image/png', 0.9);
+                    
+                    const a = document.createElement('a');
+                    a.href = dataUrl;
+                    a.download = `fixed_frame_${i + 1}.png`;
+                    a.click();
+                }
+                
+                showMessage(`成功导出 ${maxFrames} 帧`, 'success');
+            } catch (error) {
+                showMessage(`导出失败: ${error.message}`, 'error');
+            }
+        }
+        
+        function updateFrameInfo(frameIndex) {
+            const frameInfoDiv = document.getElementById('frameInfo');
+            if (!frameInfoDiv || !currentGifData.frames[frameIndex]) return;
+            
+            const frame = currentGifData.frames[frameIndex];
+            const bgColorIndex = currentGifData.logicalScreen.backgroundColorIndex;
+            let bgColorInfo = '无效';
+            
+            if (currentGifData.globalColorTable && 
+                bgColorIndex < currentGifData.globalColorTable.length) {
+                const bgColor = currentGifData.globalColorTable[bgColorIndex];
+                bgColorInfo = `RGB(${bgColor.r}, ${bgColor.g}, ${bgColor.b})`;
+            }
+            
+            frameInfoDiv.innerHTML = `
+                <div class="info">
+                    <h4>当前帧信息 (帧 ${frameIndex + 1})</h4>
+                    <p><strong>尺寸:</strong> ${frame.width}x${frame.height}</p>
+                    <p><strong>位置:</strong> (${frame.left}, ${frame.top})</p>
+                    <p><strong>延迟:</strong> ${frame.delayTime * 10}ms</p>
+                    <p><strong>透明:</strong> ${frame.transparentColorFlag ? '是' : '否'}</p>
+                    <p><strong>透明色索引:</strong> ${frame.transparentColorIndex}</p>
+                    <p><strong>GIF背景色:</strong> ${bgColorInfo}</p>
+                    <p><strong>颜色表大小:</strong> ${frame.colorTable.length}</p>
+                </div>
+            `;
+        }
+        
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message;
+            messageDiv.style.position = 'fixed';
+            messageDiv.style.top = '20px';
+            messageDiv.style.right = '20px';
+            messageDiv.style.zIndex = '1000';
+            messageDiv.style.padding = '10px 15px';
+            messageDiv.style.borderRadius = '5px';
+            messageDiv.style.color = 'white';
+            messageDiv.style.fontSize = '14px';
+            messageDiv.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+            
+            if (type === 'success') {
+                messageDiv.style.background = '#4caf50';
+            } else if (type === 'error') {
+                messageDiv.style.background = '#f44336';
+            } else {
+                messageDiv.style.background = '#2196f3';
+            }
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
