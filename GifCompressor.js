@@ -357,7 +357,7 @@ class GifCompressor {
     }
     
     // 对于大文件（>5MB），可以使用较低质量
-    return Math.max(quality, 8);
+    return Math.max(quality, 10);
   }
 
   /**
