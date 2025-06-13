@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF压缩工具测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: #f8f9fa;
+            border-left: 5px solid #007bff;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .upload-area {
+            border: 3px dashed #007bff;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: #f0f8ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #0056b3;
+            background: #e6f3ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #e8f5e8;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin: 5px;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-container {
+            margin: 20px 0;
+            background: #e9ecef;
+            border-radius: 25px;
+            overflow: hidden;
+            height: 30px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 25px;
+            position: relative;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .config-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .config-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .config-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .config-item input,
+        .config-item select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .config-item input:focus,
+        .config-item select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .result-panel {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            text-align: center;
+        }
+
+        .result-item h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .result-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .log-panel {
+            background: #2d3436;
+            color: #00b894;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #dc3545;
+            margin: 15px 0;
+        }
+
+        .success {
+            color: #155724;
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+        }
+
+        .batch-section {
+            margin-top: 30px;
+        }
+
+        .batch-results {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .batch-item {
+            background: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .middleware-panel {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 GIF压缩工具测试</h1>
+            <p>智能压缩，完美体验</p>
+        </div>
+
+        <div class="content">
+            <!-- 基本功能测试 -->
+            <div class="section">
+                <h2>📤 基本压缩功能</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <h3>拖拽GIF文件到这里或点击选择</h3>
+                    <p>支持单个或多个GIF文件</p>
+                    <input type="file" id="fileInput" class="file-input" accept=".gif" multiple>
+                </div>
+
+                <div class="config-panel">
+                    <div class="config-item">
+                        <label for="quality">压缩质量 (1-20)</label>
+                        <input type="range" id="quality" min="1" max="20" value="5">
+                        <span id="qualityValue">5</span>
+                    </div>
+                    <div class="config-item">
+                        <label for="scale">缩放比例 (0.1-1.0)</label>
+                        <input type="range" id="scale" min="0.1" max="1.0" step="0.1" value="0.7">
+                        <span id="scaleValue">0.7</span>
+                    </div>
+                    <div class="config-item">
+                        <label for="forceCompress">强制压缩</label>
+                        <input type="checkbox" id="forceCompress">
+                    </div>
+                    <div class="config-item">
+                        <label for="maxFileSize">最大文件大小 (MB)</label>
+                        <input type="number" id="maxFileSize" value="6" min="1" max="50">
+                    </div>
+                </div>
+
+                <div>
+                    <button class="btn" id="compressBtn" disabled>开始压缩</button>
+                    <button class="btn" id="clearBtn">清除结果</button>
+                    <button class="btn" id="getInfoBtn" disabled>获取GIF信息</button>
+                </div>
+
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar" id="progressBar"></div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div class="result-panel" id="resultPanel">
+                    <h3>压缩结果</h3>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <h4>原始图片</h4>
+                            <img id="originalImage" class="result-image" alt="原始图片">
+                        </div>
+                        <div class="result-item">
+                            <h4>压缩后图片</h4>
+                            <img id="compressedImage" class="result-image" alt="压缩后图片">
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="originalSize">-</div>
+                            <div class="stat-label">原始大小</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="compressedSize">-</div>
+                            <div class="stat-label">压缩后大小</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="compressionRatio">-</div>
+                            <div class="stat-label">压缩率</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="dimensions">-</div>
+                            <div class="stat-label">尺寸变化</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button class="btn" id="downloadBtn">下载压缩后文件</button>
+                        <button class="btn" id="getBase64Btn">获取Base64</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 批量处理测试 -->
+            <div class="section batch-section">
+                <h2>📦 批量处理功能</h2>
+                <button class="btn" id="batchTestBtn" disabled>批量压缩所有文件</button>
+                
+                <div class="batch-results" id="batchResults">
+                    <h3>批量处理结果</h3>
+                    <div id="batchList"></div>
+                </div>
+            </div>
+
+            <!-- 中间件测试 -->
+            <div class="section">
+                <h2>🔧 中间件功能测试</h2>
+                <div class="middleware-panel">
+                    <h4>添加自定义中间件</h4>
+                    <button class="btn" id="addMiddlewareBtn">添加文件大小检查中间件</button>
+                    <button class="btn" id="addFilterMiddlewareBtn">添加尺寸过滤中间件</button>
+                    <button class="btn" id="clearMiddlewareBtn">清除所有中间件</button>
+                </div>
+            </div>
+
+            <!-- API测试 -->
+            <div class="section">
+                <h2>⚙️ API功能测试</h2>
+                <div>
+                    <button class="btn" id="configTestBtn">配置测试</button>
+                    <button class="btn" id="conversionTestBtn">格式转换测试</button>
+                    <button class="btn" id="errorTestBtn">错误处理测试</button>
+                </div>
+            </div>
+
+            <!-- 日志面板 -->
+            <div class="log-panel" id="logPanel">
+                <div>控制台日志将在这里显示...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 依赖库 -->
+    <script src="./gif/gifuct-js.min.js"></script>
+    <script src="./gif/gif.js"></script>
+    <script src="./GifCompressor.js"></script>
+
+    <script>
+        // 初始化
+        const compressor = new GifCompressor();
+        let selectedFiles = [];
+        let currentResult = null;
+
+        // DOM元素
+        const elements = {
+            uploadArea: document.getElementById('uploadArea'),
+            fileInput: document.getElementById('fileInput'),
+            compressBtn: document.getElementById('compressBtn'),
+            clearBtn: document.getElementById('clearBtn'),
+            getInfoBtn: document.getElementById('getInfoBtn'),
+            progressContainer: document.getElementById('progressContainer'),
+            progressBar: document.getElementById('progressBar'),
+            progressText: document.getElementById('progressText'),
+            resultPanel: document.getElementById('resultPanel'),
+            logPanel: document.getElementById('logPanel'),
+            qualitySlider: document.getElementById('quality'),
+            qualityValue: document.getElementById('qualityValue'),
+            scaleSlider: document.getElementById('scale'),
+            scaleValue: document.getElementById('scaleValue'),
+            forceCompress: document.getElementById('forceCompress'),
+            maxFileSize: document.getElementById('maxFileSize'),
+            batchTestBtn: document.getElementById('batchTestBtn'),
+            batchResults: document.getElementById('batchResults'),
+            batchList: document.getElementById('batchList')
+        };
+
+        // 日志函数
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = elements.logPanel;
+            const colorMap = {
+                info: '#00b894',
+                error: '#e74c3c',
+                success: '#00cec9',
+                warning: '#fdcb6e'
+            };
+            
+            logElement.innerHTML += `<div style="color: ${colorMap[type]}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[GifCompressor] ${message}`);
+        }
+
+        // 设置进度回调
+        compressor.setProgressCallback((progress) => {
+            elements.progressBar.style.width = progress + '%';
+            elements.progressText.textContent = Math.round(progress) + '%';
+        });
+
+        // 文件上传处理
+        elements.uploadArea.addEventListener('click', () => {
+            elements.fileInput.click();
+        });
+
+        elements.fileInput.addEventListener('change', handleFileSelect);
+
+        // 拖拽上传
+        elements.uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            elements.uploadArea.classList.add('dragover');
+        });
+
+        elements.uploadArea.addEventListener('dragleave', () => {
+            elements.uploadArea.classList.remove('dragover');
+        });
+
+        elements.uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            elements.uploadArea.classList.remove('dragover');
+            handleFileSelect({ target: { files: e.dataTransfer.files } });
+        });
+
+        function handleFileSelect(e) {
+            selectedFiles = Array.from(e.target.files).filter(file => file.type === 'image/gif');
+            
+            if (selectedFiles.length === 0) {
+                showError('请选择GIF文件');
+                return;
+            }
+
+            log(`选择了 ${selectedFiles.length} 个GIF文件`);
+            elements.compressBtn.disabled = false;
+            elements.getInfoBtn.disabled = false;
+            elements.batchTestBtn.disabled = selectedFiles.length <= 1;
+
+            // 显示第一个文件的预览
+            if (selectedFiles[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('originalImage').src = e.target.result;
+                };
+                reader.readAsDataURL(selectedFiles[0]);
+            }
+        }
+
+        // 滑块值更新
+        elements.qualitySlider.addEventListener('input', (e) => {
+            elements.qualityValue.textContent = e.target.value;
+        });
+
+        elements.scaleSlider.addEventListener('input', (e) => {
+            elements.scaleValue.textContent = e.target.value;
+        });
+
+        // 压缩按钮
+        elements.compressBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            const options = {
+                quality: parseInt(elements.qualitySlider.value),
+                scale: parseFloat(elements.scaleSlider.value),
+                forceCompress: elements.forceCompress.checked
+            };
+
+            // 更新配置
+            compressor.updateConfig({
+                maxFileSize: parseInt(elements.maxFileSize.value) * 1024 * 1024,
+                forceCompress: elements.forceCompress.checked
+            });
+
+            try {
+                elements.progressContainer.style.display = 'block';
+                elements.compressBtn.disabled = true;
+
+                log(`开始压缩 "${selectedFiles[0].name}"...`);
+                log(`压缩参数: 质量=${options.quality}, 缩放=${options.scale}, 强制=${options.forceCompress}`);
+
+                const result = await compressor.compressGif(selectedFiles[0], options);
+                currentResult = result;
+
+                showResult(result);
+                log(`压缩完成! ${result.reason}`, 'success');
+
+            } catch (error) {
+                showError(`压缩失败: ${error.message}`);
+                log(`压缩错误: ${error.message}`, 'error');
+            } finally {
+                elements.progressContainer.style.display = 'none';
+                elements.compressBtn.disabled = false;
+            }
+        });
+
+        // 获取GIF信息
+        document.getElementById('getInfoBtn').addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            try {
+                log('获取GIF信息...');
+                const info = await compressor.getGifInfo(selectedFiles[0]);
+                
+                log(`GIF信息: ${info.width}×${info.height}, ${info.frameCount}帧, ${(info.fileSize/1024/1024).toFixed(2)}MB`, 'success');
+                log(`时长: ${info.duration}ms, FPS: ${info.fps}`);
+
+                showInfo(`
+                    <strong>文件信息:</strong><br>
+                    尺寸: ${info.width} × ${info.height}px<br>
+                    帧数: ${info.frameCount} 帧<br>
+                    文件大小: ${(info.fileSize/1024/1024).toFixed(2)} MB<br>
+                    时长: ${(info.duration/1000).toFixed(2)} 秒<br>
+                    帧率: ${info.fps} FPS
+                `);
+            } catch (error) {
+                showError(`获取信息失败: ${error.message}`);
+            }
+        });
+
+        // 批量处理
+        elements.batchTestBtn.addEventListener('click', async () => {
+            if (selectedFiles.length <= 1) return;
+
+            const options = {
+                quality: parseInt(elements.qualitySlider.value),
+                scale: parseFloat(elements.scaleSlider.value),
+                forceCompress: elements.forceCompress.checked
+            };
+
+            try {
+                elements.batchTestBtn.disabled = true;
+                log(`开始批量压缩 ${selectedFiles.length} 个文件...`);
+
+                const results = await compressor.batchCompress(selectedFiles, options);
+                
+                showBatchResults(results);
+                log(`批量压缩完成，成功: ${results.filter(r => r.success).length}，失败: ${results.filter(r => !r.success).length}`, 'success');
+
+            } catch (error) {
+                showError(`批量压缩失败: ${error.message}`);
+            } finally {
+                elements.batchTestBtn.disabled = false;
+            }
+        });
+
+        // 清除结果
+        elements.clearBtn.addEventListener('click', () => {
+            elements.resultPanel.style.display = 'none';
+            elements.batchResults.style.display = 'none';
+            currentResult = null;
+            log('结果已清除');
+        });
+
+        // 下载按钮
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            if (currentResult) {
+                compressor.downloadBlob(currentResult.blob, 'compressed.gif');
+                log('开始下载压缩文件');
+            }
+        });
+
+        // Base64按钮
+        document.getElementById('getBase64Btn').addEventListener('click', () => {
+            if (currentResult) {
+                navigator.clipboard.writeText(currentResult.base64).then(() => {
+                    log('Base64已复制到剪贴板', 'success');
+                });
+            }
+        });
+
+        // 中间件测试
+        document.getElementById('addMiddlewareBtn').addEventListener('click', () => {
+            compressor.addMiddleware(async (file, info) => {
+                log(`中间件检查: 文件大小 ${(info.fileSize/1024/1024).toFixed(2)}MB`);
+                if (info.fileSize > 10 * 1024 * 1024) {
+                    log('中间件阻止: 文件过大', 'warning');
+                    return { shouldProcess: false };
+                }
+                return { shouldProcess: true };
+            });
+            log('添加了文件大小检查中间件');
+        });
+
+        document.getElementById('addFilterMiddlewareBtn').addEventListener('click', () => {
+            compressor.addMiddleware(async (file, info) => {
+                log(`中间件检查: 尺寸 ${info.width}×${info.height}`);
+                if (info.width < 100 || info.height < 100) {
+                    log('中间件阻止: 图片太小', 'warning');
+                    return { shouldProcess: false };
+                }
+                return { shouldProcess: true };
+            });
+            log('添加了尺寸过滤中间件');
+        });
+
+        document.getElementById('clearMiddlewareBtn').addEventListener('click', () => {
+            compressor.clearMiddlewares();
+            log('所有中间件已清除');
+        });
+
+        // API测试
+        document.getElementById('configTestBtn').addEventListener('click', () => {
+            const config = compressor.getConfig();
+            log(`当前配置: ${JSON.stringify(config, null, 2)}`);
+            
+            compressor.updateConfig({ maxFileSize: 8 * 1024 * 1024 });
+            log('配置已更新');
+        });
+
+        document.getElementById('conversionTestBtn').addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            try {
+                const base64 = await compressor.fileToBase64(selectedFiles[0]);
+                log('File → Base64 转换成功');
+                
+                const blob = compressor.base64ToBlob(base64);
+                log('Base64 → Blob 转换成功');
+                
+                const file = compressor.blobToFile(blob, 'test.gif');
+                log('Blob → File 转换成功');
+                
+                log('格式转换测试完成', 'success');
+            } catch (error) {
+                log(`转换测试失败: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('errorTestBtn').addEventListener('click', async () => {
+            try {
+                // 测试无效文件
+                const invalidFile = new File(['invalid'], 'test.gif', { type: 'image/gif' });
+                await compressor.compressGif(invalidFile);
+            } catch (error) {
+                log(`错误处理测试: ${error.message}`, 'warning');
+            }
+
+            try {
+                // 测试并发压缩
+                if (selectedFiles.length > 0) {
+                    const promise1 = compressor.compressGif(selectedFiles[0]);
+                    const promise2 = compressor.compressGif(selectedFiles[0]);
+                    await Promise.all([promise1, promise2]);
+                }
+            } catch (error) {
+                log(`并发测试: ${error.message}`, 'warning');
+            }
+        });
+
+        // 显示结果
+        function showResult(result) {
+            elements.resultPanel.style.display = 'block';
+            
+            document.getElementById('compressedImage').src = result.base64;
+            document.getElementById('originalSize').textContent = formatSize(result.originalSize);
+            document.getElementById('compressedSize').textContent = formatSize(result.compressedSize);
+            document.getElementById('compressionRatio').textContent = result.compressionRatio + '%';
+            
+            if (result.originalDimensions && result.newDimensions) {
+                document.getElementById('dimensions').textContent = `${result.originalDimensions} → ${result.newDimensions}`;
+            }
+        }
+
+        function showBatchResults(results) {
+            elements.batchResults.style.display = 'block';
+            elements.batchList.innerHTML = '';
+            
+            results.forEach((result, index) => {
+                const item = document.createElement('div');
+                item.className = 'batch-item';
+                
+                if (result.success) {
+                    item.innerHTML = `
+                        <div>
+                            <strong>${result.filename}</strong><br>
+                            <small>压缩率: ${result.result.compressionRatio}% | 
+                            ${formatSize(result.result.originalSize)} → ${formatSize(result.result.compressedSize)}</small>
+                        </div>
+                        <button class="btn" onclick="downloadBatchResult(${index})">下载</button>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        <div>
+                            <strong>${result.filename}</strong><br>
+                            <small style="color: #dc3545">失败: ${result.error}</small>
+                        </div>
+                    `;
+                }
+                
+                elements.batchList.appendChild(item);
+            });
+        }
+
+        function downloadBatchResult(index) {
+            // 这里需要存储批量结果以便下载
+            log(`下载批量结果 ${index}`);
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            elements.resultPanel.style.display = 'block';
+            elements.resultPanel.innerHTML = '';
+            elements.resultPanel.appendChild(errorDiv);
+        }
+
+        function showInfo(html) {
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'success';
+            infoDiv.innerHTML = html;
+            elements.resultPanel.style.display = 'block';
+            elements.resultPanel.innerHTML = '';
+            elements.resultPanel.appendChild(infoDiv);
+        }
+
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 初始化日志
+        log('GIF压缩工具已初始化', 'success');
+        log('请选择GIF文件开始测试');
+    </script>
+</body>
+</html>
