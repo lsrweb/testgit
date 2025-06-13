@@ -1,146 +1,223 @@
 <!DOCTYPE html>
 <html lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <!-- Use style -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/vxe-pc-ui@3.6.21/lib/style.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/vxe-table@3.15.39/lib/style.min.css"
+    />
+    <!-- Use vue -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <!-- Use vxe -->
+    <script src="https://cdn.jsdelivr.net/npm/xe-utils@3.7.5/dist/xe-utils.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vxe-pc-ui@3.6.21/lib/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vxe-table@3.15.39/lib/index.umd.min.js"></script>
+  </head>
 
-  <!-- Use style -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vxe-pc-ui@3.6.21/lib/style.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vxe-table@3.15.39/lib/style.min.css">
-  <!-- Use vue -->
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
-  <!-- Use vxe -->
-  <script src="https://cdn.jsdelivr.net/npm/xe-utils@3.7.5/dist/xe-utils.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vxe-pc-ui@3.6.21/lib/index.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vxe-table@3.15.39/lib/index.umd.min.js"></script>
-</head>
-<body>
-  <div id="app">
-    <div class="container">
-      <h2>普通表格 (Table):</h2>
-      <vxe-table
-        border
-        show-footer
-        show-overflow
-        :data="tableData"
-        :footer-data="footerData">
-        <vxe-column field="seq" type="seq" title="Seq" width="60"></vxe-column>
-        <vxe-column field="name" title="Name">
-          <template #default="{ row }">
-            <span style="color: red;">{{ row.name }}</span>
+  <body>
+    <div id="app">
+      <div class="container">
+        <h2>普通表格 (Table):</h2>
+        <vxe-table
+          border
+          show-footer
+          show-overflow
+          :data="tableData"
+          :footer-data="footerData"
+        >
+          <vxe-column
+            field="seq"
+            type="seq"
+            title="Seq"
+            width="60"
+          ></vxe-column>
+          <vxe-column field="name" title="Name">
+            <template #default="{ row }">
+              <span style="color: red">{{ row.name }}</span>
+            </template>
+          </vxe-column>
+          <vxe-column field="role" title="Role"></vxe-column>
+          <vxe-colgroup title="Group1">
+            <vxe-column field="sex" title="Sex"></vxe-column>
+            <vxe-column field="address" title="Address"></vxe-column>
+          </vxe-colgroup>
+        </vxe-table>
+        <h2>Grid with Pagination:</h2>
+        <vxe-grid v-bind="gridOptions" @page-change="handlePageChange">
+          <template #name-default="{ row, column }">
+            <span style="color: red">{{ row[column.field] }}</span>
           </template>
-        </vxe-column>
-        <vxe-column field="role" title="Role"></vxe-column>
-        <vxe-colgroup title="Group1">
-          <vxe-column field="sex" title="Sex"></vxe-column>
-          <vxe-column field="address" title="Address"></vxe-column>
-        </vxe-colgroup>
-      </vxe-table>      <h2>Grid with Pagination:</h2>
-      <vxe-grid 
-        v-bind="gridOptions"
-        @page-change="handlePageChange">
-        <template #name-default="{ row }">
-          <span style="color: red;">{{ row.name }}</span>
-        </template>
-      </vxe-grid>
+        </vxe-grid>
+      </div>
     </div>
-  </div>
-  <script>
-    (function () {
-      var App = {        data() {
-          return {
-            // table
-            tableData: [
-              { id: '10001', name: 'Test1', role: 'Develop', sex: 'Man', num: '28', address: 'test abc' },
-              { id: '10002', name: 'Test2', role: 'Test', sex: 'Women', num: '22', address: 'Guangzhou' },
-              { id: '10003', name: 'Test3', role: 'PM', sex: 'Man', num: '32', address: 'Shanghai' }
-            ],
-            footerData: [
-              { seq: 'Total', name: '282', sex: '345' }
-            ],
-
-            // 模拟全量数据
-            allData: [],
-
-            // grid
-            gridOptions: {
-              border: true,
-              showFooter: true,
-              showOverflow: true,
-              height: 400,
-              loading: false,
-              // 添加分页配置
-              pagerConfig: {
-                enabled: true,
-                currentPage: 1,
-                pageSize: 10,
-                total: 0,
-                pageSizes: [5, 10, 20, 50, 100],
-                layouts: ['PrevJump', 'PrevPage', 'Number', 'NextPage', 'NextJump', 'Sizes', 'FullJump', 'Total']
-              },
-              columns: [
-                { field: 'seq', type: 'seq', width: 60 },
-                { field: 'name', title: 'Name', slots: { default: 'name-default' } },
-                { field: 'role', title: 'Role' },
-                { field: 'sex', title: 'Sex' },
-                { field: 'address', title: 'Address' },
-                { field: 'num', title: 'Age', width: 80 }
+    <script>
+      (function () {
+        var App = {
+          data() {
+            return {
+              // table
+              tableData: [
+                {
+                  id: "10001",
+                  name: "Test1",
+                  role: "Develop",
+                  sex: "Man",
+                  num: "28",
+                  address: "test abc",
+                },
+                {
+                  id: "10002",
+                  name: "Test2",
+                  role: "Test",
+                  sex: "Women",
+                  num: "22",
+                  address: "Guangzhou",
+                },
+                {
+                  id: "10003",
+                  name: "Test3",
+                  role: "PM",
+                  sex: "Man",
+                  num: "32",
+                  address: "Shanghai",
+                },
               ],
-              data: []
-            }
-          }
-        },
-        methods: {
-          // 分页查询
-          handlePageChange({ currentPage, pageSize }) {
-            this.gridOptions.loading = true
-            // 模拟异步请求
-            setTimeout(() => {
-              const startIndex = (currentPage - 1) * pageSize
-              const endIndex = startIndex + pageSize
-              this.gridOptions.data = this.allData.slice(startIndex, endIndex)
-              this.gridOptions.pagerConfig.currentPage = currentPage
-              this.gridOptions.pagerConfig.pageSize = pageSize
-              this.gridOptions.loading = false
-            }, 300)
-          },
-          // 初始化数据
-          loadData() {
-            // 模拟生成100条数据
-            const roles = ['Develop', 'Test', 'PM', 'Designer', 'Manager']
-            const sexes = ['Man', 'Women']
-            const addresses = ['Beijing', 'Shanghai', 'Guangzhou', 'Shenzhen', 'Hangzhou', 'Nanjing']
-            
-            this.allData = Array.from({ length: 100 }, (_, index) => ({
-              id: String(10001 + index),
-              name: `Test${index + 1}`,
-              role: roles[index % roles.length],
-              sex: sexes[index % sexes.length],
-              num: String(20 + (index % 40)),
-              address: addresses[index % addresses.length]
-            }))
-            
-            // 设置总数
-            this.gridOptions.pagerConfig.total = this.allData.length
-            
-            // 加载第一页数据
-            this.handlePageChange({ currentPage: 1, pageSize: this.gridOptions.pagerConfig.pageSize })
-          }
-        },
-        mounted() {
-          this.loadData()
-        }
-      }
+              footerData: [{ seq: "Total", name: "282", sex: "345" }],
 
-      // 全局配置
-      VxeUI.setConfig({
-        // zIndex: 999 // 全局 zIndex 起始值，如果项目的的 z-index 样式值过大时就需要跟随设置更大，避免被遮挡；新版本可以使用 dom-zindex 共享配置
-      })
-      
-      new Vue(App).$mount('#app')
-    })()
-  </script>
-</body>
+              // 模拟全量数据
+              allData: [],
+
+              // grid
+              gridOptions: {
+                border: true,
+                showFooter: true,
+                showOverflow: true,
+                height: 400,
+                loading: false,
+                // 添加分页配置
+                pagerConfig: {
+                  enabled: true,
+                  currentPage: 1,
+                  pageSize: 10,
+                  total: 0,
+                  pageSizes: [5, 10, 20, 50, 100],
+                  layouts: [
+                    "PrevJump",
+                    "PrevPage",
+                    "Number",
+                    "NextPage",
+                    "NextJump",
+                    "Sizes",
+                    "FullJump",
+                    "Total",
+                  ],
+                },
+                columns: [
+                  { field: "seq", type: "seq", width: 60 },
+                  {
+                    field: "name",
+                    title: "Name",
+                    slots: { default: "name-default" },
+                  },
+                  {
+                    field: "role",
+                    title: "Role",
+                    slots: { default: "name-default" },
+                  },
+                  {
+                    field: "sex",
+                    title: "Sex",
+                    slots: { default: "name-default" },
+                  },
+                  {
+                    field: "address",
+                    title: "Address",
+                    slots: { default: "name-default" },
+                  },
+                  {
+                    field: "num",
+                    title: "Age",
+                    width: 80,
+                    slots: { default: "name-default" },
+                  },
+                ],
+                data: [],
+              },
+            };
+          },
+          methods: {
+            // 分页查询
+            handlePageChange({ currentPage, pageSize }) {
+              this.gridOptions.loading = true;
+              // 模拟异步请求
+              setTimeout(() => {
+                const startIndex = (currentPage - 1) * pageSize;
+                const endIndex = startIndex + pageSize;
+                this.gridOptions.data = this.allData.slice(
+                  startIndex,
+                  endIndex
+                );
+                this.gridOptions.pagerConfig.currentPage = currentPage;
+                this.gridOptions.pagerConfig.pageSize = pageSize;
+                this.gridOptions.loading = false;
+              }, 300);
+            },
+            // 初始化数据
+            loadData() {
+              // 模拟生成100条数据
+              const roles = ["Develop", "Test", "PM", "Designer", "Manager"];
+              const sexes = ["Man", "Women"];
+              const addresses = [
+                "Beijing",
+                "Shanghai",
+                "Guangzhou",
+                "Shenzhen",
+                "Hangzhou",
+                "Nanjing",
+              ];
+
+              this.allData = Array.from({ length: 100 }, (_, index) => ({
+                id: String(10001 + index),
+                name: `Test${index + 1}`,
+                role: roles[index % roles.length],
+                sex: sexes[index % sexes.length],
+                num: String(20 + (index % 40)),
+                address: addresses[index % addresses.length],
+              }));
+
+              // 设置总数
+              this.gridOptions.pagerConfig.total = this.allData.length;
+
+              // 加载第一页数据
+              this.handlePageChange({
+                currentPage: 1,
+                pageSize: this.gridOptions.pagerConfig.pageSize,
+              });
+            },
+          },
+          mounted() {
+            this.loadData();
+          },
+        };
+
+        // 全局配置
+        VxeUI.setConfig({
+          // zIndex: 999 // 全局 zIndex 起始值，如果项目的的 z-index 样式值过大时就需要跟随设置更大，避免被遮挡；新版本可以使用 dom-zindex 共享配置
+        });
+
+        new Vue(App).$mount("#app");
+      })();
+    </script>
+  </body>
 </html>
