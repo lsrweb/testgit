@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GIF压缩工具</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>  <!-- 引入gif.js库用于处理GIF -->
+  <script src="./gif/gif.js"></script>
+  <!-- 引入gif-frames用于提取GIF帧 -->
+  <script src="./gif/gifuct-js.min.js"></script>
+  <!-- 引入独立的GIF压缩工具 -->
+  <script src="./GifCompressor.js"></script>
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2980b9;
+      --success-color: #2ecc71;
+      --danger-color: #e74c3c;
+      --background-color: #f8f9fa;
+      --text-color: #333;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background-color: var(--background-color);
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .file-upload {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .file-upload-label {
+      display: inline-block;
+      padding: 12px 20px;
+      background: var(--primary-color);
+      color: white;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-bottom: 15px;
+      text-align: center;
+      width: 200px;
+      box-shadow: var(--box-shadow);
+    }
+
+    .file-upload-label:hover {
+      background: var(--secondary-color);
+    }
+
+    .file-upload input[type="file"] {
+      display: none;
+    }
+
+    .file-name {
+      margin-top: 10px;
+      color: #666;
+    }
+
+    .compress-button {
+      display: block;
+      padding: 12px 30px;
+      background: var(--success-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s, transform 0.1s;
+      margin: 20px auto;
+      box-shadow: var(--box-shadow);
+    }
+
+    .compress-button:hover {
+      background: #27ae60;
+      transform: translateY(-2px);
+    }
+
+    .compress-button:active {
+      transform: translateY(0);
+    }
+
+    .compress-button:disabled {
+      background: #95a5a6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .gif-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    .gif-card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 20px;
+      flex: 1;
+      min-width: 300px;
+      max-width: 450px;
+      transition: transform 0.3s;
+    }
+
+    .gif-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .gif-card h3 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .gif-preview {
+      text-align: center;
+      margin-bottom: 15px;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .gif-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .gif-info {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: var(--border-radius);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .info-label {
+      font-weight: bold;
+    }
+
+    .compression-ratio {
+      margin-top: 10px;
+      text-align: center;
+      font-weight: bold;
+      color: var(--success-color);
+      font-size: 1.2rem;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-message {
+      background-color: var(--danger-color);
+      color: white;
+      padding: 10px;
+      border-radius: var(--border-radius);
+      margin: 15px auto;
+      text-align: center;
+      max-width: 600px;
+      animation: fadeIn 0.5s;
+    }
+
+    .progress-container {
+      height: 10px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      margin: 15px auto;
+      overflow: hidden;
+      position: relative;
+      max-width: 600px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: var(--primary-color);
+      transition: width 0.3s ease;
+      border-radius: 5px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .download-button {
+      display: block;
+      padding: 10px 20px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+      margin: 15px auto 0;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .download-button:hover {
+      background: var(--secondary-color);
+    }
+
+    /* 压缩选项样式 */
+    .compression-options {
+      background: white;
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin: 20px auto;
+      max-width: 600px;
+    }
+
+    .compression-options h3 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .option-group {
+      margin-bottom: 15px;
+    }
+
+    .option-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .slider-container {
+      position: relative;
+      padding: 5px 0;
+    }
+
+    .quality-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: #e0e0e0;
+      outline: none;
+    }
+
+    .quality-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .quality-slider::-webkit-slider-thumb:hover {
+      background: var(--secondary-color);
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    /* 复选框样式 */
+    .checkbox-container {
+      display: block;
+      position: relative;
+      padding-left: 30px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      font-weight: normal;
+      user-select: none;
+    }
+
+    .checkbox-container input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+
+    .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 20px;
+      width: 20px;
+      background-color: #eee;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .checkbox-container:hover input~.checkmark {
+      background-color: #ccc;
+    }
+
+    .checkbox-container input:checked~.checkmark {
+      background-color: var(--primary-color);
+    }
+
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+
+    .checkbox-container input:checked~.checkmark:after {
+      display: block;
+    }
+
+    .checkbox-container .checkmark:after {
+      left: 7px;
+      top: 3px;
+      width: 5px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    /* 压缩模式选择器样式 */
+    .mode-selector {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .mode-button {
+      flex: 1;
+      padding: 8px 12px;
+      border: 2px solid var(--primary-color);
+      background: white;
+      color: var(--primary-color);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .mode-button:hover {
+      background: #f0f8ff;
+    }
+
+    .mode-button.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="app" class="container">
+    <header>
+      <h1>GIF 压缩优化工具</h1>
+      <p>上传你的GIF文件，轻松实现文件大小压缩</p>
+      <div v-if="errorMsg" class="error-message">{{ errorMsg }}</div>
+    </header>
+    <div class="file-upload">
+      <label class="file-upload-label">
+        选择 GIF 文件
+        <input type="file" @change="handleFileUpload" accept="image/gif" />
+      </label>
+      <div class="file-name" v-if="fileName">已选择: {{ fileName }}</div>
+    </div>
+
+    <div class="compression-options" v-if="originalGif">
+      <h3>压缩选项</h3>
+      <div class="option-group">
+        <label>压缩模式: {{ compressionMode }}</label>
+        <div class="mode-selector">
+          <button class="mode-button" :class="{active: compressionMode === 'high-quality'}" @click="compressionMode = 'high-quality'">
+            高质量模式
+          </button>
+          <button class="mode-button" :class="{active: compressionMode === 'balanced'}" @click="compressionMode = 'balanced'">
+            平衡模式
+          </button>
+          <button class="mode-button" :class="{active: compressionMode === 'high-compression'}" @click="compressionMode = 'high-compression'">
+            高压缩模式
+          </button>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <label>压缩质量: {{ compressionQuality }}</label>
+        <div class="slider-container">
+          <input type="range" v-model="compressionQuality" min="5" max="20" class="quality-slider" title="值越大质量越好，点状伪影越少" />
+          <div class="slider-labels">
+            <span>小文件</span>
+            <span>高质量</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <label class="checkbox-container">
+          <input type="checkbox" v-model="useDithering" />
+          <span class="checkmark"></span>
+          使用抖动算法（可减少点状伪影）
+        </label>
+      </div>
+
+      <div class="option-group">
+        <label class="checkbox-container">
+          <input type="checkbox" v-model="useSmoothing" />
+          <span class="checkmark"></span>
+          使用图像平滑（增强过渡效果）
+        </label>
+      </div>
+    </div>
+
+    <button class="compress-button" @click="compressGif" :disabled="!originalGif">
+      <span v-if="isCompressing">
+        <div class="loading-spinner"></div>
+        正在压缩... {{ progress }}%
+      </span>
+      <span v-else>压缩 GIF</span>
+    </button>
+
+    <div class="progress-container" v-if="isCompressing">
+      <div class="progress-bar" :style="{width: progress + '%'}"></div>
+    </div>
+
+    <div class="gif-container">
+      <div class="gif-card" v-if="originalGif">
+        <h3>原始 GIF</h3>
+        <div class="gif-preview">
+          <img :src="originalGif" alt="原始GIF" />
+        </div>
+        <div class="gif-info">
+          <div class="info-row">
+            <span class="info-label">大小 (KB):</span>
+            <span>{{ originalSize }} KB</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">大小 (MB):</span>
+            <span>{{ (originalSize / 1024).toFixed(3) }} MB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="gif-card" v-if="compressedGif">
+        <h3>压缩后 GIF</h3>
+        <div class="gif-preview">
+          <img :src="compressedGif" alt="压缩后GIF" />
+        </div>
+        <div class="gif-info">
+          <div class="info-row">
+            <span class="info-label">大小 (KB):</span>
+            <span>{{ compressedSize }} KB</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">大小 (MB):</span>
+            <span>{{ (compressedSize / 1024).toFixed(3) }} MB</span>
+          </div>
+          <div class="compression-ratio">压缩率: {{ compressionRatio }}%</div>
+        </div>
+        <a class="download-button" :href="compressedGif" download="compressed.gif">下载压缩后的GIF</a>
+      </div>
+    </div>
+  </div>  <script>
+    const { createApp, ref } = Vue;
+
+    createApp({
+      setup() {
+        const originalGif = ref(null);
+        const compressedGif = ref(null);
+        const originalSize = ref(0);
+        const compressedSize = ref(0);
+        const compressionRatio = ref(0);
+        const isCompressing = ref(false);
+        const fileName = ref("");
+        const errorMsg = ref("");
+        const progress = ref(0);        const compressionQuality = ref(5); // 使用修复后的默认值
+        const compressionMode = ref('balanced');
+        const useDithering = ref(false);
+        const useSmoothing = ref(true);
+        let gifFile = null;
+
+        // 创建压缩器实例
+        const compressor = new GifCompressor();
+        
+        // 设置进度回调
+        compressor.setProgressCallback((progressValue) => {
+          progress.value = Math.round(progressValue);
+        });
+
+        const handleFileUpload = (event) => {
+          const file = event.target.files[0];
+          if (!file) return;
+          if (!file.type.includes("gif")) {
+            errorMsg.value = "请上传GIF格式的文件";
+            return;
+          }
+
+          // 清除之前的错误消息
+          errorMsg.value = "";
+
+          gifFile = file;
+          fileName.value = file.name;
+          originalSize.value = (file.size / 1024).toFixed(2);
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            originalGif.value = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        };        const compressGif = async () => {
+          if (!gifFile) {
+            errorMsg.value = "请先选择一个GIF文件";
+            return;
+          }
+
+          isCompressing.value = true;
+          errorMsg.value = "";
+          progress.value = 0;
+
+          try {
+            const options = {
+              quality: parseInt(compressionQuality.value),
+              scale: 0.7 // 固定缩放比例以获得稳定效果
+            };
+
+            const result = await compressor.compressGif(gifFile, options);
+            
+            // 更新Vue数据
+            compressedGif.value = result.base64;
+            compressedSize.value = (result.compressedSize / 1024).toFixed(2);
+            compressionRatio.value = result.compressionRatio;
+
+          } catch (error) {
+            errorMsg.value = `压缩失败: ${error.message}`;
+            console.error('压缩错误:', error);
+          } finally {
+            isCompressing.value = false;
+            progress.value = 0;
+          }
+        };
+
+        return {
+          originalGif,
+          compressedGif,
+          originalSize,
+          compressedSize,
+          compressionRatio,
+          isCompressing,
+          fileName,
+          errorMsg,
+          progress,
+          compressionQuality,
+          compressionMode,
+          useDithering,
+          useSmoothing,
+          handleFileUpload,
+          compressGif,
+        };
+      },
+    }).mount("#app");
+  </script>
+</body>
+
+</html>

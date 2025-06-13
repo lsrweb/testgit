@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF压缩工具 - 使用示例</title>
+    <!-- 引入必要的库 -->
+    <script src="./gif/gif.js"></script>
+    <script src="./gif/gifuct-js.min.js"></script>
+    <!-- 引入我们的GIF压缩工具 -->
+    <script src="./GifCompressor.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        
+        .section h3 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            margin-bottom: 15px;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #007bff;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .error {
+            border-left-color: #dc3545;
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .success {
+            border-left-color: #28a745;
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .gif-preview {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .gif-item {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .gif-item img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .gif-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .option-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        select, input[type="range"], input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .range-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GIF压缩工具使用示例</h1>
+        
+        <!-- 基本压缩功能 -->
+        <div class="section">
+            <h3>基本GIF压缩</h3>
+            <div class="file-input">
+                <input type="file" id="gifFile" accept="image/gif" />
+            </div>
+            
+            <div class="options">
+                <div class="option-group">
+                    <label for="compressionMode">压缩模式:</label>
+                    <select id="compressionMode">
+                        <option value="high-quality">高质量模式</option>
+                        <option value="balanced" selected>平衡模式</option>
+                        <option value="high-compression">高压缩模式</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <label for="quality">压缩质量:</label>
+                    <div class="range-display">
+                        <input type="range" id="quality" min="5" max="20" value="15" />
+                        <span id="qualityValue">15</span>
+                    </div>
+                </div>
+                
+                <div class="option-group">
+                    <label for="scale">缩放比例:</label>
+                    <div class="range-display">
+                        <input type="range" id="scale" min="0.1" max="1.0" step="0.1" value="0.7" />
+                        <span id="scaleValue">0.7</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="useDithering" />
+                <label for="useDithering">使用抖动算法</label>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="useSmoothing" checked />
+                <label for="useSmoothing">使用图像平滑</label>
+            </div>
+            
+            <button id="compressBtn">压缩GIF</button>
+            <button id="getInfoBtn">获取GIF信息</button>
+            
+            <div class="progress" id="progressContainer" style="display: none;">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div id="result"></div>
+            
+            <div class="gif-preview" id="gifPreview" style="display: none;">
+                <div class="gif-item">
+                    <h4>原始GIF</h4>
+                    <img id="originalGif" alt="原始GIF" />
+                    <div class="gif-info" id="originalInfo"></div>
+                </div>
+                <div class="gif-item">
+                    <h4>压缩后GIF</h4>
+                    <img id="compressedGif" alt="压缩后GIF" />
+                    <div class="gif-info" id="compressedInfo"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Base64转换功能 -->
+        <div class="section">
+            <h3>Base64转换功能</h3>
+            <div class="file-input">
+                <input type="file" id="base64File" accept="image/gif" />
+            </div>
+            <button id="toBase64Btn">文件转Base64</button>
+            <button id="fromBase64Btn">Base64转文件</button>
+            
+            <div style="margin-top: 15px;">
+                <label for="base64Input">Base64输入/输出:</label>
+                <textarea id="base64Input" rows="5" style="width: 100%; padding: 10px; margin-top: 5px;" placeholder="在此粘贴base64字符串或查看转换结果"></textarea>
+            </div>
+            
+            <div id="base64Result"></div>
+        </div>
+        
+        <!-- 批量压缩功能 -->
+        <div class="section">
+            <h3>批量压缩功能</h3>
+            <div class="file-input">
+                <input type="file" id="batchFiles" accept="image/gif" multiple />
+            </div>
+            <button id="batchCompressBtn">批量压缩</button>
+            
+            <div id="batchResult"></div>
+        </div>
+    </div>
+
+    <script>
+        // 创建GIF压缩器实例
+        const compressor = new GifCompressor();
+        
+        // 设置进度回调
+        compressor.setProgressCallback((progress) => {
+            const progressBar = document.getElementById('progressBar');
+            const progressContainer = document.getElementById('progressContainer');
+            
+            if (progress > 0 && progress < 100) {
+                progressContainer.style.display = 'block';
+                progressBar.style.width = progress + '%';
+            } else if (progress >= 100) {
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                }, 1000);
+            }
+        });
+        
+        // 实时更新滑块值显示
+        document.getElementById('quality').addEventListener('input', function() {
+            document.getElementById('qualityValue').textContent = this.value;
+        });
+        
+        document.getElementById('scale').addEventListener('input', function() {
+            document.getElementById('scaleValue').textContent = this.value;
+        });
+        
+        // 基本压缩功能
+        document.getElementById('compressBtn').addEventListener('click', async function() {
+            const fileInput = document.getElementById('gifFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showResult('请选择一个GIF文件', 'error');
+                return;
+            }
+            
+            const options = {
+                mode: document.getElementById('compressionMode').value,
+                quality: parseInt(document.getElementById('quality').value),
+                scale: parseFloat(document.getElementById('scale').value),
+                useDithering: document.getElementById('useDithering').checked,
+                useSmoothing: document.getElementById('useSmoothing').checked
+            };
+            
+            this.disabled = true;
+            showResult('正在压缩中...', 'info');
+            
+            try {
+                const result = await compressor.compressGif(file, options);
+                
+                // 显示结果
+                showResult(`压缩完成！原始大小: ${(result.originalSize / 1024).toFixed(2)} KB，压缩后: ${(result.compressedSize / 1024).toFixed(2)} KB，压缩率: ${result.compressionRatio}%`, 'success');
+                
+                // 显示预览
+                showGifPreview(file, result);
+                
+                // 创建下载按钮
+                const downloadBtn = document.createElement('button');
+                downloadBtn.textContent = '下载压缩后的GIF';
+                downloadBtn.onclick = () => compressor.downloadBlob(result.blob, 'compressed_' + file.name);
+                document.getElementById('result').appendChild(downloadBtn);
+                
+            } catch (error) {
+                showResult('压缩失败: ' + error.message, 'error');
+            } finally {
+                this.disabled = false;
+            }
+        });
+        
+        // 获取GIF信息
+        document.getElementById('getInfoBtn').addEventListener('click', async function() {
+            const fileInput = document.getElementById('gifFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showResult('请选择一个GIF文件', 'error');
+                return;
+            }
+            
+            try {
+                const info = await compressor.getGifInfo(file);
+                showResult(`GIF信息 - 尺寸: ${info.width}x${info.height}，帧数: ${info.frameCount}，时长: ${info.duration}ms，FPS: ${info.fps}，文件大小: ${(info.fileSize / 1024).toFixed(2)} KB`, 'success');
+            } catch (error) {
+                showResult('获取信息失败: ' + error.message, 'error');
+            }
+        });
+        
+        // Base64转换功能
+        document.getElementById('toBase64Btn').addEventListener('click', async function() {
+            const fileInput = document.getElementById('base64File');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showBase64Result('请选择一个文件', 'error');
+                return;
+            }
+            
+            try {
+                const base64 = await compressor.fileToBase64(file);
+                document.getElementById('base64Input').value = base64;
+                showBase64Result('文件已转换为Base64', 'success');
+            } catch (error) {
+                showBase64Result('转换失败: ' + error.message, 'error');
+            }
+        });
+        
+        document.getElementById('fromBase64Btn').addEventListener('click', function() {
+            const base64 = document.getElementById('base64Input').value.trim();
+            
+            if (!base64) {
+                showBase64Result('请输入Base64字符串', 'error');
+                return;
+            }
+            
+            try {
+                const blob = compressor.base64ToBlob(base64);
+                const file = compressor.blobToFile(blob, 'converted.gif');
+                
+                compressor.downloadBlob(blob, 'converted_from_base64.gif');
+                showBase64Result(`Base64已转换为文件并下载，文件大小: ${(blob.size / 1024).toFixed(2)} KB`, 'success');
+            } catch (error) {
+                showBase64Result('转换失败: ' + error.message, 'error');
+            }
+        });
+        
+        // 批量压缩功能
+        document.getElementById('batchCompressBtn').addEventListener('click', async function() {
+            const fileInput = document.getElementById('batchFiles');
+            const files = Array.from(fileInput.files);
+            
+            if (files.length === 0) {
+                showBatchResult('请选择要压缩的GIF文件', 'error');
+                return;
+            }
+            
+            this.disabled = true;
+            showBatchResult(`开始批量压缩 ${files.length} 个文件...`, 'info');
+            
+            try {
+                const results = await compressor.batchCompress(files, {
+                    mode: 'balanced',
+                    quality: 15,
+                    scale: 0.7
+                });
+                
+                let successCount = 0;
+                let resultHtml = '<h4>批量压缩结果:</h4>';
+                
+                results.forEach(result => {
+                    if (result.success) {
+                        successCount++;
+                        resultHtml += `<div style="margin-bottom: 10px;">
+                            ✅ ${result.filename} - 压缩率: ${result.result.compressionRatio}%
+                            <button onclick="compressor.downloadBlob(arguments[0], '${result.filename}')" style="margin-left: 10px;">下载</button>
+                        </div>`;
+                    } else {
+                        resultHtml += `<div style="margin-bottom: 10px; color: red;">
+                            ❌ ${result.filename} - 失败: ${result.error}
+                        </div>`;
+                    }
+                });
+                
+                resultHtml += `<p><strong>成功压缩: ${successCount}/${files.length} 个文件</strong></p>`;
+                showBatchResult(resultHtml, successCount === files.length ? 'success' : 'warning');
+                
+            } catch (error) {
+                showBatchResult('批量压缩失败: ' + error.message, 'error');
+            } finally {
+                this.disabled = false;
+            }
+        });
+        
+        // 辅助函数
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+        
+        function showBase64Result(message, type) {
+            const resultDiv = document.getElementById('base64Result');
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+        
+        function showBatchResult(message, type) {
+            const resultDiv = document.getElementById('batchResult');
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+        
+        function showGifPreview(originalFile, compressResult) {
+            const preview = document.getElementById('gifPreview');
+            const originalGif = document.getElementById('originalGif');
+            const compressedGif = document.getElementById('compressedGif');
+            const originalInfo = document.getElementById('originalInfo');
+            const compressedInfo = document.getElementById('compressedInfo');
+            
+            // 显示原始GIF
+            const originalReader = new FileReader();
+            originalReader.onload = (e) => {
+                originalGif.src = e.target.result;
+            };
+            originalReader.readAsDataURL(originalFile);
+            
+            // 显示压缩后的GIF
+            compressedGif.src = compressResult.base64;
+            
+            // 显示信息
+            originalInfo.innerHTML = `大小: ${(compressResult.originalSize / 1024).toFixed(2)} KB`;
+            compressedInfo.innerHTML = `大小: ${(compressResult.compressedSize / 1024).toFixed(2)} KB<br>压缩率: ${compressResult.compressionRatio}%`;
+            
+            preview.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
